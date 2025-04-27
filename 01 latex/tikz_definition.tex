@@ -1,0 +1,79 @@
+\usepackage{tikz}
+\usetikzlibrary{shapes.geometric, matrix, positioning, calc, intersections}
+\usetikzlibrary{patterns}
+\usetikzlibrary{decorations.pathmorphing}
+\usepackage{pgfplots,pgfmath,xcolor}
+
+
+
+\usetikzlibrary{arrows,positioning} 
+
+\usetikzlibrary {arrows.meta}
+
+\definecolor{darkblue}{rgb}{0.3,0.5,1}
+
+\makeatletter
+\pgfmathdeclarefunction{erf}{1}{%
+  \begingroup
+    \pgfmathparse{#1 > 0 ? 1 : -1}%
+    \edef\sign{\pgfmathresult}%
+    \pgfmathparse{abs(#1)}%
+    \edef\x{\pgfmathresult}%
+    \pgfmathparse{1/(1+0.3275911*\x)}%
+    \edef\t{\pgfmathresult}%
+    \pgfmathparse{%
+      1 - (((((1.061405429*\t -1.453152027)*\t) + 1.421413741)*\t 
+      -0.284496736)*\t + 0.254829592)*\t*exp(-(\x*\x))}%
+    \edef\y{\pgfmathresult}%
+    \pgfmathparse{(\sign)*\y}%
+    \pgfmath@smuggleone\pgfmathresult%
+  \endgroup
+}
+\makeatother
+
+\tikzset{
+mainnode/.style={
+    rectangle,
+    draw=black,
+    fill=white,
+    thick,
+    minimum size=5mm,
+    text width=40mm,
+    text height = 10pt,
+    text depth = 3pt
+},
+ovalbignode/.style={
+    ellipse,
+    draw=black,
+    fill=white,
+    thick,
+    minimum size=40mm,
+    text width=50mm,
+    fill opacity=.2,
+    text opacity=1
+},
+papernode/.style={
+    rectangle,
+    minimum size=5mm,
+    text width=68mm,
+    font=\normalfont
+},
+decisionnode/.style={
+    diamond, 
+    draw=black, 
+    thick, 
+    text centered,
+    minimum width=15mm,
+    minimum height=15mm, 
+    inner sep=0pt
+},    
+align=center
+}
+
+\newcommand{\nodeLabel}[2]{\node[labelnode] [above right=-0.15cm and -0.3cm of #1] {#2};}
+
+\newcommand{\checkbox}{\tikz\draw (0,0) rectangle (0.3,0.3);}
+
+\newcommand{\radiobutton}{\tikz\draw (0,0) circle (0.15);}
+
+\usetikzlibrary{positioning, shapes, arrows.meta}

@@ -1,0 +1,295 @@
+\usetikzlibrary{patterns,snakes}
+\usepackage{pgfplots,pgfmath}
+
+\usetikzlibrary{math}
+\usetikzlibrary{arrows.meta,positioning,fit}
+
+\definecolor{darkblue}{rgb}{0.3,0.5,1}
+
+\makeatletter
+\pgfmathdeclarefunction{erf}{1}{%
+  \begingroup
+    \pgfmathparse{#1 > 0 ? 1 : -1}%
+    \edef\sign{\pgfmathresult}%
+    \pgfmathparse{abs(#1)}%
+    \edef\x{\pgfmathresult}%
+    \pgfmathparse{1/(1+0.3275911*\x)}%
+    \edef\t{\pgfmathresult}%
+    \pgfmathparse{%
+      1 - (((((1.061405429*\t -1.453152027)*\t) + 1.421413741)*\t 
+      -0.284496736)*\t + 0.254829592)*\t*exp(-(\x*\x))}%
+    \edef\y{\pgfmathresult}%
+    \pgfmathparse{(\sign)*\y}%
+    \pgfmath@smuggleone\pgfmathresult%
+  \endgroup
+}
+\makeatother
+
+\tikzset{
+mainnode/.style={
+    rectangle,
+    draw=alerted text.fg,
+    fill=alerted text.fg!10,
+    thick,
+     minimum size=5mm,
+     minimum height=15mm,
+    text width=35mm
+}, 
+smallnode/.style={
+    rectangle,
+    draw=alerted text.fg,
+    fill=alerted text.fg!10,
+    thick,
+    minimum size=5mm,
+    minimum height=18pt,
+    text width=22mm
+},
+subdnode/.style={
+    rectangle,
+    draw=tertiaryOrange,
+    fill=tertiaryOrange!10,
+    thick,
+     minimum size=5mm,
+     minimum height=15mm,
+    text width=35mm
+}, 
+simplenode/.style={
+    rectangle,
+    thick,
+    minimum size=5mm,
+    text width=42mm
+},
+widesimplenode/.style={
+    rectangle,
+    thick,
+    minimum size=5mm,
+    text width=120mm
+},
+simplesmallnode/.style={
+    rectangle,
+    thick,
+    minimum size=5mm,
+    text width=20mm
+},
+labelnode/.style={
+    font=\tiny,
+    rectangle,
+    draw=darkblue,
+    fill=darkblue!10,
+    thick,
+    inner sep=2pt,
+    outer sep=0pt,
+    rounded corners=0.05cm
+}, 
+ovalnode/.style={
+    ellipse,
+    draw=alerted text.fg,
+    fill=alerted text.fg!80,
+    thick,
+    minimum size=30mm,
+    text width=40mm,
+    fill opacity=.2,
+    text opacity=1
+},
+ovalbignode/.style={
+    ellipse,
+    draw=alerted text.fg,
+    fill=alerted text.fg!80,
+    thick,
+    minimum size=40mm,
+    text width=50mm,
+    fill opacity=.2,
+    text opacity=1
+},
+ovalsmallnode/.style={
+    ellipse,
+    draw=alerted text.fg,
+    fill=alerted text.fg!80,
+    thick,
+    minimum size=25mm,
+    text width=30mm,
+    fill opacity=.2,
+    text opacity=1
+},
+ovalgreennode/.style={
+    ellipse,
+    draw=tertiaryOrange,
+    fill=tertiaryOrange!80,
+    thick,
+    minimum size=30mm,
+    text width=40mm,
+    fill opacity=.2,
+    text opacity=1
+},
+papernode/.style={
+    rectangle,
+    minimum size=5mm,
+    text width=68mm,
+    font=\tiny\normalfont
+},
+pictureNode/.style={
+    font=\tiny\normalfont,
+    inner xsep=2pt,
+    outer xsep=2pt,
+    inner ysep=2pt,
+    outer ysep=2pt
+},
+progressnode/.style={
+    rectangle,
+    draw=alerted text.fg,
+    fill=alerted text.fg!10,
+    thick,
+    minimum size=5mm,
+    text width=40mm
+},
+processnode/.style={
+    ellipse,
+    draw=alerted text.fg,
+    fill=alerted text.fg!80,
+    thick,
+    minimum size=12mm,
+    text width=10mm,
+    fill opacity=.2,
+    text opacity=1
+},
+dotnode/.style={
+    rectangle,
+    minimum size=2mm,
+    text width=2mm,
+    font=\tiny\normalfont
+},
+whitenode/.style={
+    rectangle,
+    fill=white,
+    minimum width=30mm,
+    minimum height=12pt,
+    text width=25mm,
+    font=\normalfont
+},
+modulenode/.style={
+    rectangle,
+    draw=alerted text.fg,
+    fill=alerted text.fg!10,
+    thick,
+    minimum size=5mm,
+    text width=26mm
+}, 
+modulegreennode/.style={
+    rectangle,
+    draw=tertiaryOrange,
+    fill=tertiaryOrange!10,
+    thick,
+    minimum size=5mm,
+    text width=29mm
+},
+tempusnode/.style={
+    rectangle,
+    minimum size=5mm,
+    text width=44mm,
+    font=\tiny\normalfont
+},
+align=center
+}
+
+\newcommand{\nodeLabel}[2]{\node[labelnode] [above right=-0.15cm and -0.3cm of #1] {#2};}
+\newcommand{\nodeLabelLeft}[2]{\node[labelnode] [above left=-0.05cm and -3.3cm of #1] {#2};}
+\newcommand{\paperTitle}[2]{\node[papernode,align=left, anchor=north]  [right=0.25cm of #1] {\baselineskip=4.5pt#2\par};}
+
+
+% Define a custom command for labeled arrows
+\newcommand{\drawArrowsMoralBankruptcy}[1]{
+    % Horizontal arrow with "moral hazard" label
+    \draw[-{Stealth[length=2mm, width=1.5mm]}, thick] 
+        ([yshift=0cm, xshift=-0.2cm]#1.south east) -- ([yshift=0cm, xshift=0.5cm]#1.south west)
+        node[midway, above, font=\small, fill=white, inner sep=1pt, minimum width=2.5cm, minimum height=0.5cm, yshift=-0.00cm] {moral hazard};
+    
+    % Vertical arrow with "bankruptcy cost" label
+    \draw[-{Stealth[length=2mm, width=1.5mm]}, thick] 
+        ([yshift=.5cm, xshift=-0.05cm]#1.south west) -- ([yshift=-.2cm, xshift=-.05cm]#1.north west)
+        node[midway, right, font=\normalsize, fill=white, inner sep=1pt, xshift=0.4cm, yshift=-1.2cm, rotate=90, minimum width=2.5cm, minimum height=0.4cm] {bankruptcy cost};
+}
+
+% Define a custom command for labeled arrows
+\newcommand{\drawArrowsMoralEffort}[1]{
+    % Horizontal arrow with "moral hazard" label
+    \draw[-{Stealth[length=2mm, width=1.5mm]}, thick] 
+        ([yshift=0cm, xshift=-0.2cm]#1.south east) -- ([yshift=0cm, xshift=0.5cm]#1.south west)
+        node[midway, above, font=\small, fill=white, inner sep=1pt, minimum width=2.5cm, minimum height=0.3cm, yshift=0.08cm] {moral hazard};
+    
+    % Vertical arrow with "effort" label
+    \draw[-{Stealth[length=2mm, width=1.5mm]}, thick] 
+        ([yshift=.5cm, xshift=-0.05cm]#1.south west) -- ([yshift=-.2cm, xshift=-.05cm]#1.north west)
+        node[midway, right, font=\normalsize, fill=white, inner sep=1pt, xshift=0.27cm, yshift=-1.9cm, rotate=90, minimum width=3.5cm, minimum height=0.4cm] {effort};
+}
+
+% Define a custom command for labeled arrows
+\newcommand{\drawArrowsMoralW}[1]{
+    % Horizontal arrow with "moral hazard" label
+    \draw[-{Stealth[length=2mm, width=1.5mm]}, thick] 
+        ([yshift=-0.1cm, xshift=-0.2cm]#1.south east) -- ([yshift=-0.1cm, xshift=0.5cm]#1.south west)
+        node[midway, above, font=\small, fill=white, inner sep=1pt, minimum width=2.5cm, minimum height=0.4cm, yshift=0.05cm] {moral hazard};
+    
+    % Vertical arrow with "wholesale price" label
+    \draw[-{Stealth[length=2mm, width=1.5mm]}, thick] 
+        ([yshift=.5cm, xshift=-0.1cm]#1.south west) -- ([yshift=-.2cm, xshift=-.1cm]#1.north west)
+        node[midway, right, font=\normalsize, fill=white, inner sep=1pt, xshift=0.3cm, yshift=-1.2cm, rotate=90, minimum width=2.5cm, minimum height=0.4cm] {wholesale price};
+}
+
+\usetikzlibrary{positioning, fit}
+% Define the command with five parameters:
+% #1: Node to position below (XXX)
+% #2: yshift value
+% #3: xshift value
+% #4: "hat" (TRUE/FALSE to determine whether to add hats to variables)
+% #5: Other options for positioning (e.g., distance from XXX)
+
+\newcommand{\supplierBankGroup}[5]{
+    % Determine whether to add a hat to variables
+    \ifthenelse{\equal{#4}{TRUE}}{
+        \newcommand{\varL}{\hat{L}}
+        \newcommand{\varR}{\hat{R}}
+        \newcommand{\vare}{\hat{e}}
+    }{
+        \newcommand{\varL}{L}
+        \newcommand{\varR}{R}
+        \newcommand{\vare}{e}
+    }
+    
+    % Grouped elements in a scope for relative positioning
+    \begin{scope}[below=of #1, yshift=#2, xshift=#3, #5]
+       \node[circle, draw, minimum size=1.8cm, below left=of #1, yshift=#2, xshift=#3] (bank) {bank};
+\node[circle, draw, minimum size=1.8cm, right=of bank, xshift=2cm] (supplier) {supplier};
+\node[draw, rectangle, dashed, fit=(bank) (supplier)] (box) {};
+
+\node[below=of box, yshift=-50, xshift=-5em] (no) {cash flows};
+\node[below=of box, yshift=-50, xshift=5em] (CLbusiness) {investment, shocks,\\production, sales,\\cash flows};
+
+% Define a coordinate 2cm to the right of the center below "box"
+\coordinate (start) at ($(box.south) + (0cm, -0.0cm)$);
+
+% Draw arrows from the "start" coordinate
+\draw[<->] (bank.east) -- (supplier) node[midway, above, align=center, yshift=2] {$\left(\varL, \varR\right)$\\contract terms};
+\draw[->] (start) -- (no) node[midway, left, align=center, yshift=10, xshift=-10] {either supplier \\or bank rejects};
+\draw[->] (start) -- (CLbusiness.north) node[midway, left, align=center, yshift=10, xshift=2.4cm] {supplier and\\bank accept\\supplier decides\\effort $\vare$};
+
+    \end{scope}
+}
+
+
+% Define a command to place an "X" with adjustable x and y shifts
+\newcommand{\overlayX}[2]{%
+    \begin{tikzpicture}[remember picture, overlay]
+        \draw[line width=2pt, red] (current page.center) ++(#1 cm,#2 cm) ++(-0.5, -0.5) -- ++(1, 1);
+        \draw[line width=2pt, red] (current page.center) ++(#1 cm,#2 cm) ++(0.5, -0.5) -- ++(-1, 1);
+    \end{tikzpicture}
+}
+
+
+
+% Define a command to place a filled white box with adjustable position and size
+\newcommand{\overlayBox}[4]{%
+    \begin{tikzpicture}[remember picture, overlay]
+        \fill[white] (current page.center) ++(#1 cm,#2 cm) rectangle ++(#3 cm,#4 cm);
+        \draw[white, thick] (current page.center) ++(#1 cm,#2 cm) rectangle ++(#3 cm,#4 cm);
+    \end{tikzpicture}
+}

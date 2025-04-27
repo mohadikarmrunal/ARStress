@@ -1,0 +1,170 @@
+\documentclass[A4,11pt]{article}
+
+
+\usepackage{url,graphicx,array,authblk}
+\usepackage[usenames,dvipsnames]{color}
+
+\usepackage{graphicx,setspace}
+\usepackage[margin=1in]{geometry}
+\usepackage[utf8]{inputenc}
+\usepackage{multirow}
+\usepackage{natbib}
+\usepackage{amsmath,amssymb,mathtools,amsthm}
+\DeclarePairedDelimiter{\ceil}{\lceil}{\rceil}
+\DeclarePairedDelimiter{\floor}{\lfloor}{\rfloor}
+\usepackage[title]{appendix}
+\newcommand{\HRule}{\rule{\linewidth}{0.35mm}}
+
+\makeatletter
+
+\makeatother
+
+\usepackage{placeins}
+
+\usepackage{listings}
+\usepackage{float,mdwlist,enumitem}
+\usepackage{footmisc}
+
+\newcolumntype{C}[1]{>{\centering\arraybackslash}p{#1}} 
+\newcolumntype{L}[1]{>{\raggedright\arraybackslash}p{#1}} 
+\newcolumntype{R}[1]{>{\raggedleft\arraybackslash}p{#1}} 
+\newlength\interColSepSmall
+\newlength\interColSepLarge
+\setlength{\interColSepSmall}{0.2em}
+\setlength{\interColSepLarge}{0.4em}
+
+\setlength{\parindent}{0em}
+\setlength{\parskip}{0.4em}
+
+\usepackage{booktabs}
+\usepackage[colorlinks = true,
+            linkcolor =black,
+            urlcolor  = black,
+            citecolor = black,
+            anchorcolor = black]{hyperref}
+
+
+\usepackage{siunitx}
+\usepackage{dcolumn}
+\newcolumntype{e}[1]{D{.}{.}{#1}}
+\newcommand{\muc}[2]{\multicolumn{1}{C{#1}}{#2}}
+\newcommand{\mul}[2]{\multicolumn{1}{L{#1}}{#2}}
+\newcommand{\suc}[1]{\multicolumn{1}{c}{#1}}
+\newcommand{\mucThree}[2]{\multicolumn{3}{C{#1}}{#2}}
+\newcommand{\mulTen}[2]{\multicolumn{10}{L{#1}}{#2}}
+
+
+% Natbib setup for author-year style
+\usepackage{natbib}
+ \bibpunct[, ]{(}{)}{,}{a}{}{,}%
+ \def\bibfont{\small}%
+ \def\bibsep{\smallskipamount}%
+ \def\bibhang{24pt}%
+ \def\newblock{\ }%
+ \def\BIBand{and}%
+
+\newcommand{\dyad}{dyad}
+\input{01 latex/tikz_definition}
+
+%%%%%%%%%%%%%%%%
+\begin{document}
+%%%%%%%%%%%%%%%%
+
+\subsection*{1. Contact Information}
+% Note that the experimenter must be a researcher with TUM (PhD student or better). The experimenter must run the experiment personally.
+\begin{enumerate}
+\item Mrunal Mohadikar - Doctoral student in Supply Chain Management, TUM School of Management, Technical University of Munich\\ \href{mailto:mrunal.mohadikar@tum.de}{(mrunal.mohadikar@tum.de)}
+\item Prof. Dr. David Wuttke - Assistant Professor of Supply Chain Management, TUM School of Management, Technical University of Munich\\ \href{mailto:david.wuttke@tum.de}{(david.wuttke@tum.de)}
+\item Prof. Dr. Enno Siemsen - Professor of Operations and Information Management, Wisconsin School of Business, University of Wisconsin-Madison\\ 
+\href{mailto:esiemsen@wisc.edu}{(esiemsen@wisc.edu)}
+\end{enumerate}
+
+\subsection*{2. Title of the Experiment} 
+% The title is for internal use and is supposed to characterize the experiment for people unfamiliar with it.
+Augmented Reality in field-based service operations: How the dyad formation is affected?
+
+\subsection*{3. Description of the Experiment}
+% It must be clear from the description that the experiment complies with experimenTUM’s policies.
+%The goal of the experiment is to find out how a dyad (pair) of subjects performs when the subject is working repeatedly with the same partner (dedicated), and when the partner is different (random). The experiment also looks at how the performance is affected when the dyad works remotely, and together on-site. For this, a real-effort experiment will be conducted in two parts - one with the use of Augmented Reality and one without. 
+
+The objective of the experiment is to evaluate how Augmented Reality (AR) technology impacts the performance dynamics between technician-expert dyads in field-based service operations. This study specifically investigates the role of AR in modifying the effectiveness of dedicated and random dyad formations. Dedicated dyads consist of a fixed technician and expert pair that consistently work together, while random dyads are formed by pairing technicians with any available expert. The experiment aims to determine whether AR enhances or limits the performance benefits typically associated with each dyad type by improving problem-solving capabilities, learning opportunities, and communication efficiency.
+
+In deploying AR technologies, such as smart glasses that overlay real-time visual and textual information, this research hypothesizes potential shifts in operational advantages. It posits that AR could either amplify the benefits of random dyads by introducing varied perspectives and creative problem-solving or could strengthen dedicated dyads by making communication more seamless and collaboration more effective. The study explores these hypotheses by examining the interactions within these dyads during service repair tasks, both in remote and on-site settings, to understand better how AR can be strategically utilized to enhance service management practices in various industries.
+
+The experimental design involves a controlled setup where the complexity of tasks (whether simple or complex) and the proximity of dyad members (whether collaborating on-site or remotely) are varied to assess their impact on the performance of service repairs. The experiment aims to provide evidence on how AR can be optimally employed to refine the efficiency and effectiveness of technician-expert collaborations in field services by systematically evaluating the performance outcomes of different dyad configurations under these varied conditions. This research could potentially redefine strategies within service operations, paving the way for more innovative and effective use of technology in complex environments.
+
+The experiment will follow a between-subject design, with each subject assigned to one of two conditions in each part---either a dedicated or random condition. Each part will have 120 student participants, thus 240 participants in total. These students will be organized into ten sessions per part, each session accommodating 12 subjects. Each session, unknown to the participants, will either be a random treatment or a dedicated treatment. Within each session, 6 students will be randomly assigned the role of technicians, while the remaining 6 will assume the role of experts. Each technician student will be randomly paired with an expert student in their condition.
+
+The student dyads will have to repair six faulty microcontroller circuit boards. For this, the students will be provided with comprehensive guidelines, presented in a booklet form, outlining the basics of circuit boards and electrical components, alongside safety instructions. In addition, students assigned as experts will be provided with supplementary instructional materials in the form of a video guide focusing on electrical components and will be provided with trial tasks to work on. For sessions with AR, the technicians will receive further training on using the AR device, and to check if they have any motion sickness associated with the device.
+
+To illustrate the specific task, we created a video that can be accessed using the following link:
+
+\url{https://syncandshare.lrz.de/getlink/fiBzutdPjNKR3ed68Ubksz/4.Participants_View.mp4}
+
+Lastly, the students will receive a fixed payment for their participation, supplemented by an additional payment based on the collaborative performance of the dyad with which they were engaged.
+
+\subsection*{4. Expected Compensation}
+% On average, students must earn at least what they are paid as student assistants by TUM.
+The students will receive a fixed payment of 15€ for their participation, supplemented by an additional expected payment of 8€ based on the collaborative performance of the dyad with which they were engaged. The expected compensation for a participant is 23€. The experiment sessions will be overbooked to have enough participants even if some did not show up. The student that comes first will enter the experiment first. The students will be compensated with a show-up fee of 5€ if they were invited, and arrived on time but are not allowed to attend. All payments will be made with Wunschgutschein vouchers\footnote{https://www.wunschgutschein.de/}.
+
+\subsection*{5. Anonymity and Data Protection}
+Participants will connect via video conferencing for augmented reality (AR) sessions, during which dyad members will see each other and each other's perspectives on their computers and holographic screens. No conversations between the technician-expert dyad will be recorded, nor will any video footage be captured.
+
+Performance data will be recorded manually and stored locally on the experimenter's laptop during the experiments. At the conclusion of the experiment, all participants will complete a questionnaire. Personal information such as names or matriculation numbers will not be collected. Instead, participants will be assigned unique identifiers during the experimentation process. This limits us in connecting the results of the experiment to an individual. 
+
+The data obtained from the experiment and survey will be used for statistical analysis. The data will be stored on the experimenter's computer in a secured folder to prevent unauthorized access. The data may be stored and subjected to specific analyses for up to 10 years to facilitate further detailed analysis. Any additional analyses may be conducted by potential co-authors, but such analyses will be performed on anonymized data, which will remain password protected.
+
+\subsection*{6. Anticipated Challenges}
+We will use Microsoft HoloLens 2, an optical see-through head-mounted display. The advantage of using optical see-through display technology is that it allows participants to perceive the world as if they were wearing a normal pair of glasses. The HoloLens 2 features eye tracking and can adjust the holographic projection to accommodate different visual impairments. Additionally, it supports individuals who wear glasses, which reduces the likelihood of motion sickness commonly associated with virtual reality devices. A study involving 142 subjects found that the HoloLens induces negligible symptoms of simulator sickness.\footnote{Vovk, A., Wild, F., Guest, W., \& Kuula, T. (2018, April). Simulator sickness in augmented reality training using the Microsoft HoloLens. In \textit{Proceedings of the 2018 CHI conference on human factors in computing systems} (pp. 1-9).\\}
+
+In our experiments, participants will test the AR device and report any motion sickness before beginning the experiment. Based on our extensive experience with virtual reality, participants usually know if they are prone to motion sickness. If not, they typically determine this within the first 10 minutes of use. Therefore, we anticipate that participants will be able to assess their ability to take part in the experiment after a 10-minute trial.
+
+If students still witness physical drawbacks due to motion sickness or other adverse side effects, they may choose to terminate the trial. Students who drop out due to health issues will still be compensated for their participation (with the base pay but no performance-dependent payment).
+
+The post-experiment questionnaire will also include questions regarding motion sickness and any difficulties experienced while using the AR headsets, which will be assessed on a Likert scale.
+
+\subsection*{7. Exclusion Criteria}
+For the experiments, participants should not have any known history of motion sickness. Before the start of the experiments, subjects will try the HoloLens 2 to familiarize themselves with the technology. If they report experiencing motion sickness (or other rare issues such as headaches), they will take on the role of the expert, as the expert does not wear the AR glasses. Additionally, any participant can opt out of the experiment at any time if they experience motion sickness, 
+
+Participants must be able to communicate and understand English.
+
+\subsection*{8. Sessions} 
+% Please suggest dates and times for your sessions. Also indicate the planned duration and the desired number of participants (up to 32).
+\begin{tabular}{L{2cm}L{2cm}L{3cm}L{3cm}L{2cm}L{1cm}L{3.5cm}}
+\toprule
+    \textbf{Date} & \textbf{Weekday} & \textbf{Time} & \textbf{Treatment} & \textbf{Code} & \textbf{CS/SC} & \textbf{No. of participants}\\\midrule
+    15.01.2025 & Wednesday & 12:30-14:30 & dedicated & D-1 & SC & 12\\
+    15.01.2025 & Wednesday & 16:00-18:00 & random & R-1 & SC & 12\\\midrule
+    16.01.2025 & Thursday & 10:30-12:30 & dedicated & D-2 & CS & 12\\
+    16.01.2025 & Thursday & 14:30-16:30 & random & R-2 & CS & 12\\
+\midrule
+    17.01.2025 & Friday & 10:30-12:30 & random & R-3 & CS & 12\\
+    17.01.2025 & Friday & 14:30-16:30 & dedicated & D-3 & CS & 12\\\midrule
+    20.01.2025 & Monday & 09:00-11:00 & dedicated (AR) & DAR-1 & SC & 12\\
+    20.01.2025 & Monday & 12:30-14:30 & random & R-4 & SC & 12\\20.01.2025 & Monday & 16:00-18:00 & random (AR) & RAR-1 & SC & 12\\\midrule
+    21.01.2025 & Tuesday & 09:00-11:00 & random (AR) & RAR-2 & SC & 12\\
+    21.01.2025 & Tuesday & 12:30-14:30 & dedicated & D-4 & SC & 12\\
+    21.01.2025 & Tuesday & 16:00-18:00 & dedicated (AR) & DAR-2 & SC & 12\\\midrule
+    22.01.2025 & Wednesday & 09:00-11:00 & random (AR) & RAR-3 & CS & 12\\
+    22.01.2025 & Wednesday & 12:30-14:30 & dedicated & D-5 & CS & 12\\    
+    22.01.2025 & Wednesday & 16:00-18:00 & dedicated (AR) & DAR-3 & CS & 12\\\midrule
+    23.01.2025 & Thursday & 09:00-11:00 & dedicated (AR) & DAR-4 & CS & 12\\
+    23.01.2025 & Thursday & 12:30-14:30 & random & R-5 & CS & 12\\
+    23.01.2025 & Thursday & 16:00-18:00 & random (AR) & RAR-4 & CS & 12\\\midrule
+    24.01.2025 & Friday & 09:00-11:00 & dedicated (AR) & DAR-5 & SC & 12\\
+    24.01.2025 & Friday & 12:30-14:30 & random (AR) & RAR-5 & SC & 12\\
+     \bottomrule
+     & & & & & & \textbf{240 participants}
+\end{tabular}
+
+\subsection*{9. Test dates} 
+% Please suggest dates and times to test your software. 
+The tests have been already performed.
+
+\subsection*{10. Other Requirement}
+We will need both sides of the laboratory for the experiments, and tests i.e., the larger, and smaller lab as it is the requirement of the experimental setup.
+
+
+\end{document}
+
+  

@@ -1,0 +1,131 @@
+\usepackage[utf8]{inputenc}
+\usetheme[block=fill,progressbar=frametitle,background=light, numbering=fraction]{metropolis}     
+\usepackage[english]{babel}
+\usepackage{csquotes}       
+\usepackage[T1]{fontenc}        
+\usepackage{booktabs}
+\usepackage{pgfgantt}
+\usepackage{pifont}
+\usepackage{adfbullets}
+\usepackage{enumitem}
+\usepackage{amsmath,amsthm}   
+\usepackage{tikz}
+\usepackage{lipsum}
+\usepackage{amssymb}
+\usepackage{amsfonts}
+\usepackage{mathrsfs}   
+\usepackage{graphicx}
+\usepackage{adjustbox}
+\usepackage{varioref}
+\usepackage{probsoln}
+\usepackage{setspace}
+\usepackage{comment}
+
+\usepackage{tum_colors}
+
+\setbeamertemplate{itemize items}[circle]
+\setbeamertemplate{enumerate items}[default]
+
+\DeclareMathOperator*{\argmax}{arg\,max}
+
+
+
+\newcommand{\CL}{\ensuremath{{CL}}}
+\newcommand{\NP}{\ensuremath{{0}}}
+\newcommand{\BIF}{\ensuremath{{BIF}}}
+\newcommand{\Bank}{\ensuremath{{Bank}}} 
+\newcommand{\US}{\ensuremath{{U}}}
+\newcommand{\e}[1]{{\mathbb E}\left[ #1 \right]}
+\newcommand{\p}[1]{{\mathbb P}\left[ #1 \right]}
+\newcommand{\iUS}{\mathbbm 1_{S^\US}}
+\newcommand{\iS}{\mathbbm 1_{S}}
+\newcommand{\iCL}{\mathbbm 1_{S^\CL}}
+\newcommand{\iBIF}{\mathbbm 1_{S^\BIF}}
+\newcommand{\rf}{\ensuremath{r}}
+
+\makeatletter
+
+\setlength{\metropolis@titleseparator@linewidth}{2pt}
+\setlength{\metropolis@progressonsectionpage@linewidth}{2pt}
+\setlength{\metropolis@progressinheadfoot@linewidth}{2pt}
+\newcommand*{\rom}[1]{\expandafter\@slowromancap\romannumeral #1@}
+
+\makeatother
+
+\setbeamertemplate{frame footer}{\insertshortauthor}
+\setbeamerfont{page number in head/foot}{size=\tiny}
+\setbeamercolor{footline}{fg=gray}
+
+\setbeamercolor{frametitle}{bg=white, fg=black}
+
+\usepackage{booktabs}
+
+\newtheorem{proposition}{Proposition}
+\usepackage{subfigure,placeins,subcaption}
+\usepackage{fontspec}
+\setsansfont{Ubuntu}
+
+\usepackage{natbib}
+\let\realcitep\citep
+\renewcommand*{\citep}[1]{{\footnotesize\realcitep{#1}}}
+
+
+\usepackage{rotating}
+\usepackage{siunitx}
+\usepackage{dcolumn}
+\newcolumntype{d}[1]{D{.}{.}{#1}}
+\newcommand{\muc}[2]{\multicolumn{1}{C{#1}}{#2}}
+\newcommand{\mul}[2]{\multicolumn{1}{L{#1}}{#2}}
+\newcommand{\mucThree}[2]{\multicolumn{3}{C{#1}}{#2}}
+\newcommand{\mulTen}[2]{\multicolumn{10}{L{#1}}{#2}}
+
+\newcolumntype{C}[1]{>{\centering\arraybackslash}p{#1}} 
+\newcolumntype{L}[1]{>{\raggedright\arraybackslash}p{#1}} 
+\newcolumntype{R}[1]{>{\raggedleft\arraybackslash}p{#1}} 
+\newlength\interColSepSmall
+\newlength\interColSepLarge
+\setlength{\interColSepSmall}{0.2em}
+\setlength{\interColSepLarge}{0.4em}
+\usepackage{bbm}
+
+\usepackage{multirow,setspace}
+\usepackage{minibox}
+
+\setlength{\itemindent}{-0.4em}
+\usepackage{pst-all}
+\usepackage{pst-plot}
+
+
+\newcommand{\positionLogo}{
+    \begin{tikzpicture}[remember picture,overlay]
+        \node[anchor=north east, inner sep=5pt] at (current page.north east) {\includegraphics[width=1cm]{01 latex/Beamer/input/TUM_Logo_blau_rgb_p.png}};
+    \end{tikzpicture}
+}
+
+%\addtobeamertemplate{frametitle}{}{\positionLogo} % Position logo on each frame
+
+\setbeamertemplate{itemize item}{\scriptsize\raise1.25pt\hbox{\textbullet}}
+\setbeamertemplate{itemize subitem}{\tiny\raise1.5pt\hbox{\textbullet}}
+\setbeamertemplate{itemize subsubitem}{\tiny\raise1.5pt\hbox{\textbullet}}
+
+\usepackage{adjustbox} % Add this line in your preamble if not already included
+%\newcommand{\setmyheader}{
+%    \setbeamertemplate{headline}{
+%        \begin{beamercolorbox}[wd=\paperwidth, ht=7.5ex, dp=1.125ex]{bg=white, fg=white}
+%        \hspace*{\dimexpr\paperwidth-0.3cm} % Move to the right
+%            \vspace*{-0.4cm} % Move down
+%            \includegraphics[width=1cm]{TUM_Logo_blau_rgb_p.png} % Adjust width as needed
+%            % Add any additional content here
+%        \end{beamercolorbox}
+%    }
+%}
+
+\newcommand{\HypothesisArrow}[1]{%
+    \raisebox{4ex}{%
+        \begin{tikzpicture}[line/.style={draw, black}]
+            \draw[line, {Latex}-{Latex}] (-1,2.5) -- (1,2.5) 
+                node[midway, below] {\small(Hypothesis #1)};
+        \end{tikzpicture}
+    }%
+}
+

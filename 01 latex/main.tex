@@ -1,0 +1,1063 @@
+\documentclass[msom,nonblindrev]{01 latex/class/informs3}
+
+%%%%%%%%%%%%%%%
+% BASIC PACKAGES
+%%%%%%%%%%%%%%%
+
+\usepackage[T1]{fontenc}
+\usepackage{graphicx}
+\usepackage{array}
+\usepackage{longtable}
+%\usepackage{amsmath, amsthm}
+\usepackage{enumitem}
+\usepackage{siunitx}
+\usepackage{eurosym}
+\usepackage{xcolor}
+
+%%%%%%%%%%%%%%%
+% HYPERLINKS & REFERENCES
+%%%%%%%%%%%%%%%
+
+\usepackage[colorlinks=true, linkcolor=black, urlcolor=black, citecolor=black, anchorcolor=black]{hyperref}
+\usepackage{cleveref} % Add this line for clever referencing
+\usepackage{comment,soul}
+
+
+%%%%%%%%%%%%%%%
+% REFERENCES
+%%%%%%%%%%%%%%%
+
+\usepackage{natbib}
+\bibpunct[, ]{(}{)}{,}{a}{}{,}%
+\def\bibfont{\small}%
+\def\bibsep{\smallskipamount}%
+\def\bibhang{24pt}%
+\def\newblock{\ }%
+\def\BIBand{and}%
+
+  
+%%%%%%%%%%%%%%%
+% TABLE & FIGURE SETTINGS
+%%%%%%%%%%%%%%%
+
+\usepackage{booktabs} % For better table lines
+\usepackage{multirow} % For multi-row cells
+\usepackage{graphicx, wrapfig, subcaption} % For figures and subfigures
+\usepackage{placeins}
+
+\newcolumntype{C}[1]{>{\centering\arraybackslash}p{#1}} 
+\newcolumntype{L}[1]{>{\raggedright\arraybackslash}p{#1}} 
+\newcolumntype{R}[1]{>{\raggedleft\arraybackslash}p{#1}} 
+
+\newcommand{\HypothesisArrow}[1]{%
+    \raisebox{4ex}{%
+        \begin{tikzpicture}[line/.style={draw, black}]
+            \draw[line, {Latex}-{Latex}] (-1.6,2.5) -- (1.6,2.5) 
+                node[midway, below] {\small(\Cref{#1})};
+        \end{tikzpicture}
+    }%
+}
+%\newcolumntype{d}{S[input-open-uncertainty=, input-close-uncertainty=, parse-numbers = false, table-align-text-pre=false, table-align-text-post=false]}
+
+%\usepackage{tikz}
+%\usetikzlibrary{matrix}
+%\tikzset{papernode/.style={draw, rectangle, fill=gray!20}}
+
+%\usetikzlibrary{positioning, arrows.meta}
+
+\input{01 latex/tikz_definition}
+
+%%%%%%%%%%%%%%%
+% BREQN PACKAGE FOR DMATH
+%%%%%%%%%%%%%%%
+
+\usepackage{breqn}
+
+%%%%%%%%%%%%%%%
+% THEOREM DEFINITIONS
+%%%%%%%%%%%%%%%
+
+\newtheorem{hypothesis}{Hypothesis}
+\newtheorem{definition}{Definition}
+\usepackage{chngcntr}
+%\newcounter{pretheorem}
+%\counterwithin{hypothesis}{pretheorem}
+%\renewcommand\thehypothesis{\arabic{pretheorem}\alph{hypothesis}}
+%\newcommand{\theoremgroup}{\refstepcounter{pretheorem}}
+
+%%%%%%%%%%%%%%%
+% CUSTOM COMMANDS
+%%%%%%%%%%%%%%%
+
+\newcommand{\Hypo}[2]{\begin{hypothesis}\label{hypo:#1}#2\end{hypothesis}}
+\newcommand{\HRule}[1]{\rule{\linewidth}{#1}}
+\newcommand{\killSpace}{$\;$\vspace{-36pt}\\}
+\newcommand{\pDefSig}[0]{${}^{+} p< 0.10$,${}^{*} p <0.05$,${}^{**} p <0.01$,${}^{***} p <0.001$}
+\newcommand{\pDefSigCor}[0]{${}^{*} p <0.05$}
+\newcommand{\muc}[2]{\multicolumn{1}{C{#1}}{#2}}
+\newcommand{\mul}[2]{\multicolumn{1}{L{#1}}{#2}}
+\newcommand{\mucThree}[2]{\multicolumn{3}{C{#1}}{#2}}
+\newcommand{\mucFive}[2]{\multicolumn{5}{C{#1}}{#2}}
+\newcommand{\mulTen}[2]{\multicolumn{10}{L{#1}}{#2}}
+\newcommand{\suc}[1]{\multicolumn{1}{c}{#1}}
+\newcommand{\indLine}[0]{Industry\\\;\\}
+
+
+%% Spacing
+\OneAndAHalfSpacedXI
+
+\begin{document}
+
+%% Author and Title Information
+\RUNAUTHOR{Mohadikar, Wuttke, Siemsen}
+\RUNTITLE{Dedicated versus random dyads in repair operations}
+
+\TITLE{Dedicated versus random dyads in repair services}
+
+\ARTICLEAUTHORS{
+
+    \AUTHOR{Mrunal Mohadikar}
+    \AFF{Technical University of Munich, TUM School of Management, TUM Campus Heilbronn, Bildungscampus 9, 74076 Heilbronn, Germany, 
+    \EMAIL{mrunal.mohadikar@tum.de}, corresponding author}
+    
+    \AUTHOR{David Wuttke}
+    \AFF{Technical University of Munich, TUM School of Management, TUM Campus Heilbronn, Bildungscampus 9, 74076 Heilbronn, Germany, 
+    \EMAIL{david.wuttke@tum.de}, corresponding author}
+    
+    \AUTHOR{Enno Siemsen}
+    \AFF{University of Wisconsin, Madison, 4291 Grainger Hall, Madison, WI, USA 
+    \EMAIL{esiemsen@wisc.edu}}
+}
+
+\ABSTRACT{
+Abstract. 
+}
+
+\KEYWORDS{behavioral operations; team formation; repair service operations}
+
+\maketitle
+\section{Introduction}
+Field-based service operations such as maintenance, repair, inspection, and overhaul are crucial in various industries \citep{ulaga2011hybrid, mathieu2001product, hull1994field, blumberg1994strategies}. Whereas local technicians understand the local context, constantly operate machines, and can handle routine operations, repairing and maintaining sophisticated technical equipment requires specialized expertise \citep{johnson1988cognitive}. Therefore, companies form dyads comprising on-site technicians with extensive knowledge of local requirements and experts with in-depth knowledge of intricate components.
+
+%Our theory is when something is broken, and it needs to be fixed - corrective maintenance. 1. when something is broken 2. you dont know what is broken
+
+Traditionally, these experts must travel to the repair locations. However, with Augmented Reality (AR) on the rise \citep{wuttke2022seeing, seeliger2023augmented}, experts can guide the field technician remotely, thereby reducing the logistical challenges associated with their physical presence \citep{porter2017HBR}. AR smart glasses supplement real-world vision with an overlay of interactable computer-generated graphics and text, allowing hands-free usage. This enhances the speed of service repair operations, improves accuracy, and reduces error rates and repair costs \citep{abraham2017HBR}. Though studies demonstrate the use of AR in field service operations, such as the case study by \citet{rapaccini2014evaluating} on AR implementation of Canon Group, the technology is still at its pioneering stage. Many companies lack a comprehensive understanding of its potential managerial implications on service repair operations \citep{coughlan2002action}.
+
+Remote support can only succeed if the collaboration within the technician-expert dyad is effective and efficient. Therefore, assigning dyads is at the core of remote support. There have been different approaches to assigning dyads comprising on-site technicians and experts even before the advent of AR. Some companies have dedicated service experts for support, resulting in \emph{dedicated technician-expert dyads} \citep{voss1992applying}. In contrast to dedicated technician-expert dyads, some companies use a service helpdesk infrastructure. Typically, this approach involves ticket systems where on-site technicians open a ticket to call for support, and IT systems filter those tickets and assign the next available expert. This results in \emph{random technician-expert dyads}. Between these two extremes, there is a vast spectrum of hybrid approaches, such as trying random assignment first and, if needed, escalating problems to even more experienced experts. Alternatively, firms could assign a dedicated expert but deviate from that rule if that person is unavailable. To derive foundational results, we omit hybrid approaches and focus on the dichotomy between dedicated and random dyads.
+
+Before the advent of AR, the \emph{assignment tradeoff} (defined as using dedicated vs random technician-expert dyads) was non-trivial because either approach has benefits, as described in Table~\ref{table:dedicatedvsrandom}. Dedicated dyads improve collaboration \citep{berman2002tacit, avgerinos2017team}, streamline communication \citep{cramton2001mutual}, reduce error rates \citep{kane2005knowledge, argote2012organizational}, and increase trust \citep{siemsen2009influence}. Randomly assigning technician-expert dyads raises creativity in problem-solving \citep{gruenfeld2000groups, choi2005old, edmondson2009product,ramachandran2017help}, facilitates learning \citep{kane2005knowledge, argote2012organizational}, reduces complacency \citep{dixon2018reinventing, ball2017plant}, and increases operational flexibility.% To some extent, we can also interpret the strengths of one approach as the other approach's weaknesses.
+
+%{We rewrote this part. Does this logic make sense? We have not yet adjusted the hypotheses section. But after writing it, I felt we might be able to understand the underlying mechanism, how AR informs the tradeoff. E.g., we could have a survey on the relevant concepts (trust, seamless communication) and whether there are differences depending on the assignment. Or maybe we can find a better measurement method than surveys.}
+
+We revisit the technician-expert dyad\ assignment in the age of Industry 4.0. How does AR interact with the strengths and weaknesses of either approach? For instance, if AR attenuates the importance of seamless communication and trust but accentuates the importance of problem-solving, creativity, and learning, it would shift the tradeoff in favor of random dyads---and vice-versa. What happens when a dyad\, which could be assignment specific, and thereby short-lived, collaborates on-site or remotely using AR? Keeping everything else fixed, does AR shift the balance towards one assignment form? Should firms rely more on dedicated dyads or random dyads when using AR?
+
+%Enno: In your literature review, you then mention a study that shows the benefits of either - which leads to the question of 'compared to what?'
+
+  \begin{table}[h]
+    \centering
+    \caption{Benefits of dedicated and random assignments}
+
+    \begin{tabular}{|p{0.45\linewidth}|p{0.45\linewidth}|}
+        \hline
+        \multicolumn{1}{|c|}{Dedicated dyad} & \multicolumn{1}{|c|}{Random dyad}\\
+        \hline
+        \textbf{Improved performance}: When people work together consistently, they develop deeper relationships, especially when they've faced challenging situations together. This strengthens collaboration in subsequent assignments \citep{berman2002tacit, avgerinos2017team}.
+        & 
+        \textbf{Creative problem solving}: New people bring fresh perspectives and experiences, fostering innovative solutions to complex problems  \citep{gruenfeld2000groups, choi2005old, edmondson2009product}. In contrast, consistently working with the same person can hinder creativity \citep{ramachandran2017help}.\\
+        \hline        
+        \textbf{Seamless communication}: People who work together often would use same terminology, facilitating easy exchange of ideas \citep{cramton2001mutual}. 
+        & 
+        \textbf{Learning}: Collaborating with new people provides opportunities to gain knowledge about superior techniques from high-performing peers \citep{kane2005knowledge, argote2012organizational}.\\
+        \hline
+        \textbf{Reduced error}: Efficient collaborations among familiar people who are already aware of each other's skills and have a common knowledge base and shared understanding minimizes errors \citep{katz1982effects, littlepage1997effects, huckman2009team}.
+        & 
+        \textbf{Reduced complacency}: Working with new people fosters excitement and promotes continuous learning and their diverse, and unique perspective  \citep{dixon2018reinventing, ball2017plant}.\\
+        \hline
+        \textbf{Stronger trust}: Regular interaction allows people to build rapport and extensive knowledge sharing \citep{siemsen2009influence}. 
+        & 
+        \textbf{Increased operational flexibility}: Working with new people ensures work continuity even if specific person is unavailable.\\
+        \hline
+    \end{tabular}	
+    \label{table:dedicatedvsrandom}
+\end{table}
+\FloatBarrier
+
+This paper provides evidence from controlled experiments. We systematically compare the performance of dedicated dyads with those of random dyads. We examine task complexity and dyad\ members' proximity (i.e., on-site or remote collaboration using AR) as the moderators.
+
+%. Specifically, we compare the repair time when repairs are made by dedicated pairs vs varying pairs. We look for the effect that task complexity may have when pairing a technician with an expert. We aim to assess whether digital tools can establish stronger trust and, concurrently, resolve the challenges associated with scheduling experts.
+
+\section{Literature Review}
+The formation of teams has been extensively studied \citep{guzzo1996teams}. As we will review in this section.... However, the specific case of optimally assinging a technician-expert dyads for repair tasks is less well understood.
+
+
+
+\section{Hypothesis Development}
+%\subsubsubsection{What?}
+This study examines dyads within collaborative service environments and investigates the influence of changes in dyad compositions on their overall performance. In this study, a \emph{dyad} is defined as a collaborative unit put together to carry out a certain service-repair task. The dyad comprises two members: a technician and an expert. The \emph{technician}, situated locally, is an individual who is seeking guidance on repair operations, while an \emph{expert} is a person who possesses in-depth knowledge of the system in question. This person can either work on-site or remotely.
+
+Technicians regularly require support from experts. This requires pairing them with an expert each time. If they are always paired with the same expert, we refer to the pair as a \emph{dedicated dyad}. If they are paired with a potentially different expert, such as the next available expert, we refer to them as a \emph{random dyad}. 
+
+According to \citet{harrison2003time} and \citet{espinosa2007familiarity}, the impact of dyad formation on performance might vary based on the type of work involved. \citet{chae2015effects} have indicated that both task complexity and individual creativity of team members contribute to the performance of temporary teams. Thus, we classify service repair operations as simple and complex. We distinguish \emph{simple} repairs as low-creative tasks with well-defined procedures or algorithms to resolve, while \emph{complex} tasks necessitate creative problem-solving and lack predefined procedures. According to \citet{wuttke2022seeing}, a truly complex task differs from a difficult task in that the latter requires several predetermined steps to be performed sequentially. A complex task, on the other hand, requires out-of-the-box thinking, involves several linked and conflicting elements \citep{campbell1988task}, and cannot be completed with predetermined steps \citep{liu2012task}. Complex tasks often involve higher degrees of uncertainty and require adaptability and flexibility to navigate ambiguous situations.
+
+Furthermore, we distinguish collaboration for service repairs into on-site and AR. In an \emph{on-site} collaborative service environment, the expert is physically present at the service site and collaborates closely with the technician to diagnose the problem and execute necessary repairs. In a \emph{remote} collaborative service environment, the technician stationed at the service site utilizes AR glasses to seek guidance on repair procedures while the expert provides support remotely. This setup enables the technician to receive real-time assistance and visual cues from the expert through AR technology. However, the expert is only involved in the diagnosis of the problem and cannot physically support the execution of the solution. These two situations are close to real-world scenarios and demonstrate the flexibility of collaborative service environments.
+%Enno's comment: One thing to examine is the difference between diagnostic and execution. Complex maintenance tasks have a huge diagnostic component to it, and it may be useful (for theory building and experimental design) to call that out explicitly.
+
+Since service repair operations frequently require employees to work under high time pressure \citep{de2010augmented}, we focus on repair time as the metric for assessing dyad performance, where a shorter duration indicates superior performance. The study posits that reduced repair time is a key indicator of efficient collaboration within the dyad, with implications for optimizing remote repair processes.
+%we focus our attention on the effectiveness of dyad\ formation, specifically on whether the dyad\ can finish the repair work within a certain time frame. In addition,
+
+Figure~\ref{tab:conceptual_model} presents an overview of our hypotheses. We test two benchmark hypotheses based on former literature, which assess the performance of dedicated and random dyads for tasks of varying complexity when members collaborate on-site or remotely. Following this, we propose that the use of AR technology may impact dyad performance differently when they are working remotely, as it creates a virtual barrier between dyad members. We provide arguments for our hypotheses in the remainder of this section.
+
+\begin{figure}[h]
+\FIGURE
+{\begin{tabular}{lC{4cm}lC{4cm}}
+        \toprule
+         task complexity & 
+        \multicolumn{3}{c}{members' proximity} \\
+        \midrule
+        & in-person && remote (AR) \\
+        \cmidrule{2-2}\cmidrule{4-4}\vspace{-6pt}\\
+        simple  & dedicated $>$ random (\Cref{h:onsite_simple})
+                && dedicated $>$ random (\Cref{h:remote_simple}) \vspace{12pt}\\
+        %\midrule
+        complex & dedicated $<$ random (\Cref{h:onsite_complex})
+                && dedicated $>$ random (\Cref{h:remote_complex}) \\
+        \bottomrule
+    \end{tabular}
+}
+{Overview of the hypotheses\label{tab:conceptual_model}}
+{Symbols $>$ and $<$ indicate the hypothesized direction of performance.}
+\end{figure}
+
+\subsection{Effect of task complexity on dyad formation}
+Members of a dedicated dyad learn to know each other when they have collaborated on multiple occasions \citep{katz1982effects}. This familiarity establishes a consistent working relationship that fosters a deep understanding of each member's strengths, weaknesses, and expertise \citep{littlepage1997effects}. While working together, the members may develop a shared tacit knowledge, which includes the unspoken understanding and awareness of each other's approaches and problem-solving strategies, enabling them to work more efficiently with each other without the need for extended discussions \citep{campbell1988task, shamsie2013looking}. In addition, it facilitates more effective communication since they may use and understand the same technical terms \citep{cramton2001mutual}, reducing the need for explicit interactions during service repair operations. 
+
+The effect of team members' familiarity with each other on team performance has been shown in many research. For instance, \citet{huckman2009team} shows that greater performance is correlated with dedicated members in software development teams, as seen by lower error rates and improved schedule adherence. \citet{avgerinos2017team} studied a granular data set from a private hospital to show that high familiarity within temporary teams is also associated with better performance in surgical healthcare operations. 
+
+Simple tasks often involve repetitive or routine actions. This would imply adhering to a checklist or set procedures when performing repair work. For this reason, dedicated dyads, having worked together on multiple occasions, are well-equipped to handle these tasks efficiently due to their established workflows and familiarity with each other's roles and responsibilities. Hence, we hypothesize the following:
+
+\begin{hypothesis}\label{h:onsite_simple} 
+For simple tasks, dedicated dyads perform better than random dyads when collaborating in-person.
+\end{hypothesis}
+
+Despite the benefits of dedicated dyads, changes in team composition have been recognized to bring creativity in solving problems \citep{gruenfeld2000groups}. In an experimental study, \citet{choi2005old}, demonstrated that randomly changing team members fosters the generation of unique ideas. The participants also learn superior techniques when the changing team member performs better than themselves \citep{kane2005knowledge}. Since different technicians and experts may have different approaches to conducting the tasks, randomization offers a variety of viewpoints \citep{edmondson2009product}, which a technician and expert may find helpful for upcoming repairs. In addition, working with different experts can be advantageous for technicians as it allows them to gain knowledge by learning from people with diverse expertise \citep{argote2012organizational}. They can learn from different approaches and acquire new skills to solve future problems faster.
+
+The effect of dynamically assigning members of a team on the team's performance has also been explored in various contexts. For example, in a healthcare setting, \cite{kim2023learning} found a negative performance effect when decision executors (sub-ordinates) were exposed to random decision makers (leaders) in temporary teams. On the contrary, they found positive performance effects when decision-makers were exposed to random decision executors. In a laboratory experimental study where students had to make paper art, \citet{argote1995group} found that dynamically, or even randomly, assigning members of a team harmed team performance. They found the effect less pronounced for complex tasks and attributed it to the perception that randomization brings new ideas and creativity in teams. \citet{akcsin2021learning} studied the effect of randomizing members in temporary teams who were new paramedic recruits in ambulance transportation. They found the performance of random dyads outweighs dedicated dyads for tasks with less standardization. These results were attributed to the increased volume and freshness of new information learned and generated by the random dyads.
+
+Complex tasks, as opposed to simple tasks, often require adaptability and flexibility to navigate uncertainty or ambiguity in tasks. A complex repair task, for instance, requires extensive diagnostics to determine the root of the problem. Because these tasks do not have standard operating procedures, the random assignment of dyad members provides flexibility in applying new execution strategies to problem-solving \citep{shostack1987service}, which they might have learned by working with other members. Random dyads, composed of individuals who may have different approaches to problem-solving, might be better positioned to adapt to changing circumstances and explore unconventional solutions compared to dedicated dyads, which may have developed a similar style of problem-solving due to repeated interactions. The diversity of perspectives within random dyads enhances their ability to tackle complex problems creatively and effectively. Furthermore, exposure to various approaches and strategies through randomization can stimulate innovation and promote brainstorming within the dyad. Considering these points, we hypothesize,
+
+\begin{hypothesis}\label{h:onsite_complex}
+For complex tasks, random dyads perform better than dedicated dyads when collaborating in-person.
+\end{hypothesis}
+%Measured objectively using repair time.
+
+\subsection{Effect of members' proximity on dyad formation}
+Studies indicate that the proximity of team members affects interpersonal communication and interactions amongst the members \citep{hoegl2004team, kahn1997empirical}. Members' proximity influences various aspects of collaboration, including contextual awareness, coordination, knowledge sharing, and accountability \citep{herbsleb1999architectures, olson2000distance}. When a technician-expert dyad operates on-site, close proximity and direct observation foster rapport development and enable spontaneous interactions. However, when the expert operates remotely, various factors hinder effective communication channels \citep{espinosa2007familiarity}. Research suggests that the absence of physical proximity can depersonalize trust \citep{nandhakumar2002virtual} and may lead to conflicts arising from miscommunication \citep{kankanhalli2006conflict}. Despite advancements in communication technology, remote collaboration may introduce challenges in coordination, as it relies on computer-mediated communication and thus creates a virtual barrier between members of the dyad \citep{daft1986organizational}. Thus, the dynamics of remote collaboration may influence the performance of dedicated and random dyads differently than on-site collaboration because of the remoteness enabled by AR technology with the desire for reduced travel time. 
+
+While working remotely, the inherent challenges necessitate a high degree of coordination, communication, and adaptability between the technician-expert dyad. The continuity afforded by a dedicated dyad becomes particularly advantageous in this case. Studies indicate that repeated collaboration fosters strong ties, develops trust, and forms a mutual tacit understanding \citep{edmondson2012teaming, maloney2019lasting, lewicki1996developing}. The strong familiarity between dyad members lowers misunderstandings about each other's capabilities \citep{harrison2003time} and allows for more seamless coordination \citep{reagans2005individual}, especially in remote environments where members may not see each other physically. On the other hand, a random dyad is assignment specific by design, and thereby, the members do not have enough opportunity to obtain a certain level of communication quality and establish interpersonal trust when working remotely. This increases the time needed to convey and comprehend repair instructions as the members can face difficulties anticipating each other's actions and responding accordingly. 
+
+\citet{espinosa2007familiarity} conducted a field study to show that the benefit of familiarity on team performance is amplified when the team is geographically dispersed, similar to remote service repairs. Having dedicated dyads encourages the development of a collaborative synergy amongst members and the accumulation of shared learning over repeated service repair collaborations. The shared tacit knowledge developed by long-term collaboration provides greater performance benefits than groups lacking familiarity with one another \citep{berman2002tacit}. In addition, an expert may feel more confident in sharing knowledge with the technician in a dedicated dyad where there is a higher frequency of communication between the pair \citep{siemsen2009influence}. This facilitates faster problem resolution, as the technicians may make some decisions themselves. 
+
+%Focus on how AR may diminish the positive effect of dynamic collaboration. 
+
+The advantage of dedicated dyads may remain consistent while working remotely, and the remote dedicated dyads may maintain their superior performance compared to the remote random dyads, thanks to their established familiarity, efficient communication, and shared learning capabilities. Conversely, the benefits of random dyads may diminish due to the inherent distance created by remote collaboration, resulting in similar performance effects across simple and complex tasks. Considering these points, we propose the following hypotheses:
+%The advantages of having innovative solutions in random dyads may fade away because of the distance created by working remotely and the additional time required to understand each other ideas. Thus, there may not be different effects on performance while comparing simple and complex tasks. 
+\begin{hypothesis}\label{h:remote_simple}
+For simple tasks, dedicated dyads perform better than random dyads when collaborating remotely using AR.
+\end{hypothesis}
+%Measured objectively using repair time.
+
+\begin{hypothesis}\label{h:remote_complex}
+For complex tasks, dedicated dyads perform better than random dyads when collaborating remotely using AR.
+\end{hypothesis}
+%Measured objectively using repair time.
+
+
+
+
+\section{Experimental Design}
+We conducted a controlled laboratory experiment to test how dyad assignment (dedicated vs. random) affects performance under varying task conditions. The study was pre-registered on OSF\footnote{URL: https://doi.org/10.17605/OSF.IO/FDQ2X}.
+
+Our hypotheses focus on how dyad performance depends on two factors: task complexity (simple versus complex) and member proximity (in-person vs. AR). Each hypothesis fixes one task condition and compares performance across dyad types. This setup isolates the effect of dyad formation within specific environments. We used a $2\times2\times2$ between-subject factorial design, shown in \Cref{fig:experimental_design}.
+
+\begin{figure}[h]
+\FIGURE
+{\begin{tabular}{lC{3cm}C{3cm}lC{3cm}C{3cm}}
+        \toprule
+         task complexity & 
+        \multicolumn{5}{c}{members' proximity} \\
+        \cmidrule{1-6}
+        & \multicolumn{2}{c}{IN-PERSON} && \multicolumn{2}{c}{AR} \\
+        \cmidrule{2-3} \cmidrule{5-6}\\
+        SIMPLE  & DEDICATED & RANDOM  && DEDICATED & RANDOM \vspace{8pt}\\
+        &\multicolumn{2}{c}{\HypothesisArrow{h:onsite_simple}} 
+        &&\multicolumn{2}{c}{\HypothesisArrow{h:remote_simple}}\vspace{8pt} \\
+        COMPLEX & DEDICATED & RANDOM  && DEDICATED & RANDOM \vspace{8pt}\\
+        &\multicolumn{2}{c}{\HypothesisArrow{h:onsite_complex}} 
+        &&\multicolumn{2}{c}{\HypothesisArrow{h:remote_complex}}\vspace{-12pt} \\
+        \bottomrule
+    \end{tabular}
+}
+{Experimental design\label{fig:experimental_design}}
+{}
+\end{figure}
+
+We refer to each condition in all caps. Subjects were randomly assigned to either the DEDICATED or RANDOM condition, and to either the IN-PERSON (same room, no AR) or AR (separate rooms, AR interface) condition. Each subject completed both tasks: SIMPLE and COMPLEX. We test our hypotheses by comparing DEDICATED and RANDOM dyads within each fixed task-proximity condition (i.e., horizontal comparisons in the figure).
+
+We performed a power analysis, indicating that we need 60 subjects per condition\footnote{For a medium effect size (d = 0.5) with 85\% power at an alpha level of 0.05, an a priori power analysis using G*Power \citep{faul2009statistical} and a two-tailed independent samples t-test indicated that a sample size of 59 participants per group would be sufficient. For simplicity, we rounded up and invited 60 participants per condition.}. Since every subject performed both types of tasks, we recruited 240 participants from the subject pool of a German Technical University. According to \citet{exadaktylos2013experimental}, student subjects are a suitable pool for behavioral experiments, yielding results comparable to those with professionals and managers \citep{bolton2012managers, frechette2015}. As we will describe below, participants had to perform a technical task, which aligns with the interests and skills of many students at this technical university. Furthermore, selecting student subjects offers us advantages in ease of control and manipulation, incentivization, reduction of heterogeneity, and increased possibility for replication of the experiment's results \citep{katok2018designing}.
+
+One challenge of using student subjects in our context is that students are no experts. At the same time, this challenge yields an opportunity. Ex-ante, randomly assigned students have the same level of expertise, regardless of whether they perform the role of a technician or expert in our experiment. Yet, through the experimental procedure, we can manipulate their expertise. We present below a manipulation test that confirms that, upon the training, subjects' expertise differed significantly by their role.
+
+\subsection{Experiment}
+Figure~\ref{fig:experimental_procedure} shows the key stages of the experiment. 
+
+\begin{figure}[h]
+\FIGURE
+{
+  \begin{tikzpicture}[
+  font=\sffamily,
+  every node/.style={align=center},
+  timeline/.style={draw, thick, -{latex}},
+  event/.style={font=\small, text centered},
+  time/.style={font=\footnotesize}
+]
+% Timeline
+\draw[timeline] (0,0) -- (14,0);
+% Time point 1
+\draw[thick] (0,0.2) -- (0,-0.2);
+\node[event] at (1,1) {\parbox{2cm}{\SingleSpacedXI instruction\\video}};
+\node[time] at (0,-0.6) {$t_1$};
+% Time point 1
+\draw[thick] (2.2,0.2) -- (2.2,-0.2);
+\node[event] at (3.2,1.2) {\parbox{2cm}{\SingleSpacedXI random\\role\\assignment}};
+\node[time] at (2.2,-0.6) {$t_2$};
+% Time point 3
+\draw[thick] (4.4,0.2) -- (4.4,-0.2);
+\node[event] at (5.4,1.2) {\parbox{2cm}{\SingleSpacedXI role\\specific\\training}};
+\node[time] at (4.4,-0.6) {$t_3$};
+% Time point 4
+\draw[thick] (6.6,0.2) -- (6.6,-0.2);
+\node[event] at (7.6,1.2) {\parbox{2cm}{\SingleSpacedXI manipu-lation\\check}};
+\node[time] at (6.6,-0.6) {$t_4$};
+% Time point 5
+\draw[thick] (8.8,0.2) -- (8.8,-0.2);
+\node[event] at (9.8,1) {\parbox{2cm}{\SingleSpacedXI repair\\tasks}};
+\node[time] at (8.8,-0.6) {$t_5$};
+% Time point 6
+\draw[thick] (11,0.2) -- (11,-0.2);
+\node[event] at (12,1) {\parbox{2cm}{\SingleSpacedXI exit\\survey}};
+\node[time] at (11,-0.6) {$t_6$};
+\end{tikzpicture}
+}
+{Experimental procedure\label{fig:experimental_procedure}}
+{}
+\end{figure}
+
+At $t_1$, all the participants were shown an instructional video about the experiment on a virtual reality headset. We conveyed instructions in virtual reality to identify motion sickness or issues on dizziness. None of the participants reported dizziness or feeling of motion sickness. At $t_2$, participants were randomly assigned the role of either an expert or a technician. At $t_3$, the participants took a role-specific training. The technicians watched a 2.5-minute training video alongside a 4-page manual. Experts, on the other hand, watched an 8-minute-long video alongside an 8-page manual. The experts were provided with trial tasks to work on as well. For sessions with AR, the technician also learned how to use an AR device for remote support.  
+
+At $t_4$, all subjects took part in a manipulation check, which assessed whether role-specific training led to superior expert knowledge. This assessment comprised one multiple-choice and three single-choice items, which informed us whether subjects have sufficient knowledge to solve even complex tasks (as, by design, should only the experts do). Experts answered the multiple-choice question correctly more often than technicians $(t = 12.51,\ df = 181.48,\ p < 0.001)$ and also outperformed them on three single-choice questions $(t = 9.82,\ df = 237.54,\ p < 0.001)$. To ensure all subjects understood the task and instructions, we included seven additional single-choice questions. These were answered significantly above chance by both technicians $(t = 55.64,\ df = 119,\ p < 0.001)$ and experts $(t = 66,\ df = 119,\ p < 0.001)$. We, therefore, conclude that the manipulation was successful. Appendix~\ref{app:manipulation} provide the complete quiz used as the manipulation check.
+
+At $t_5$, all subjects performed two simple and two complex repair tasks. We describe the tasks in detail in \Cref{subsec:experiment_tasks}. In the DEDICATED condition, the same technician and expert worked together across all tasks. In the RANDOM condition, technicians and experts worked with different partners for each task. We ensured that each dyad performed different experimental tasks, leading to different learning trajectories. These tasks, with either dedicated or random pairings, served to manipulate the form of dyad assignment.
+
+After completing these four tasks, each dyad performed one additional simple and one complex task. These final two tasks were identical across all dyads and served as standardized tasks for hypothesis testing. To account for potential order effects, we counterbalanced the sequence in which these tasks were presented. Half of the dyads performed the simple task first, and the other half began with the complex task.
+
+%At $t_5$, the experimental dyads were formed, and then these dyads were assigned to perform six real-effort repair tasks consecutively. A pool of 13 distinct yet comparable simple tasks (of which one was assigned as a standard task) and an equal number of complex tasks were created. A simple task is one that could be solved using the instructions provided in the manual and a complex task could not be readily solved using the instructions but required further brainstorming. Each dyad was required to perform three simple and three complex tasks presented alternately, of which four tasks (two simple, and two complex) were distinct, and two tasks (one simple, and one complex) were standard across dyads. The standard tasks were always presented after the first four tasks, a consistent arrangement applied uniformly across all dyads, serving as the basis for hypothesis testing. %We used the first four tasks as learning tasks for dyads, and used the standard tasks for hypothesis testing.
+
+%The technician-expert dyad in the dedicated formation remains together for all the tasks, and thus, a subject participating in a DEDICATED treatment session always sees the same task that their other dyad member do. Conversely, the dyads in random formation change after every task, and thus, a subject participating in a RANDOM treatment session always sees different tasks than what the other dyad member has seen before.
+
+Finally, at $t_6$, the subjects had to answer a post-experiment survey (see Appendix~\ref{app:survey}) after which they received a fixed payment for their participation, supplemented by an additional payment based on the collaborative performance of the dyads with which they were involved.
+
+\subsection{Experiment tasks\label{subsec:experiment_tasks}}
+Our hypotheses apply to settings that typically require in-person collaboration—situations in which neither a technician alone can resolve the problem, nor would a simple audio call be sufficient. At the same time, these are also the very settings where augmented reality (AR) has the potential to substitute for physical co-presence by enabling remote support. With this in mind, we designed a repair task that reflects a common AR use case: a technician with limited expertise attempts to fix a malfunctioning system under time pressure, while relying on guidance from a more knowledgeable collaborator. Two features were critical in creating this setting. First, the technician was not equipped to solve the task independently; they lacked the technical knowledge, the vocabulary, and any mental model of what a functional circuit should look like. Second, the problem was difficult to communicate verbally due to the multitude of potential error sources and the technician’s inability to recognize or describe them. The task therefore captured the defining tension of remote support scenarios, where guidance is needed, but not easily communicated.
+
+In the tasks that we designed, each dyad had five minutes to restore a broken circuit board to a functional state such that an LED bulb would light up. While all circuits used the same components, their layout and specific faults varied. The technician received the faulty board and a kit of spare parts. Both participants had access to a repair manual, which contained reference images of correct circuit configurations. The dyad had to identify the corresponding task in the manual and carry out the necessary repairs to stop the timer.
+
+\Cref{fig:task_example} illustrates examples of both simple and complex repair tasks. In the simple task (\Cref{fig:simple_flawed}), a resistor is missing. This fault is straightforward to diagnose by comparing the board to the manual. Once the missing part is inserted, the circuit is completed and the LED lights up (\Cref{fig:simple_solved}). The complex task, in contrast, combines multiple issues. In \Cref{fig:complex_flawed}, a resistor is connected incorrectly, and the power jumper is set to 0V, effectively disabling the circuit. \Cref{fig:complex_flawed} shows the fixed version. These issues are not immediately visible, cannot be resolved by visual matching alone, and often interact in non-obvious ways.
+
+
+\begin{figure}[htbp]
+\FIGURE
+{% trim = left bottom right top
+ \begin{subfigure}[b]{0.225\textwidth}
+  \includegraphics[clip, trim=150 250 300 300, width=\textwidth]{01 latex/pictures/simple_flawed_grayscale.png}
+      \caption{simple flawed\label{fig:simple_flawed}}
+ \end{subfigure}
+ \hfill
+ \begin{subfigure}[b]{0.225\textwidth}
+  \centering
+  \includegraphics[clip, trim=150 250 300 300, width=\textwidth]{01 latex/pictures/simple_solved_grayscale.png}
+      \caption{simple solved\label{fig:simple_solved}}
+ \end{subfigure}
+   \hfill
+ \begin{subfigure}[b]{0.225\textwidth}
+  \centering
+  \includegraphics[clip, trim=150 550 300 400, width=\textwidth]{01 latex/pictures/complex_flawed_grayscale.png}
+      \caption{complex flawed\label{fig:complex_flawed}}
+ \end{subfigure}
+  \hfill
+ \begin{subfigure}[b]{0.225\textwidth}
+  \centering
+  \includegraphics[clip, trim=150 550 300 400, width=\textwidth]{01 latex/pictures/complex_solved_grayscale.png}
+      \caption{complex solved\label{fig:complex_solved}}
+ \end{subfigure}
+}
+{Example of a simple task\label{fig:task_example}}
+{The red arrow and the white margin around components indicate the needed fixes for the circuits.}
+\end{figure}
+
+Before the experiment, we pre-tested the tasks with research and student assistants not belonging to our subject tool. We made various adjustments to balance the needs for complexity---the tasks needed to be so complex that technicians would not be able to solve them without the help of experts---and feasibility---the dyads needed to be able to fix them in 5 minutes. 
+
+%Please refer to Appendix~B for a detailed task description and pictures.
+
+\subsection{Sample}
+\Cref{tab:demographics} provides the sample demographics based on the survey responses. It is representative for the student population in that subject pool and shows that the clear majority does not consider themselves an expert in AR or electrical equipment, but is open to new technology.
+\begin{table}[h]
+{
+\scalebox{1}{%
+\begin{tabular}{%
+lc@{\hspace{.2em}}rc@{\hspace{.2em}}rc@{\hspace{.9em}}lc@{\hspace{.2em}}rc@{\hspace{.2em}}rc
+}\toprule\\[-12pt]
+education && {count} && {percentage} && AR experience && {count} && {percentage} \\ \cmidrule{1-5} \cmidrule{7-11}\\[-12pt]
+ high school && 67 && 27.92\% && no experience && 103 && 42.92\% \\[3pt]
+ undergraduate && 116 && 48.33\% && little experience && 64 && 26.67\% \\[3pt]
+ graduate && 57 && 23.75\% && some experience && 24 && 10.00\% \\[3pt] \cmidrule{1-5}\\[-12pt]
+ \textbf{total} && 240 && 100\% && intermediate experience && 12 && 5.00\% \\[3pt]
+  &&  &&  && notable experience && 14 && 5.83\% \\[3pt]
+ major && {count} && {percentage} && substantial experience && 14 && 5.83\% \\ \cmidrule{1-5}\\[-12pt]
+ business && 105 && 43.75\% && expert experience && 9 && 3.75\% \\[3pt] \cmidrule{7-11}\\[-12pt]
+ computer science && 45 && 18.75\% && \textbf{total} && 240 && 100\% \\[3pt]
+ engineering && 51 && 21.25\% &&  &&  &&  \\[3pt]
+ other && 39 && 16.25\% && electrical equipment experience && {count} && {percentage} \\ \cmidrule{7-11}\\[-12pt] \cmidrule{1-5}\\[-12pt]
+ \textbf{total} && 240 && 100\% && no experience && 138 && 57.50\% \\[3pt]
+  &&  &&  && little experience && 33 && 13.75\% \\[3pt]
+ gender && {count} && {percentage} && some experience && 15 && 6.25\% \\ \cmidrule{1-5}\\[-12pt]
+ female && 122 && 50.83\% && intermediate experience && 13 && 5.42\% \\[3pt]
+ male && 117 && 48.75\% && notable experience && 15 && 6.25\% \\[3pt]
+ other && 1 && 0.42\% && substantial experience && 14 && 5.83\% \\[3pt] \cmidrule{1-5}\\[-12pt]
+ \textbf{total} && 240 && 100\% && expert experience && 12 && 5.00\% \\[3pt] \cmidrule{7-11}\\[-12pt]
+  &&  &&  && \textbf{total} && 240 && 100\% \\[3pt]
+ years of work experience && {count} && {percentage} &&  &&  &&  \\ \cmidrule{1-5}\\[-12pt]
+ no work experience && 53 && 22.08\% && open to new technology && {count} && {percentage} \\ \cmidrule{7-11}\\[-12pt]
+ less than two years && 107 && 44.58\% && not open at all && 4 && 1.67\% \\[3pt]
+ two or more years && 80 && 33.33\% && not open && 6 && 2.50\% \\[3pt] \cmidrule{1-5}\\[-12pt]
+ \textbf{total} && 240 && 100\% && rather not open && 1 && 0.42\% \\[3pt]
+  &&  &&  && neutral && 9 && 3.75\% \\[3pt]
+  &&  &&  && rather open && 18 && 7.50\% \\[3pt]
+  &&  &&  && open && 72 && 30.00\% \\[3pt]
+  &&  &&  && very open && 130 && 54.17\% \\[3pt] \cmidrule{7-11}\\[-12pt]
+  &&  &&  && \textbf{total} && 240 && 100\% \\[3pt]
+  \bottomrule
+\end{tabular}
+}%scalebox
+}
+\caption{Sample demographics.}
+\label{tab:demographics}
+\end{table}%
+
+\subsection{Variables}
+\Cref{tab:summary_stats} provides summary statistics for all continuous variables. We use the numbering of tasks as they appeared to subjects. So, simple task 1 is the first simple task that a subject performs. By design, simple tasks 1 and 2 and complex tasks 1 and 2 differed for subjects. So, we cannot use them for comparison. To test our hypotheses, we use the repair time for simple task 3 and for complex task 3. Thus, we operationalize performance as faster time for making repairs for these tasks. The maximum of 300 seconds for each task is the limit of 5 minutes that we imposed. Although we cannot meaningfully compare across treatments, notice that, on average, the repair time decreased for the simple and complex tasks, respectively, indicating learning effects.
+
+The lower part of \Cref{tab:summary_stats} presents constructs that we measured through the survey (see Appendix~\ref{app:survey} for details on the items). 
+
+\begin{table}[htb]
+\TABLE
+{Summary statistics \label{tab:summary_stats}}
+{
+\scalebox{1}{%
+\begin{tabular}{%
+L{3in}c@{\hspace{.1em}}*{3}{R{0.52in}c@{\hspace{.1em}}}R{0.57in}c@{\hspace{.1em}}R{0.43in}c@{\hspace{.1em}}
+} \toprule
+variable name  &&  min.  &&  max.  &&  mean  &&  std. dev.  &&  count\\[3pt]\midrule
+repair time (simple task 1) && 28.000 && 300.000 && 211.850 && 97.550 && 120 \\[3pt]
+repair time (simple task 2) && 14.000 && 300.000 && 139.075 && 96.578 && 120 \\[3pt]
+repair time (simple task 3) && 15.000 && 300.000 && 82.300 && 67.344 && 120 \\[3pt]
+repair time (complex task 1) && 105.000 && 300.000 && 292.517 && 28.348 && 120 \\[3pt]
+repair time (complex task 2) && 48.000 && 300.000 && 261.683 && 69.532 && 120 \\[3pt]
+repair time (complex task 3) && 34.000 && 300.000 && 228.892 && 87.027 && 120 \\[3pt]\midrule
+team relationship quality && 2.000 && 5.000 && 4.246 && 0.604 && 240 \\[3pt]
+team ability to solve problem && 1.000 && 5.000 && 4.051 && 0.605 && 240 \\[3pt]
+team ability to acquire skills and learn && 1.000 && 5.000 && 4.009 && 0.598 && 240 \\[3pt]
+preference for dedicated dyad && 1.000 && 7.000 && 4.817 && 1.906 && 240 \\[3pt]
+preference for random dyad && 1.000 && 7.000 && 3.625 && 1.758 && 240 \\[3pt]
+importance of dedicated dyad for complex task && 1.000 && 7.000 && 5.171 && 1.816 && 240 \\[3pt]
+importance of random dyad for complex task && 1.000 && 7.000 && 3.104 && 1.624 && 240 \\[3pt]
+benefits of onsite collaboration && 1.000 && 7.000 && 5.112 && 1.697 && 240 \\[3pt]
+ \bottomrule
+\end{tabular}
+}}
+{Variables are not transformed in this table. The upper part captures objective measurements on the task level (two subjects per task, hence $N=120$), and the lower part presents perceived measurements based on a survey on the subject level ($N=240)$.}
+\end{table}
+
+
+\subsection{Randomization Checks}
+We conducted a series of tests to ensure that the assignment to conditions was random and did not introduce systematic differences between groups. A series of $\chi^2$-tests that reveals no significant differences across conditions (see Appendix~\ref{app:add_analysis} for details). These results confirm that randomization was successful. Therefore, we can pool subjects and conduct simple $t$-tests for hypotheses testing. 
+
+
+\section{Analysis}
+
+\subsection{Hypotheses Testing}
+
+Figure~\ref{fig:treatment.comparison}(a) shows that, in the IN-PERSON condition, dedicated dyads completed simple tasks approximately 50\% faster than random dyads, showing a significantly lower mean task duration for dedicated dyads compared to random dyads. This finding supports \Cref{h:onsite_simple} $(t=-2.81, df=37.1, p=0.008)$.
+
+Figure~\ref{fig:treatment.comparison}(b) shows that, in the IN-PERSON condition, random dyads completed complex tasks approximately 21\% faster than dedicated dyads, showing a significantly lower mean task duration for random dyads compared to dedicated dyads. This finding supports \Cref{h:onsite_complex} $(t=2.24, df=55.52, p=0.03)$.
+
+
+\begin{figure}[htbp]
+\FIGURE{
+    \begin{subfigure}[b]{0.45\textwidth}
+      \centering
+      \includegraphics[width=\textwidth]{01 latex/pictures/bar.chart.simple.task.time.comparison.pdf}\vspace{-24pt}
+      \label{fig:simple.comparison}
+      \caption{simple task}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.45\textwidth}
+      \centering
+      \includegraphics[width=\textwidth]{01 latex/pictures/bar.chart.complex.task.time.comparison.pdf}\vspace{-24pt}
+      \label{fig:complex.comparison}
+      \caption{complex task}
+    \end{subfigure}\vspace{-6pt}
+}
+{Average completion time by condition and task complexity\label{fig:treatment.comparison}}
+{Whiskers indicate standard errors. $N = 240.$}
+\end{figure}
+
+Figure~\ref{fig:treatment.comparison}(a) shows no significant difference in task duration for simple tasks between dedicated and random dyads in the AR condition $(t=0.77, df=57.32, p=0.44)$. This rejects \Cref{h:remote_simple}.
+
+Figure~\ref{fig:treatment.comparison}(b) shows that, in the AR condition, the random dyads completed complex tasks approximately 13\% faster than dedicated dyads, as indicated by their slightly lower mean task duration. This finding is suggestive of ~\Cref{h:remote_complex}, but insignificant $(t=-1.68, df=54.8, p=0.098)$.
+
+Table \ref{tab:mean} presents mean task completion times (in seconds) across different experimental conditions, categorized by members’ proximity (ONSITE vs. AR), task complexity (simple vs. complex), and dyad type (DEDICATED vs. RANDOM).
+
+\begin{table}[htb]
+\TABLE
+{Mean performance by members' proximity, task complexity, and dyad type\label{tab:mean}}
+{
+\begin{tabular}{%
+L{1.3in} L{1.1in} C{1in} C{1in} C{0.5in} C{0.5in}
+}  
+\toprule
+ members' proximity & task complexity & DEDICATED & RANDOM & \suc{difference} & \suc{t-statistic} \\[3pt]
+\midrule
+IN-PERSON & simple & 46.87 & 93.83 & -46.97 & -2.81$^{**}$ \\
+IN-PERSON & complex & 240.80 & 189.83 & 50.97 & 2.24$^{*}$ \\ [3pt]
+ \midrule
+AR & simple & 100.70 & 87.80 & 12.90 & 0.77$^{}$ \\ 
+AR & complex & 225.03 & 259.90 & -34.87 & -1.68$^{}$ \\ [3pt]
+\bottomrule 
+\end{tabular}
+}
+{\pDefSig.}
+\end{table}
+\FloatBarrier
+
+Virtually all dyads (118 of 120) solved the simple task within the maximum allowed duration of 300 seconds. The results are robust to excluding the two dyads who did not complete the task. In contrast, 51 of 120 dyads did not solve the complex task. This number is plausible, given the complexity and design. To consider it more thoroughly, we fitted two models. First, we fitted a probit model with `success of solving the task' as the dependent variable, and interactions of ONSITE, AR, DEDICATED, and RANDOM, as presented in column (1) of \Cref{tab:success.main}. Notice that due to co-linearity, the terms AR $\times$ RANDOM is assumed to be zero, forming the baseline. The significant coefficient of ONSITE$\times$RANDOM implies that it is only the combination of being onsite and using a random assignment that leads to significant better performance measured as probability of solving the task. This is consistent with our results on performance measured through the time to solve a task. 
+
+Column (2) of \Cref{tab:success.main} reports estimates of a Cox Proportional Hazard Rate model. Here, we consider the time since the beginning and solving the task successfully the event. Cox Proportional Hazard Rate models can handle censored data, which is non-normally distributed. Both apply to our sample. We can interpret the significant coefficient of 1.206 by exponentiating it; that is, when performing on site and being paired randomly, the propensity of solving the task increases by a factor of $\exp(1.206)=3.34$, or 234\%. 
+
+\begin{table}
+\TABLE
+{Fitted models on the success of solving complex tasks\label{tab:success.main}}
+{
+\scalebox{1}{\begin{tabular}{%
+l c *{3}{cS[table-format=-3.3,table-space-text-post=***]}
+}
+\toprule
+&&\suc{(1)} && \suc{(2)} && \suc{(3)}\\
+\cmidrule{3-3}\cmidrule{5-5}\cmidrule{7-7}
+ONSITE$\times$DEDICATED && -19.100 && 0.170 && 0.259\\
+&&\suc{(18.811)}&&\suc{(0.326)}&&\suc{(0.392)}\\
+AR$\times$DEDICATED && -34.867$^{+}$ && 0.507 && 0.616$^{+}$\\
+&&\suc{(20.363)}&&\suc{(0.327)}&&\suc{(0.368)}\\
+ONSITE$\times$RANDOM && -70.067$^{**}$ && 1.221$^{***}$ && 1.206$^{***}$\\
+&&\suc{(21.431)}&&\suc{(0.357)}&&\suc{(0.338)}\\
+\midrule
+AIC&& &&\suc{157.25}&&\suc{602.46}\\
+Num.observations&&\suc{120}&&\suc{120}&&\suc{120}\\
+Num.successes&&\suc{--}&&\suc{69}&&\suc{69}\\
+model&&\suc{Linear}&&\suc{Probit}&&\suc{Cox PH}\\
+\bottomrule
+ \end{tabular}}}{\hl{EXPLAIN MODELS HERE. TABLE SHOULD BE READABLE STAND ALONE! What is the dependent variable each?}Robust standard errors; positive values indicate an increased probability of solving a task within 300 seconds; negative values in linear model indicate faster performance; \pDefSig. }
+\end{table}
+
+% # INTERCEPT: ARTRUE, dyad.formationrandom => 259.9
+% 
+% move column (3) to the first column
+% add (intercept) terms if provided by models
+
+% check whether you can estimate linear model through ML (maximum likelihood)
+
+% LOGIC
+% Remove meant time col
+% move col (3) as new col (1). Keep others as (2) and (3)
+% Discuss linear just to show how the coeffecicients look like. Emphasize: same as in table before. READERS LOVE CONSISTENTCY! Emphasize, just replication.
+
+\section{Discussion}
+
+In essence, \Cref{h:remote_simple} and \Cref{h:remote_complex} are not supported. But what does that mean? Is AR unsuitable in our task context? Certainly not. We did not hypothesize on comparing ONSITE versus AR performance because this is a question that rarely arise in industry. AR has many benefits, like reduced travel time, faster response time and more flexibility for experts. Concerning support, however, there is no doubt that AR poses a constraint. Being onsite allows experts directly fixing a machine, inspecting it, or at least pointing towards the issues---despite high levels of sophistication, AR does not enable the same. Thus, everything else being equal, AR cannot lead to better performance. However, the results of our study show that AR performs not necessarily worse, which is somewhat surprising, also given the limited AR experience of our subjects.
+
+\begin{figure}[htbp]
+\FIGURE{
+    \begin{subfigure}[b]{0.45\textwidth}
+      \centering
+      \includegraphics[width=\textwidth]{01 latex/pictures/bar.chart.simple.task.alternate.pdf}\vspace{-24pt}
+      \label{fig:simple.alternate.comparison}
+      \caption{simple task}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.45\textwidth}
+      \centering
+      \includegraphics[width=\textwidth]{01 latex/pictures/bar.chart.complex.task.alternate.pdf}\vspace{-24pt}
+      \label{fig:complex.alternate.comparison}
+      \caption{complex task}
+    \end{subfigure}\vspace{-6pt}
+}
+{Average completion time by condition and task complexity\label{fig:treatment.alternate.comparison}}
+{Whiskers indicate standard errors. $N = 240.$}
+\end{figure}
+
+Consider \Cref{fig:simple.alternate.comparison}a. The optimal dyad formation in the ONSITE condition is DEDICATED, as we hypothesized and found. Comparing within the DEDICATED assignment (between ONSITE and AR), AR dyads perform significantly worse. However, comparing within the RANDOM assignment between the ONSITE and AR groups, there are no significant differences. In other words, in the simple task, AR Remote support does not per se lead to worse performance. However, it seems to fail to capture the benefits due to DEDICATED assignments, where technicians and experts get to know each other and benefit from social engagement.
+
+Now, consider \Cref{fig:complex.alternate.comparison}b. The optimal dyad formation in the ONSITE condition is RANDOM, as we hypothesized and found. Comparing within the RANDOM assignment (between ONSITE and AR), AR dyads perform significantly worse. However, comparing within the DEDICATED assignment between the ONSITE and AR groups, there are no significant differences. In other words, in the complex task, AR Remote support does not per se lead to worse performance. However, it seems to fail to capture the benefits due to RANDOM assignments, where technicians and experts benefit from different learning paths. 
+
+Taken together, we can conclude that dyad formation is the crucial driver in our experiment, which indicates whether remote support through AR is disadvantageous. That applies to both, simple and complex tasks. In either case, we find that remotely operating dyads using AR perform as well as locally operating dyads unless you pick the optimal dyad formation, in which case the assignment benefits seem not to be realized under AR.
+
+The next section examines this aspect further by studying the perceived differences between the subjects that we measured through the survey.
+
+\subsection{Perceived team effectiveness}
+Thus far, our discussion has primarily focused on objective performance outcomes, demonstrating how different dyad types perform under varying collaboration conditions. Though such metrics are important for evaluating success, or answering a question---is task performance better with AR? or does dedicated dyads performs better?---it only answers part of the question. In real-world organizational settings, managerial decisions are made based on several parameters. Importantly, the introduction of new technologies, such as AR, does not occur in a vacuum. Adoption decisions are influenced by cognitive biases that can shape how decision-makers interpret both performance data and personal experiences. These personal experiences---how team members and managers feel about working together under different conditions—--can strongly influence whether a new collaboration approach is embraced, modified, or rejected.
+
+To better understand the personal, and subjective beliefs of participants regarding working within a team under different conditions, we used three constructs from the Team Effectiveness Questionnaire\footnote{adapted from ``Team Effectiveness Diagnostic'' created by National Health Service, and available at \url{https://www.cu.edu/sites/default/files/Team_effectiveness_questionnaire.pdf}}, namely---team relationship; problem solving ability; and skills, and learning. We analyzed the hypotheses:
+
+\begin{hypothesis}\label{h:subjective:team.effectiveness}
+(a) Workers and experts perceive better (i) team relationships, (ii) stronger problem-solving abilities, and (iii) skills and learning when collaborating onsite compared to remotely using AR.\\ 
+(b) These effects is stronger in random dyads as compared to dedicated dyads.
+\end{hypothesis}
+
+Table~\ref{tab:team.quality} summarizes participants’ ratings of team relationships, problem-solving, and skills and learning. Across all three constructs, participants perceived ONSITE collaboration more positively than remote AR collaboration. These differences are statistically significant, supporting Hypothesis~\ref{h:subjective:team.effectiveness}a. We also tested whether dyad assignment affected these perceptions; however, we found no differences between subjects based on their assignment, that is, \Cref{h:subjective:team.effectiveness}b is not supported. 
+
+\begin{table}[htb]
+\TABLE
+{Mean ratings of team quality constructs between conditions\label{tab:team.quality}}
+{
+\begin{tabular}{%
+L{1.5in} C{0.7in} C{0.7in} C{0.5in} C{0.5in}
+}  
+\toprule
+ perceived team quality  & ONSITE & AR & \suc{difference} & \suc{t-statistics} \\[3pt]
+\midrule
+team relationships
+   & 4.37 & 4.13 & 0.24 & -3.13$^{**}$\\
+problem solving
+    & 4.13 & 3.97 & 0.16 & -2.06$^{*}$\\
+skills and learning
+   & 4.1 & 3.92 & 0.18 & -2.35$^{*}$\\
+\bottomrule 
+\end{tabular}
+}
+{\hl{UPDATE}The t-statistics of 0.047, -0.031, and -0.078 indicate whether the magnitude of decline from the ONSITE to the AR condition differs significantly between random and dedicated dyads. These values are derived from t-tests comparing the difference scores (ONSITE minus AR) across dyad types. \pDefSig.}
+\end{table}
+\FloatBarrier
+
+Figure~\ref{fig:team.quality} shows the perceived team quality across conditions, broken down by dyad type (RANDOM vs. DEDICATED) and collaboration mode (ONSITE vs. AR), for each of the three constructs. For all three constructs—(a) team relationships, (b) problem solving, and (c) skills and learning, the decline in ratings from ONSITE to AR is visible for both dyad types. However, the magnitude of this decline does not differ significantly between random and dedicated dyads, indicating no interaction effect. These findings indicate that the effect of AR use on perceived team quality does not differ based on dyad type, providing no support for Hypotheses~\ref{h:subjective:team.effectiveness}b(i) $(t=0.047, df=236, p=0.96)$, \ref{h:subjective:team.effectiveness}b(ii) $(t=-0.031, df=236, p=0.98)$, and \ref{h:subjective:team.effectiveness}b(iii) $(t=-0.078, df=236, p=0.94)$.
+
+\begin{figure}[htbp]
+\FIGURE{
+    \begin{subfigure}[b]{0.35\textwidth}
+      \centering
+      \includegraphics[width=\textwidth]{01 latex/pictures/bar.chart.team.relationships.pdf}\vspace{-24pt}
+      \label{fig:team.relationships}
+      \caption{team relationships}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.35\textwidth}
+      \centering
+      \includegraphics[width=\textwidth]{01 latex/pictures/bar.chart.problem.solving.pdf}\vspace{-24pt}
+      \label{fig:problem.solving}
+      \caption{problem solving}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.35\textwidth}
+      \centering
+      \includegraphics[width=\textwidth]{01 latex/pictures/bar.chart.skills.and.learning.pdf}\vspace{-24pt}
+      \label{fig:skills.and.learning}
+      \caption{skills and learning}
+    \end{subfigure}
+    \vspace{-6pt}
+}
+{Perceived team quality\label{fig:team.quality}}
+{Whiskers indicate standard errors. $N = 240.$}
+\end{figure}
+
+\subsection{Subjective beliefs about technology}
+The adoption of new technologies is often shaped by cognitive biases that influence decision-making processes. In some cases, pro-innovation bias may lead individuals to overestimate the capabilities and benefits of digital technologies. Conversely, some individuals exhibit risk aversion,  and a tendency to favor the status quo over novel solutions. Understanding these subjective beliefs is crucial for evaluating how technologies are adopted in workplace environments.
+
+To systematically examine these beliefs, we adopt assume that decision-makers—specifically technicians and domain experts—are fully informed, hyper-rational actors with unbiased expectations. Under this assumption, their expectations should align with our theoretical predictions. However, individuals' perceptions are often shaped by prior experiences and contextual factors. An individual, thus, may have different perception towards a technology after using it than an individual than an individual who has not used it. For instance, an expert who has direct experience with AR may assess its utility differently from one who has not.
+
+Participants were asked to evaluate statements regarding their preference for working with the same partner versus a random partner across tasks. Consistent with the rational beliefs, we hypothesize that technicians and experts possess accurate intuitions about whether a consistent dyadic partnership would facilitate or hinder performance, particularly under varying technological conditions (e.g., ONSITE or with AR). The results indicate a strong and statistically significant preference for dedicated dyads over random ones across all conditions $(\beta = 1.19, t=7.12, df=474.9, p<0.001)$, indicating a clear tendency for participants to favor working with the same partner throughout the experiment. The effect is even more pronounced as task complexity increases $(\beta = 2.07, t=13.14, df=472.17, p<0.001)$. However, AR did not meaningfully influence decision-makers’ preference for working with the same partner $(\beta = 0.22, t=0.5, df=237.58, p=0.619)$. This indicates that while participants generally favored dedicated dyads, this preference was not amplified when using AR for remote support.
+
+We further explored how participants evaluated the efficiency of remote repair using AR relative to traditional onsite repair. Interestingly, decision-makers who completed a task with AR had significantly stronger beliefs that the tasks could be completed faster ONSITE than decision-makers who completed the task without AR $(\beta = 0.58, t=2.66, df=237.9, p=0.008)$. This suggests that exposure to AR did not necessarily increase confidence in its practical utility; rather, it may have highlighted limitations when compared to the immediacy and tangibility of in-person support. 
+
+%We expect a status-quo bias. First, subjects who have performed a task with (or without AR) might have come used to their approach and feel it is the right thing to do. Second, a status-quo bias is common in industry, where many believe in ``we have always done it this way, and we must continue doing so''. 
+
+These findings highlight the nuanced role of subjective beliefs in technology adoption. While AR has potential as a remote support tool, workers and experts may perceive it differently based on their experiences and task complexity.
+
+\newpage
+\bibliographystyle{agsm}
+\bibliography{references}
+\newpage
+
+\begin{APPENDICES}
+\SingleSpacedXI
+\section{MANIPULATION CHECK}\label{app:manipulation}
+\begin{enumerate}
+ \item Which component(s) lets the current flow in only one direction?
+  \begin{itemize}
+    \item \checkbox\ Diode
+    \item \checkbox\ Jumper cable
+    \item \checkbox\ Potentiometer
+    \item \checkbox\ LED
+    \item \checkbox\ Resistor
+  \end{itemize}
+
+ \item Which colored cable should you NOT touch in the experiment?
+  \begin{itemize}
+    \item \radiobutton Red
+    \item \radiobutton Black
+    \item \radiobutton Orange
+    \item \radiobutton Yellow
+   \end{itemize}
+
+  \item Your compensation is based on
+   \begin{itemize}
+    \item \radiobutton\ how accurately you answer this quiz.
+    \item \radiobutton\ how quickly you and your partner(s) solve the tasks.
+    \item \radiobutton\ how many participants are involved in solving the tasks.
+    \item \radiobutton\ the number of components used in the circuit.
+   \end{itemize}
+
+  \item How are the holes on a breadboard connected?
+   \begin{itemize}
+    \item \radiobutton\ Only the holes in the power rails are electrically connected.
+    \item \radiobutton\ All holes on the breadboard are electrically connected.
+    \item \radiobutton\ Holes in the same vertical column are electrically connected.
+    \item \radiobutton\ Holes in the same horizontal row on either side of the middle divider are electrically connected.
+   \end{itemize}
+
+  \item Which cable closes the circuit in order to light up the yellow LED? 
+  \begin{center}
+   \includegraphics[width=1\textwidth]{01 latex/pictures/manipulation_circuit.png}
+  \end{center}
+   \begin{itemize}
+    \item \radiobutton\ Green
+    \item \radiobutton\ Brown
+    \item \radiobutton\ Red
+    \item \radiobutton\ Blue
+   \end{itemize}
+
+  \item How do you stop the timer in the experiment? 
+   \begin{itemize}
+    \item \radiobutton\ Connect the orange cable, perform a self-test, and then switch off the power supply.
+    \item \radiobutton\ Perform a self-test, connect the yellow cable, and then switch off the power supply.
+    \item \radiobutton\ Switch off the power supply, perform a self-test, and then connect the black cable.
+    \item \radiobutton\ Perform a self-test, and then switch off the power supply.
+   \end{itemize}
+
+  \item What is the purpose of the LED on the power supply unit? 
+   \begin{itemize}
+    \item \radiobutton\ To notify about the availability of input power.
+    \item \radiobutton\ To regulate voltage output.
+    \item \radiobutton\ To connect the power supply to a 9V battery.
+    \item \radiobutton\ To indicate how what is the power supply output voltage.
+   \end{itemize}
+
+  \item How do you connect the power supply unit to the breadboard in this experiment?
+   \begin{itemize}
+    \item \radiobutton\ By connecting the breadboard with a battery.
+    \item \radiobutton\ It will always be already connected. I do not have to connect it.
+    \item \radiobutton\ By connecting the red cable to the negative rail and the black cable to the positive rail.
+    \item \radiobutton\ By connecting the yellow cable directly to the power source.
+   \end{itemize}
+
+  \item How many participants in total are involved in solving each task? 
+   \begin{itemize}
+    \item \radiobutton\ One
+    \item \radiobutton\ Two
+    \item \radiobutton\ Three
+    \item \radiobutton\ Four
+   \end{itemize}
+   
+  \item How many terminals (legs) does a potentiometer have? 
+   \begin{itemize}
+    \item \radiobutton\ 1
+    \item \radiobutton\ 2
+    \item \radiobutton\ 3
+    \item \radiobutton\ 4
+   \end{itemize}
+   
+  \item Which component description is INCORRECT?
+   \begin{itemize}
+    \item \radiobutton\ LED: Emits light when current flows
+    \item \radiobutton\ Potentiometer: Adjusts electrical resistance
+    \item \radiobutton\ Diode: Allows current in both directions
+    \item \radiobutton\ Resistor: Regulates current flow
+   \end{itemize}
+     
+  \item What is the primary role of the expert in this experiment? 
+   \begin{itemize}
+    \item \radiobutton\ To observe the experiment without participating.
+    \item \radiobutton\ To perform all tasks alone.
+    \item \radiobutton\ There is no expert in the experiment.
+    \item \radiobutton\ To guide the technician with the repair tasks.
+   \end{itemize}
+   
+  \item Which statement is TRUE regarding repair tasks in this experiment?
+   \begin{itemize}
+    \item \radiobutton\ All repairs require external components not included in the spare parts kit.
+    \item \radiobutton\ All repairs can be made using the spare parts kit.
+    \item \radiobutton\ No repairs can be made using the spare parts kit.
+    \item \radiobutton\ Some repairs cannot be completed without additional tools and materials.
+   \end{itemize}
+\end{enumerate}
+
+
+\section{SURVEY}\label{app:survey}
+\subsection{Effectiveness and Experience}
+Imagine you are working on both simple and complex repair tasks. A simple repair task is one you can readily solve by following the manual (the diode tasks). A complex repair task is one you cannot readily solve by following the manual and requires brainstorming with your partner (the potentiometer tasks). 
+
+Augmented Reality (AR) enables a worker to receive visual instructions from a remote expert. The expert sees through the worker's head-mounted camera and can highlight areas or objects directly on their screen, aiding in tasks like locating a missing cable connector.
+
+Please express your level of agreement or disagreement of the following statements using the scale provided. Provide a rating from 1 (Strongly Disagree) to 7 (Strongly Agree).
+
+\begin{enumerate}
+    \item I prefer to work with the same person on all tasks in the experiment.
+    \item I prefer to work with varying people on different tasks in the experiment.
+    \item Working with the same person is more important for complex than simple tasks.
+    \item Working with varying people is more important for complex than simple tasks.
+    \item Experts and workers fix damaged circuit boards much quicker when they work directly at the location rather than using augmented reality (AR) technology from afar.
+    \item Before this study, I had substantial experience working with circuit boards and electrical components.
+    \item Before this study, I had substantial experience with AR headsets.
+    \item I am open to new technologies.                        
+\end{enumerate}
+
+
+\subsection{Team Effectiveness}\footnote{adapted from ``Team Effectiveness Diagnostic'' created by National Health Service, and available at \url{https://www.cu.edu/sites/default/files/Team_effectiveness_questionnaire.pdf}}
+
+Consider you and your partner(s) during the experiment as a team.
+For each of the statements below, in the context of the experimental tasks, please indicate your level of agreement or disagreement using the following scale. Provide a rating from Strongly Disagree to Strongly Agree.
+
+\begin{enumerate}
+    \item Team members appreciate one another's unique capabilities.
+    \item Team members are effective listeners.
+    \item Communication in our team is open and honest.
+    \item Members of our team trust each other.
+    \item Team members help one another deal with problems or resolve issues.
+    \item We are able to work through differences of opinion without damaging relationships.
+    \item Team members display high levels of cooperation and mutual support.
+\end{enumerate}
+
+\vspace{5mm}
+For each of the statements below, in the context of the experimental tasks, please indicate your level of agreement or disagreement using the following scale. Provide a rating from Strongly Disagree to Strongly Agree.
+
+\begin{enumerate}
+    \item Team members take personal responsibility for the effectiveness of our team.
+    \item Team members maintain a can-do approach when they encounter frustrating situations.
+    \item Team members take initiative to resolve issues between themselves without involving the team leader.
+    \item We spend very little time complaining about things we cannot control.
+    \item Team members seek and give each other constructive feedback.
+    \item Team members are sure about what is expected of them and take pride in a job well done.
+    \item Team members consider how their actions will impact others when deciding what to do.
+\end{enumerate}
+
+\vspace{5mm}
+For each of the statements below, in the context of the experimental tasks, please indicate your level of agreement or disagreement using the following scale. Provide a rating from Strongly Disagree to Strongly Agree. 
+
+\begin{enumerate}
+    \item We have the skills we need to do our jobs effectively.
+    \item We always ask ourselves, "How can we do better next task than what we did?"
+    \item As a team, we are continually working to improve cycle time, speed to market, customer responsiveness, or other key performance indicators.
+    \item We view everything, even mistakes, as opportunities for learning and growth.
+    \item We use various forms of training to keep our skills up-to-date.
+    \item Team members embrace continuous improvement.
+    \item Team members work to ensure we are using best-practice methods.
+\end{enumerate}
+
+\section{EXPERIMENT}
+
+\subsection{Experiment Task}
+
+\textbf{Simple tasks}: always with one or two of the following errors that can be solved with the provided manual.
+
+\begin{itemize}
+\item The resistor is incorrectly connected.
+\item The diode is incorrectly connected.
+\item The LED is incorrectly connected.
+\item The potentiometer is incorrectly connected.
+\item A cable is incorrectly connected.
+\item The resistor is missing.
+\item The diode is missing.
+\item The LED is missing.
+\item The potentiometer is missing.
+\item A cable is missing.
+\item The diode is in the wrong polarity.
+\end{itemize}
+
+Figure~\ref{fig:technician.workstation} shows the technician’s workstation. During the experiment, the technician was seated here and performed repair tasks with a timer placed in front of them. In the AR condition, the technician wore a head-mounted AR display (Microsoft HoloLens 2) to receive live guidance from a remote expert. A printed manual was also available as a reference throughout the task.
+
+Figure~\ref{fig:expert.workstation} shows the expert’s workstation in the AR condition. The expert was located in another room during the experiment, and provided instructions via their computer screens. They could annotate the technician’s workspace using a live video feed. These annotations were overlaid directly into the technician’s view through the AR headset, enabling intuitive, spatially aligned remote collaboration.
+
+\begin{figure}[htbp]
+\FIGURE
+{
+ \begin{subfigure}[b]{0.4\textwidth}
+  \includegraphics[width=1\textwidth]{01 latex/pictures/technician_ar_view.jpg}
+  \label{fig:technician.workstation}
+      \caption{technician workstation}
+ \end{subfigure}
+ \hfill
+ \begin{subfigure}[b]{0.4\textwidth}
+  \centering
+  \includegraphics[width=1\textwidth]{01 latex/pictures/expert_ar_view.jpg}
+  \label{fig:expert.workstation}
+      \caption{expert workstation (AR condition)}
+ \end{subfigure}
+}
+{Workstation}
+{For ONSITE condition, the technician and expert both were present at the technician workstation.}
+\end{figure}
+
+\FloatBarrier
+\newpage
+\section{ADDITIONAL ANALYSIS}\label{app:add_analysis}
+
+\begin{table}[htb]
+\TABLE
+{Randomization checks\label{tab:randomization}}
+{
+\begin{tabular}{%
+L{2.6in} L{1.5in} C{0.7in} C{0.4in} C{0.5in}
+}  \toprule
+variable & condition & $\chi^2$ & df & $p$-value \\[3pt]
+\midrule
+\multirow{2}{=}{education} 
+  & members' proximity       & 1.93 & 2 & 0.381 \\
+  & dyad formation  & 1.43 & 2 & 0.490 \\[3pt]
+\multirow{2}{=}{major} 
+  & members' proximity       & 3.66 & 3 & 0.300 \\
+  & dyad formation  & 0.77 & 3 & 0.857 \\[3pt]
+\multirow{2}{=}{gender} 
+  & members' proximity       & 1.11 & 2 & 0.574 \\
+  & dyad formation  & 1.71 & 2 & 0.424 \\[3pt]
+\multirow{2}{=}{years of work experience} 
+  & members' proximity       & 1.73 & 2 & 0.421 \\
+  & dyad formation  & 0.45 & 2 & 0.797 \\[3pt]
+\multirow{2}{=}{AR experience} 
+  & members' proximity       & 5.72 & 6 & 0.455 \\
+  & dyad formation  & 0.97 & 6 & 0.987 \\[3pt]
+\multirow{2}{=}{electrical equipment experience} 
+  & members' proximity       & 7.49 & 6 & 0.278 \\
+  & dyad formation  & 9.00 & 6 & 0.174 \\[3pt]
+\multirow{2}{=}{open to new technology} 
+  & members' proximity       & 7.80 & 6 & 0.253 \\
+  & dyad formation  & 5.53 & 6 & 0.478 \\[3pt]
+\bottomrule 
+\end{tabular}
+}
+{}
+\end{table}
+\FloatBarrier
+
+
+
+\begin{table}[thb]
+\TABLE
+{Correlation matrix (objective measures)\label{tab:corr}}
+{
+\scalebox{0.8}{
+\begin{tabular}{lc *{9}{S[table-format=-1.2,table-space-text-post=*]c}}
+\toprule
+&& {1.} && {2.} && {3.} && {4.} && {5.} && {6.}&& {7.}&& {8.}\\ 
+\midrule
+1. AR (1=yes)&&&&&&&&&&&&&&&&&&\\[2pt]
+2. random dyad (1=yes)&&0.00&&&&&&&&&&&&&&&&\\[2pt]
+3. technician (1=yes)&&0.00&&0.00&&&&&&&&&&&&&&\\[2pt]
+4. repair time (simple task 1)&&0.20*&&-0.13*&&0.00&&&&&&&&&&&&\\[2pt]
+5. repair time (simple task 2)&&0.14*&&0.04&&0.00&&0.38*&&&&&&&&&&\\[2pt]
+6. repair time (simple task 3)&&0.18*&&0.13*&&0.00&&0.29*&&0.31*&&&&&&&&\\[2pt]
+7. repair time (complex task 1)&&0.13*&&-0.11&&0.00&&0.16*&&0.18*&&0.08&&&&&&\\[2pt]
+8. repair time (complex task 2)&&0.21*&&-0.11&&-0.00&&0.20*&&0.20*&&0.20*&&0.33*&&&&\\[2pt]
+9. repair time (complex task 3)&&0.16*&&-0.05&&0.00&&0.15*&&0.23*&&0.26*&&0.21*&&0.28*&&\\[2pt]
+\bottomrule
+\end{tabular}}}{$N = 240$, \pDefSigCor.}
+\end{table}
+
+\begin{table}
+\TABLE
+{Fitted models on the success of solving tasks\label{tab:success.main.all}}
+{
+\scalebox{1}{\begin{tabular}{%
+l*{4}{cS[table-format=-3.3,table-space-text-post=***]}
+}
+\toprule
+&& \suc{(1)}&& \suc{(2)}&& \suc{(3)}&& \suc{(4)}\\
+&& \suc{simple task}&& \suc{complex task}&& \suc{simple task}&& \suc{complex task}\\
+\cmidrule{3-3}\cmidrule{5-5}\cmidrule{7-7}\cmidrule{9-9}
+(Intercept)&&6.083&&-0.253&&&&\\
+&&\suc{}&&\suc{(0.232)}&&\suc{}&&\suc{}\\
+ONSITE$\times$DEDICATED&&0.000&&0.170&&0.851$^{***}$&&0.259\\
+&&\suc{}&&\suc{(0.326)}&&\suc{(0.257)}&&\suc{(0.392)}\\
+AR$\times$DEDICATED&&-4.250$^{***}$&&0.507&&-0.251&&0.616$^{+}$\\
+&&\suc{(0.437)}&&\suc{(0.327)}&&\suc{(0.224)}&&\suc{(0.368)}\\
+ONSITE$\times$RANDOM&&-4.250$^{***}$&&1.221$^{***}$&&-0.127&&1.206$^{***}$\\
+&&\suc{(0.437)}&&\suc{(0.357)}&&\suc{(0.275)}&&\suc{(0.338)}\\
+\midrule
+AIC&&\suc{25.54}&&\suc{157.25}&&\suc{902.6}&&\suc{602.46}\\
+Num.observations&&\suc{120}&&\suc{120}&&\suc{120}&&\suc{120}\\
+Num.successes&&\suc{118}&&\suc{69}&&\suc{118}&&\suc{69}\\
+model&&\suc{Probit}&&\suc{Probit}&&\suc{Cox PH}&&\suc{Cox PH}\\
+\bottomrule
+ \end{tabular}}}{Robust standard errors; positive values indicate an increased probability of solving a task within 300 seconds; \pDefSig. }
+\end{table}
+\FloatBarrier
+\begin{table}
+\TABLE
+{t-tests abnormal approval activities in the last months of quarters \label{tab:TA}}
+{\begin{tabular}{%
+lll
+S[table-format=-3.3] 
+S[table-format=-3.3,table-space-text-post=$^{***}$]
+}
+\toprule
+hypothesis & condition & tested prediction  & \suc{difference} & \suc{t-statistic} \\
+\midrule
+H1 & simple, onsite & dedicated > random  & -46.967 & -2.809$^{**}$ \\[3pt]
+H2 & complex, onsite & random > dedicated  & -50.967 & 2.244$^{*}$ \\[3pt]
+\midrule
+H3 & simple, AR & dedicated > random  & 12.900 & 0.771$^{}$ \\[3pt]
+H4 & complex, AR & dedicated > random  & -34.867 & -1.684$^{}$ \\[3pt]
+\bottomrule
+\end{tabular}}
+{> indicates better performance, meaning less time to complete the repairs. \pDefSig.}
+\end{table}
+\newpage
+
+\section{UNRELATED EXAMPLE FOR LAYOUT DELETE}
+
+\section{FIGURE  }
+\begin{figure}[htbp]
+  \caption{Average score of the manipulation quiz by role}
+  \label{fig:manipulation.quiz}
+  \vspace{0.5cm} % Adjust space between caption and figure
+  \begin{center} 
+      \centering
+      \includegraphics[width=0.5\textwidth]{02 R/03 Figures/bar.chart.manipuation.quiz.pdf}
+  \end{center}
+  \vspace{-0.4cm} % Move note even closer
+  \captionsetup{font=footnotesize} % Makes note smaller
+  \caption*{\raggedright \textit{Note:} Whiskers indicate standard errors. N = 240.}
+\end{figure}
+
+\FloatBarrier
+
+
+\end{APPENDICES}
+\end{document}
+

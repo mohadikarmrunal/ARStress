@@ -1,0 +1,57 @@
+\ifthenelse{\boolean{clean}}
+{
+\newcommand{\mrunal}[1]{}
+\newcommand{\mrunalHL}[1]{}
+\newcommand{\enno}[1]{}
+\newcommand{\david}[1]{}
+\newcommand{\davidHL}[1]{}
+}
+{
+\usepackage{marginnote}
+\setlength{\marginparwidth}{1.2in}
+
+
+\newcounter{mrunalCommentCounter}
+\newcommand{\mrunal}[1]{
+    \reversemarginpar\marginpar{
+        \tiny\singlespacing
+        \raggedright
+        \color{darkgreen}Mrunal comment  \#\stepcounter{mrunalCommentCounter}\arabic{mrunalCommentCounter}: #1
+        }
+    }
+
+\newcommand{\mrunalHL}[1]{
+    \marginpar{
+        \tiny\singlespacing
+        \raggedright
+        \color{darkgreen}\hl{Mrunal comment}  \#\stepcounter{mrunalCommentCounter}\arabic{mrunalCommentCounter}:  #1
+        }
+    }
+    
+\newcounter{EnnoCommentCounter}
+\newcommand{\enno}[1]{
+    \reversemarginpar\marginpar{
+        \tiny\singlespacing
+        \raggedright
+        \color{darkblue}Enno comment  \#\stepcounter{EnnoCommentCounter}\arabic{EnnoCommentCounter}: #1
+        }
+    }
+
+\newcounter{davidCommentCounter}
+\newcommand{\david}[1]{
+    \marginpar{
+        \tiny\singlespacing
+        \raggedright
+        \color{darkred}David comment  \#\stepcounter{davidCommentCounter}\arabic{davidCommentCounter}: #1
+        }
+    }
+
+\newcommand{\davidHL}[1]{
+    \marginpar{
+        \tiny\singlespacing
+        \raggedright
+        \color{darkred}\hl{David comment}  \#\stepcounter{davidCommentCounter}\arabic{davidCommentCounter}:  #1
+        }
+    }
+
+}

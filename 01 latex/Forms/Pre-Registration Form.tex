@@ -1,0 +1,348 @@
+\documentclass[A4,11pt]{article}
+
+
+\usepackage{url,graphicx,array,authblk}
+\usepackage[usenames,dvipsnames]{color}
+
+\usepackage{graphicx,setspace}
+\usepackage[margin=1in]{geometry}
+\usepackage[utf8]{inputenc}
+\usepackage{multirow}
+\usepackage{natbib}
+\usepackage{amsmath,amssymb,mathtools,amsthm}
+\DeclarePairedDelimiter{\ceil}{\lceil}{\rceil}
+\DeclarePairedDelimiter{\floor}{\lfloor}{\rfloor}
+\usepackage[title]{appendix}
+\newcommand{\HRule}{\rule{\linewidth}{0.35mm}}
+
+\makeatletter
+
+\makeatother
+\usepackage{breqn}
+
+
+%\DeclareMathOperator*{\argmax}{arg\,max}
+%\DeclareMathOperator*{\argmin}{arg\,min}
+
+\usepackage{placeins}
+
+\usepackage{listings}
+\usepackage{float,mdwlist,enumitem}
+\usepackage{footmisc}
+
+\newcolumntype{C}[1]{>{\centering\arraybackslash}p{#1}} 
+\newcolumntype{L}[1]{>{\raggedright\arraybackslash}p{#1}} 
+\newcolumntype{R}[1]{>{\raggedleft\arraybackslash}p{#1}} 
+\newlength\interColSepSmall
+\newlength\interColSepLarge
+\setlength{\interColSepSmall}{0.2em}
+\setlength{\interColSepLarge}{0.4em}
+
+\usepackage{booktabs}
+
+\newcommand{\PValue}[1]{($p<#1$)}
+\newcommand{\Ex}{\mathbb{E}}
+\renewcommand{\~}[1]{\tilde{#1}}
+\renewcommand{\-}[1]{\overline{#1}}
+\newcommand{\D}[0]{\ensuremath{\mathrm{d}}}
+\newcommand{\pDefSig}[0]{${}^{+} p< 0.10$,${}^{*} p <0.05$,${}^{**} p <0.01$,${}^{***} p <0.001$}
+%\newcommand{\pDefSig}[0]{${}^{*}\mathrm p <0.05$,${}^{**}\mathrm p <0.01$,${}^{***}\mathrm p <0.001$}
+\newcommand{\pDefSigCor}[0]{${}^{*} p <0.05$}
+\DeclareMathOperator*{\argmax}{arg\,max}
+\DeclareMathOperator*{\argmin}{arg\,min}
+\usepackage{array}
+\usepackage{makecell}
+
+\renewcommand\theadalign{cb}
+\renewcommand\theadfont{\bfseries}
+\renewcommand\theadgape{\Gape[4pt]}
+\renewcommand\cellgape{\Gape[4pt]}
+
+
+\setlength{\parindent}{0em}
+\setlength{\parskip}{0.4em}
+
+\usepackage[colorlinks = true,
+            linkcolor =black,
+            urlcolor  = black,
+            citecolor = black,
+            anchorcolor = black]{hyperref}
+
+
+\usepackage{siunitx}
+\usepackage{dcolumn}
+\newcolumntype{e}[1]{D{.}{.}{#1}}
+\newcommand{\muc}[2]{\multicolumn{1}{C{#1}}{#2}}
+\newcommand{\mul}[2]{\multicolumn{1}{L{#1}}{#2}}
+\newcommand{\suc}[1]{\multicolumn{1}{c}{#1}}
+\newcommand{\mucThree}[2]{\multicolumn{3}{C{#1}}{#2}}
+\newcommand{\mulTen}[2]{\multicolumn{10}{L{#1}}{#2}}
+
+\newtheorem{hypothesis}{Hypothesis}
+\newtheorem{definition}{Definition}
+\newtheorem{proposition}{Proposition}
+\newtheorem{corollary}{Corollary}
+
+%\usepackage{booktabs}
+\usepackage{siunitx}
+\newcolumntype{d}{S[input-symbols = ()]}
+
+%\newcolumntype{d}{S[
+%    input-open-uncertainty=,
+%    input-close-uncertainty=,
+%    parse-numbers = false,
+%    table-align-text-pre=false,
+%    table-align-text-post=false
+% ]}
+
+\sisetup{
+	group-digits = integer, % group integers in groups of 3 (not decimals)
+	input-decimal-markers = {.},
+	table-number-alignment = center, %  requires defining pre post spacing
+	input-open-uncertainty = {},
+	input-close-uncertainty = {},
+	table-align-text-pre = false,
+    table-align-text-post = false,
+    table-format = -2.2, % defaults, can easily be changed for specific table
+    table-space-text-pre ={(},
+    table-space-text-post={)}
+}
+
+\definecolor{comment_one_color}{cmyk}{0.2,0.2,1,0.2}
+\definecolor{comment_two_color}{cmyk}{0.6,0.2,0.7,0.3}
+
+
+% Natbib setup for author-year style
+\usepackage{natbib}
+ \bibpunct[, ]{(}{)}{,}{a}{}{,}%
+ \def\bibfont{\small}%
+ \def\bibsep{\smallskipamount}%
+ \def\bibhang{24pt}%
+ \def\newblock{\ }%
+ \def\BIBand{and}%
+
+\newcommand{\dyad}{dyad}
+\input{01 latex/tikz_definition}
+
+%%%%%%%%%%%%%%%%
+\begin{document}
+%%%%%%%%%%%%%%%%
+
+\section*{Metadata}
+
+\subsection*{1. Title (required) }
+Augmented Reality in Field-Based Service Operations: How the \dyad\ formations is affected?
+
+\subsection*{2. Description (required) }
+%1. Please give a brief description of your study, including some background, the purpose of the study, or broad research questions.
+One of the use cases for Augmented Reality (AR) technology is remote support in field-based service operations such as maintenance, repair, inspection, and overhaul. Companies form \dyad s comprising on-site technicians with extensive knowledge of local requirements and experts with in-depth knowledge of intricate components to carry out these service repair operations. A \dyad\ can be dedicated (a technician and an expert always working together) or random (assigning the next available expert to the technician for support), both of which have their benefits and challenges. Remote support can only succeed if the collaboration between the technician-expert \dyad\ is effective and efficient.
+
+We revisit the technician-expert \dyad\ assignment in the age of Industry 4.0, focusing on \textbf{how AR technology affects the performance dynamics between \dyad s in field-based service operations}. How does AR interact with the strengths and weaknesses of either approach? How does AR interact with the strengths and weaknesses of either approach? For instance, if AR attenuates the importance of seamless communication and trust but accentuates the importance of problem-solving, creativity, and learning, it would shift the tradeoff in favor of random \dyad s---and vice-versa. Keeping everything else fixed, does AR shift the balance towards one assignment form? Should firms rely more on dedicated \dyad s or random \dyad s when using AR? The study aims to contribute to the remote working, and team building literature by providing insights into if and how remote working may create a virtual barrier between \dyad\ members. The study also aims to provide a better understanding of how AR can be strategically utilized to enhance service management practices in various industries.
+
+\subsection*{3. Contributors (optional)}
+1. Mrunal Mohadikar\\
+2. David Wuttke\\
+3. Enno Siemsen
+
+\subsection*{4. Affiliated institutions (optional)}
+
+\subsection*{5. License (required) }
+%A license tells others how they can use your work in the future and only applies to the information and files submitted with the registration. 
+%What to fill here?
+
+\subsection*{6. Subjects (required) }
+Business\\
+Social and Behavioral Sciences
+
+\subsection*{7. Tags (optional)}
+
+\newpage
+
+\section*{Study Information}
+
+\subsection*{1. Hypotheses (required) }
+
+\begin{hypothesis}\label{h:onsite_simple}
+For simple tasks, a dedicated \dyad\ leads to better performance than random \dyad s when collaborating on-site.
+\end{hypothesis}
+
+\begin{hypothesis}\label{h:onsite_complex}
+For complex tasks, a random \dyad\ leads to better performance than dedicated \dyad s when collaborating on-site.
+\end{hypothesis}
+
+\begin{hypothesis}\label{h:remote_simple}
+For simple tasks, a dedicated \dyad\ leads to better performance than random \dyad s when collaborating remotely.
+\end{hypothesis}
+
+\begin{hypothesis}\label{h:remote_complex}
+For complex tasks, a dedicated \dyad\ leads to better performance than random \dyad s when collaborating remotely.
+\end{hypothesis}
+
+\newpage
+
+\section*{Design Plan}
+
+%In this section, you will be asked to describe the overall design of your study. Remember that this research plan is designed to register a single study, so if you have multiple experimental designs, please complete a separate preregistration. 
+
+\subsection*{1. Study type (required) }
+%Please check one of the following statements
+Experiment
+
+\subsection*{2. Blinding (required) }
+%Blinding describes who is aware of the experimental manipulations within a study. Mark all that apply.
+For studies that involve human subjects, they will not know the treatment group to which they have been assigned.
+
+%1. No blinding is involved in this study. 
+
+%3. Personnel who interact directly with the study subjects (either human or non-human subjects) will not be aware of the assigned treatments. (Commonly known as “double blind”) 
+
+%4. Personnel who analyze the data collected from the study are not aware of the treatment applied to any given group. 
+
+\subsection*{3. Is there any additional blinding in this study? (optional)}
+
+\subsection*{4. Study design (required) }
+%Describe your study design. The key is to be as detailed as is necessary given the specific parameters of the design. There may be some overlap between this question and the following questions. That is OK, as long as sufficient detail is given in one of the areas to provide all of the requested information. Examples include two-group, factorial, randomized block, and repeated measures. Is it a between (unpaired), within-subject (paired), or mixed design? Describe any counterbalancing required.
+The experiment is designed as a controlled laboratory study using a 2x2x2 full factorial design. This design involves two types of collaboration (remote and on-site), two types of dyads (dedicated and random), and two types of tasks (simple and complex). The study follows a between-subject design, meaning each subject is assigned to either a dedicated or random condition and performs both simple and complex tasks.\\
+
+\textbf{EXPERIMENT PARTS}\\
+The experiment is divided into two parts:\\
+1. Benchmark Hypotheses Testing\\
+2. AR Implementation Focus\\
+
+Each part includes 10 sessions, with 12 subjects per session, resulting in 120 subjects per part and 240 subjects in total.\\
+
+\textbf{SESSION DETAILS}\\
+\textbf{Sessions:} Each session is pre-assigned to be either in a dedicated or random condition.\\
+\textbf{Subjects:} 12 subjects per session, unaware of whether the session is remote or on-site, or whether it follows a dedicated or random condition.\\
+\textbf{Roles:} Subjects are randomly assigned to be either a technician or an expert.\\
+
+\textbf{DYAD FORMATION}\\
+\textbf{Dedicated Dyads:} Consists of the same two people working together on all tasks within a session.\\
+\textbf{Random Dyads:} Consists of different pairs for each task, ensuring different individuals work together across tasks.\\
+
+\textbf{TASK TYPES}\\
+\textbf{Simple Tasks:} These tasks can be solved by following a standard operating procedure.\\
+\textbf{Complex Tasks:} These tasks require brainstorming and cannot be solved using a standard operating procedure.\\
+
+In each session, a technician-expert dyad will perform several simple and complex real-effort repair tasks alternatively. \\
+
+\subsection*{5. Randomization (optional)}
+%If you are doing a randomized study, state how you will randomize, and at what level. Typical randomization techniques include: simple, block, stratified, and adaptive covariate randomization. If randomization is required for the study, the method should be specified here, not simply the source of random numbers. 
+
+
+\newpage
+
+\section*{Sampling Plan}
+%In this section* we’ll ask you to describe how you plan to collect samples, as well as the number of samples you plan to collect and your rationale for this decision. Please keep in mind that the data described in this section* should be the actual data used for analysis, so if you are using a subset of a larger dataset, please describe the subset that will actually be used in your study. 
+
+\subsection*{1. Existing data (required) }
+%Preregistration is designed to make clear the distinction between confirmatory tests, specified prior to seeing the data, and exploratory analyses conducted after observing the data. Therefore, creating a research plan in which existing data will be used presents unique challenges. Please select the description that best describes your situation. Please do not hesitate to contact us if you have questions about how to answer this question (\href{mailto:prereg@cos.io}{prereg@cos.io}). 
+Registration prior to creation of data
+
+%2. Registration prior to any human observation of the data: As of the date of submission, the data exist but have not yet been quantified, constructed, observed, or reported by anyone - including individuals that are not associated with the proposed study. Examples include museum specimens that have not been measured and data that have been collected by non-human collectors and are inaccessible. 
+
+%3. Registration prior to accessing the data: As of the date of submission, the data exist, but have not been accessed by you or your collaborators. Commonly, this includes data that has been collected by another researcher or institution. 
+
+%4. Registration prior to analysis of the data: As of the date of submission, the data exist and you have accessed it, though no analysis has been conducted related to the research plan (including calculation of summary statistics). A common situation for this scenario when a large dataset exists that is used for many different studies over time, or when a data set is randomly split into a sample for exploratory analyses, and the other section of data is reserved for later confirmatory data analysis. 
+
+%5. Registration following analysis of the data: As of the date of submission, you have accessed and analyzed some of the data relevant to the research plan. This includes preliminary analysis of variables, calculation of descriptive statistics, and observation of data distributions. Please see cos.io/prereg for more information.
+
+\subsection*{2. Explanation of existing data (optional)}
+
+\subsection*{3. Data collection procedures (required) }
+%Please describe the process by which you will collect your data. If you are using human subjects, this should include the population from which you obtain subjects, recruitment efforts, payment for participation, how subjects will be selected for eligibility from the initial pool (e.g. inclusion and exclusion rules), and your study timeline. For studies that don’t include human subjects, include information about how you will collect samples, duration of data gathering efforts, source or location of samples, or batch numbers you will use.
+
+\textbf{PARTICIPANTS}\\
+Participants will be students, and researchers from a German University. Recruitment will be conducted through the university's subject pool using the ORSEE (Online Recruitment System for Economic Experiments). A researcher will invite students to participate via the ORSEE system. This system allows students to select one of the 20 planned experiment sessions.\\
+
+\textbf{EXCLUSION CRITERIA}\\
+Students with a known history of motion sickness or discomfort while wearing virtual reality (VR), or augmented reality (AR) head-mounted displays will be excluded. For students unaware of any such conditions, an introductory video in Virtual Reality (VR) will be shown. If they experience dizziness, they will be offered a role (expert) that does not require wearing the AR device.\\
+
+\textbf{SESSION SCHEDULING}\\
+The experiment will be conducted over a two-week period, with sessions scheduled as follows:\\
+\textbf{Tuesdays and Fridays:} 2 sessions per day.\\
+\textbf{Wednesdays and Thursdays:} 3 sessions per day.\\
+
+\textbf{COMPENSATION}\\
+Participants will receive a fixed payment of 15€ for their participation, supplemented by an additional performance-based bonus. Payment vouchers will be provided as compensation for their participation.
+
+
+\subsection*{4. Sample size (required) }
+
+%1. Describe the sample size of your study. How many units will be analyzed in the study? This could be the number of people, birds, classrooms, plots, interactions, or countries included. If the units are not individuals, then describe the size requirements for each unit. If you are using a clustered or multilevel design, how many units are you collecting at each level of the analysis? 
+The target sample size for this study is 240 participants. 
+
+
+\subsection*{5. Sample size rationale (optional)}
+%This could include a power analysis or an arbitrary constraint such as time, money, or personnel.  
+
+
+\subsection*{6. Stopping rule (optional)}
+%If your data collection procedures do not give you full control over your exact sample size, specify how you will decide when to terminate your data collection.
+We continue sampling until we have reached the intended sample size.
+
+\newpage
+
+\section*{Variables}
+%In this section you can describe all variables (both manipulated and measured variables) that will later be used in your confirmatory analysis plan. In your analysis plan, you will have the opportunity to describe how each variable will be used. If you have variables which you are measuring for exploratory analyses, you are not required to list them, though you are permitted to do so. 
+
+\subsection*{1. Manipulated variables (optional)}
+%Describe all variables you plan to manipulate and the levels or treatment arms of each variable. This is not applicable to any observational study.
+
+\subsection*{2. Measured variables (required) }
+%Describe each variable that you will measure. This will include outcome measures, as well as any predictors or covariates that you will measure. You do not need to include any variables that you plan on collecting if they are not going to be included in the confirmatory analyses of this study. 
+
+%2. Example: The single outcome variable will be the perceived tastiness of the single brownie each participant will eat. We will measure this by asking participants ‘How much did you enjoy eating the brownie’ (on a scale of 0-100, 1 being ‘not at all’, 7 being ‘a great deal’) and ‘How good did the brownie taste’ (on a scale of 1-7, 1 being ‘very bad’, 7 being ‘very good’).
+
+%3. More information: Observational studies and meta-analyses will include only measured variables. As with the previous questions, the answers here must be precise. For example, 'intelligence,' 'accuracy,' 'aggression,' and 'color' are too vague. Acceptable alternatives could be 'IQ as measured by Wechsler Adult Intelligence Scale' 'percent correct,' 'number of threat displays,' and 'percent reflectance at 400 nm.' 
+The primary outcome variable for our study is the task completion time. We will measure the time taken by each dyad to make the repairs.  A shorter task completion time indicates better performance. A repair is only considered complete when it meets the set quality requirements. 
+
+We will use the completion times of the last two tasks (one simple, one complex) in each session for the analysis.
+
+\subsection*{3. Indices (optional) }
+%If any measurements are going to be combined into an index (or even a mean), what measures will you use and how will they be combined? Include either a formula or a precise description of your method. If you are using a more complicated statistical method to combine measures (e.g. a factor analysis), you can note that here but describe the exact method in the analysis plan section. 
+
+\newpage   
+
+\section*{Analysis Plan}
+
+%You may describe one or more confirmatory analysis in this preregistration. Please remember that all analyses specified below must be reported in the final article, and any additional analyses must be noted as exploratory or hypothesis generating. 
+
+%A confirmatory analysis plan must state up front which variables are predictors (independent) and which are the outcomes (dependent), otherwise it is an exploratory analysis. You are allowed to describe any exploratory work here, but a clear confirmatory analysis is required.
+
+\subsection*{1. Statistical models (required) }
+%What statistical model will you use to test each hypothesis? Please include the type of model (e.g. ANOVA, multiple regression, SEM, etc) and the specification of the model (this includes each variable that will be included as predictors, outcomes, or covariates). Please specify any interactions, subgroup analyses, pairwise or complex contrasts, or follow-up tests from omnibus tests. If you plan on using any positive controls, negative controls, or manipulation checks you may mention that here. Remember that any test not included here must be noted as an exploratory test in your final article. 
+
+
+
+ 
+\subsection*{2. Transformations (optional)}
+%If you plan on transforming, centering, recoding the data, or will require a coding scheme for categorical variables, please describe that process. 
+
+ 
+\subsection*{3. Inference criteria (optional)}
+
+%What criteria will you use to make inferences? Please describe the information youÍll use (e.g. p-values, bayes factors, specific model fit indices), as well as cut-off criterion, where appropriate. Will you be using one or two tailed tests for each of your analyses? If you are comparing multiple conditions or testing multiple hypotheses, will you account for this? 
+
+
+\subsection*{3. Data exclusion (optional)}
+%How will you determine what data or samples, if any, to exclude from your analyses? How will outliers be handled? Will you use any awareness check? 
+
+
+\subsection*{4. Missing data (optional)}
+%How will you deal with incomplete or missing data? 
+
+\subsection*{5. Exploratory analysis (optional)}
+%If you plan to explore your data set to look for unexpected differences or relationships, you may describe those tests here. An exploratory test is any test where a prediction is not made up front, or there are multiple possible tests that you are going to use. A statistically significant finding in an exploratory test is a great way to form a new confirmatory hypothesis, which could be registered at a later time. 
+
+\newpage
+
+\section*{ Other }
+
+\subsection*{1. Other (Optional)}
+
+%1. If there is any additional information that you feel needs to be included in your preregistration, please enter it here. Literature cited, disclosures of any related work such as replications or work that uses the same data, or other context that will be helpful for future readers would be appropriate here.
+
+\end{document}
+
+ 
