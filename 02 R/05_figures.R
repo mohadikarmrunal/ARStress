@@ -7,8 +7,7 @@ source(file.path(dirname(rstudioapi::getActiveDocumentContext()$path), "init.R")
 ###############################
 
 load(file = "./02 RData/analysis.RData")
-load(file = "./02 RData/pvals_study2.RData")
-load(file = "./02 RData/pvals_study3.RData")
+load(file = "./02 RData/pvals.RData")
 
 ##############################
 #Function to calculate significance stars from p-value
@@ -710,40 +709,3 @@ remove(study3.cortisol.mean.df, study3.perceived.mean.df) # clean workspace
 #   STUDY 4
 #
 ################################
-
-# Create readable labels
-study4.final.df <- study4.final.df %>%
-  mutate(condition.label = ifelse(condition == "Digital", "DIGITAL", "TRADITIONAL"),
-         resource = factor(resource, levels = c("gain", "loss")))
-
-# Apply to whole list
-sigstars.study4 <- lapply(pvals.study4, get.significance.stars)
-
-############################
-#
-# H1b: the loss of digital resources increases stress; 
-# H2b: The loss of traditional resources increases stress; 
-#
-############################
-# Cortisol
-study3.cortisol.mean.df <- summarize.study.data(study3.final.df, "AUCi.cortisol")  # Summarize mean and SE for plotting
-
-#Plot mean
-p.study3.cortisol.mean <- create.mean.plot(study3.cortisol.mean.df, sigstars.study3, expression(AUCi[cortisol]), "cortisol")
-
-print(p.study3.cortisol.mean)
-
-############################
-# Perceived
-study3.perceived.mean.df <- summarize.study.data(study3.final.df, "AUCi.perceived")  # Summarize mean and SE for plotting
-
-#Plot mean
-p.study3.perceived.mean <- create.mean.plot(study3.perceived.mean.df, sigstars.study3, expression(AUCi[perceived]), "perceived")
-
-print(p.study3.perceived.mean)
-
-# Save the plot to a PDF file
-ggsave(file.path(artwork.dir, "p.study3.cortisol.mean.pdf"), plot = p.study3.cortisol.mean, width = 20, height = 20, units = "cm") 
-ggsave(file.path(artwork.dir, "p.study3.perceived.mean.pdf"), plot = p.study3.perceived.mean, width = 20, height = 20, units = "cm")
-
-
