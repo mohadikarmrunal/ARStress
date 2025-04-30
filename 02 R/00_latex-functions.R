@@ -227,35 +227,39 @@ winsor.fn <- function(value,p){
 se <- function(x) sd(x)/sqrt(length(x))
 
 
-
-
 # Print function for t-tests
 print.t.test <- function(T.TEST) {
-  # Extract values from the t-test result
-  mean1 <- round(T.TEST$estimate[1], 2)
-  mean2 <- round(T.TEST$estimate[2], 2)
-  t.value <- round(T.TEST$statistic, 2) # t-value
-  df <- round(T.TEST$parameter, 2) # Degrees of freedom
-  p.value <- T.TEST$p.value # p-value
+  paired <- T.TEST$method == "Paired t-test"
+  tval <- as.numeric(T.TEST$statistic)
+  df <- as.numeric(T.TEST$parameter)
   
-  # Format p-value for LaTeX output
+  # Extract beta
+  if (paired) {
+    beta <- round(T.TEST$estimate, 2)
+    n <- df + 1
+    cohens.d <- round(tval / sqrt(n), 2)
+  } else {
+    beta <- round(T.TEST$estimate[1] - T.TEST$estimate[2], 2)
+    cohens.d <- round(2 * tval / sqrt(df), 2)
+  }
+  
+  # Format p-value
+  p.value <- T.TEST$p.value
   p.text <- if (p.value < 0.001) {
     "p<0.001"
   } else if (p.value < 0.01) {
-    paste0("p=", sprintf("%.3f", p.value))  # more precise for small values
+    paste0("p=", sprintf("%.3f", p.value))
   } else {
     paste0("p=", sprintf("%.2f", p.value))
   }
   
-  # Create LaTeX formatted output
-  latex.output <- paste0("$(M_1 = ", mean1, ", M_2 = ", mean2, ", t=", t.value, ", df=", df, ", ", p.text, ")$")
+  # Output
+  latex.output <- paste0("$(\beta = ", beta, ", d = ", cohens.d, ", ", p.text, ")$")
   clipr::write_clip(latex.output)
   return(latex.output)
 }
 
-
 # Copied msummary here
-
 library(modelsummary)
 
 

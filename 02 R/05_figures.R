@@ -8,6 +8,7 @@ source(file.path(dirname(rstudioapi::getActiveDocumentContext()$path), "init.R")
 
 load(file = "./02 RData/analysis.RData")
 load(file = "./02 RData/pvals_study2.RData")
+load(file = "./02 RData/pvals_study3.RData")
 
 ##############################
 #Function to calculate significance stars from p-value
@@ -41,7 +42,7 @@ summarize.study.data <- function(df, measure) {
 }
 
 # Function to add hypothesis annotations for mean plot (arrows, texts)
-add.mean.hypothesis.annotations <- function(df, sigstars, measure.label) {
+study2.add.mean.hypothesis.annotations <- function(df, sigstars, measure.label) {
   ymax <- max(df$mean, na.rm = TRUE) * 1.4
   ytext <- max(df$mean, na.rm = TRUE) * 1.5
   
@@ -104,6 +105,48 @@ add.mean.hypothesis.annotations <- function(df, sigstars, measure.label) {
   )
 }
 
+study3.add.mean.hypothesis.annotations <- function(df, sigstars, measure.label) {
+  ymax <- max(abs(df$mean), na.rm = TRUE) * 0.9
+  ytext <- max(abs(df$mean), na.rm = TRUE) * 1
+  
+  layers <- list()
+  
+  # DIGITAL: gain vs loss
+  layers <- append(layers, list(
+    geom_segment(data = subset(df, condition.label == "DIGITAL"),
+                 aes(x = 1, xend = 2, y = ymax, yend = ymax),
+                 color = cbPalette[6], linewidth = 0.75),
+    geom_segment(data = subset(df, condition.label == "DIGITAL"),
+                 aes(x = 1, xend = 1, y = ymax, yend = mean[resource == "gain" & condition.label == "DIGITAL"]),
+                 color = cbPalette[6], linewidth = 0.75, arrow = arrow_single),
+    geom_segment(data = subset(df, condition.label == "DIGITAL"),
+                 aes(x = 2, xend = 2, y = ymax, yend = mean[resource == "loss" & condition.label == "DIGITAL"]),
+                 color = cbPalette[6], linewidth = 0.75, arrow = arrow_single),
+    geom_text(data = subset(df, condition.label == "DIGITAL"),
+              aes(x = 1.5, y = ytext, label = paste0("H1b ", sigstars[[paste0("h1b.", measure.label)]])),
+              color = cbPalette[6], size = 5, family = "latex")
+  ))
+  
+  # TRADITIONAL: gain vs loss
+  layers <- append(layers, list(
+    geom_segment(data = subset(df, condition.label == "TRADITIONAL"),
+                 aes(x = 1, xend = 2, y = ymax, yend = ymax),
+                 color = cbPalette[6], linewidth = 0.75),
+    geom_segment(data = subset(df, condition.label == "TRADITIONAL"),
+                 aes(x = 1, xend = 1, y = ymax, yend = mean[resource == "gain" & condition.label == "TRADITIONAL"]),
+                 color = cbPalette[6], linewidth = 0.75, arrow = arrow_single),
+    geom_segment(data = subset(df, condition.label == "TRADITIONAL"),
+                 aes(x = 2, xend = 2, y = ymax, yend = mean[resource == "loss" & condition.label == "TRADITIONAL"]),
+                 color = cbPalette[6], linewidth = 0.75, arrow = arrow_single),
+    geom_text(data = subset(df, condition.label == "TRADITIONAL"),
+              aes(x = 1.5, y = ytext, label = paste0("H2b ", sigstars[[paste0("h2b.", measure.label)]])),
+              color = cbPalette[6], size = 5, family = "latex")
+  ))
+  
+  return(layers)
+}
+
+
 # Function to create mean plot
 create.mean.plot <- function(summary.df, sigstars, y.label, measure.label) {
   ggplot(summary.df, aes(x = resource, y = mean, fill = condition.label)) +
@@ -123,6 +166,30 @@ create.mean.plot <- function(summary.df, sigstars, y.label, measure.label) {
           text = element_text(size = 24, family = "latex")) +
     facet_grid(. ~ condition.label, switch = "x") +
     add.mean.hypothesis.annotations(summary.df, sigstars, measure.label)
+}
+
+create.mean.plot <- function(summary.df, sigstars, y.label, measure.label) {
+  # Check which annotation logic to use
+  is.study2 <- "lack" %in% summary.df$resource
+  annotation.fn <- if (is.study2) study2.add.mean.hypothesis.annotations else study3.add.mean.hypothesis.annotations
+  
+  ggplot(summary.df, aes(x = resource, y = mean, fill = condition.label)) +
+    geom_bar(stat = "identity", color = cbPalette[4], position = position_dodge(width = 0.9), alpha = 0.5) +
+    scale_fill_manual(values = c("DIGITAL" = cbPalette[2], "TRADITIONAL" = cbPalette[2]), guide = "none") +
+    geom_errorbar(aes(ymin = mean - std.err, ymax = mean + std.err),
+                  width = 0.2, position = position_dodge(width = 0.9)) +
+    labs(x = "", y = y.label) +
+    theme(panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+          panel.background = element_blank(),
+          strip.background = element_blank(),
+          strip.placement = "outside",
+          strip.text.x = element_text(size = 20, face = "bold"),
+          axis.line = element_line(colour = "black"),
+          plot.title = element_text(size = 26, face = "bold", hjust = 0.5),
+          text = element_text(size = 24, family = "latex")) +
+    facet_grid(. ~ condition.label, switch = "x") +
+    annotation.fn(summary.df, sigstars, measure.label)
 }
 
 
@@ -316,7 +383,7 @@ p.study2.cortisol.delta <-
                arrow = arrow_single) +
   geom_text(data = subset(study2.cortisol.delta.coordinate.df, condition.label == "DIGITAL"),
             aes(x = 2, y = max(diffbar.lack.gain.ymax) * 1.5, 
-                label = paste("H2c", sigstars.study2$h1c.cortisol)),
+                label = paste("H1c", sigstars.study2$h1c.cortisol)),
             color = cbPalette[6], size = 5, family = "latex") +
   
   #H2c
@@ -515,7 +582,7 @@ p.study2.perceived.delta <-
                arrow = arrow_single) +
   geom_text(data = subset(study2.perceived.delta.coordinate.df, condition.label == "DIGITAL"),
             aes(x = 2, y = max(diffbar.lack.gain.ymax)+1.1, 
-                label = paste("H2c", sigstars.study2$h1c.perceived)),
+                label = paste("H1c", sigstars.study2$h1c.perceived)),
             color = cbPalette[6], size = 5, family = "latex") +
   
   #H2c
@@ -588,7 +655,95 @@ print(p.study2.perceived.delta)
 
 # Save the plot to a PDF file
 ggsave(file.path(artwork.dir, "p.study2.cortisol.mean.pdf"), plot = p.study2.cortisol.mean, width = 20, height = 20, units = "cm") 
-ggsave(file.path(artwork.dir, "p.study2.perceived.mean.pdf"), plot = p.study2.perceived.delta, width = 20, height = 20, units = "cm")
+ggsave(file.path(artwork.dir, "p.study2.perceived.mean.pdf"), plot = p.study2.perceived.mean, width = 20, height = 20, units = "cm")
 
 ggsave(file.path(artwork.dir, "p.study2.cortisol.delta.pdf"), plot = p.study2.cortisol.delta, width = 20, height = 20, units = "cm") 
 ggsave(file.path(artwork.dir, "p.study2.perceived.delta.pdf"), plot = p.study2.perceived.delta, width = 20, height = 20, units = "cm")
+
+remove(study2.cortisol.mean.df, study2.perceived.mean.df, study2.cortisol.delta.df, study2.perceived.delta.df, study2.cortisol.delta.coordinate.df, study2.perceived.delta.coordinate.df) # clean workspace
+
+################################
+#
+#   STUDY 3
+#
+################################
+
+# Create readable labels
+study3.final.df <- study3.final.df %>%
+  mutate(condition.label = ifelse(condition == "Digital", "DIGITAL", "TRADITIONAL"),
+         resource = factor(resource, levels = c("gain", "loss")))
+
+# Apply to whole list
+sigstars.study3 <- lapply(pvals.study3, get.significance.stars)
+
+############################
+#
+# H1b: the loss of digital resources increases stress; 
+# H2b: The loss of traditional resources increases stress; 
+#
+############################
+# Cortisol
+study3.cortisol.mean.df <- summarize.study.data(study3.final.df, "AUCi.cortisol")  # Summarize mean and SE for plotting
+
+#Plot mean
+p.study3.cortisol.mean <- create.mean.plot(study3.cortisol.mean.df, sigstars.study3, expression(AUCi[cortisol]), "cortisol")
+
+print(p.study3.cortisol.mean)
+
+############################
+# Perceived
+study3.perceived.mean.df <- summarize.study.data(study3.final.df, "AUCi.perceived")  # Summarize mean and SE for plotting
+
+#Plot mean
+p.study3.perceived.mean <- create.mean.plot(study3.perceived.mean.df, sigstars.study3, expression(AUCi[perceived]), "perceived")
+
+print(p.study3.perceived.mean)
+
+# Save the plot to a PDF file
+ggsave(file.path(artwork.dir, "p.study3.cortisol.mean.pdf"), plot = p.study3.cortisol.mean, width = 20, height = 20, units = "cm") 
+ggsave(file.path(artwork.dir, "p.study3.perceived.mean.pdf"), plot = p.study3.perceived.mean, width = 20, height = 20, units = "cm")
+
+remove(study3.cortisol.mean.df, study3.perceived.mean.df) # clean workspace
+
+################################
+#
+#   STUDY 4
+#
+################################
+
+# Create readable labels
+study4.final.df <- study4.final.df %>%
+  mutate(condition.label = ifelse(condition == "Digital", "DIGITAL", "TRADITIONAL"),
+         resource = factor(resource, levels = c("gain", "loss")))
+
+# Apply to whole list
+sigstars.study4 <- lapply(pvals.study4, get.significance.stars)
+
+############################
+#
+# H1b: the loss of digital resources increases stress; 
+# H2b: The loss of traditional resources increases stress; 
+#
+############################
+# Cortisol
+study3.cortisol.mean.df <- summarize.study.data(study3.final.df, "AUCi.cortisol")  # Summarize mean and SE for plotting
+
+#Plot mean
+p.study3.cortisol.mean <- create.mean.plot(study3.cortisol.mean.df, sigstars.study3, expression(AUCi[cortisol]), "cortisol")
+
+print(p.study3.cortisol.mean)
+
+############################
+# Perceived
+study3.perceived.mean.df <- summarize.study.data(study3.final.df, "AUCi.perceived")  # Summarize mean and SE for plotting
+
+#Plot mean
+p.study3.perceived.mean <- create.mean.plot(study3.perceived.mean.df, sigstars.study3, expression(AUCi[perceived]), "perceived")
+
+print(p.study3.perceived.mean)
+
+# Save the plot to a PDF file
+ggsave(file.path(artwork.dir, "p.study3.cortisol.mean.pdf"), plot = p.study3.cortisol.mean, width = 20, height = 20, units = "cm") 
+ggsave(file.path(artwork.dir, "p.study3.perceived.mean.pdf"), plot = p.study3.perceived.mean, width = 20, height = 20, units = "cm")
+
+

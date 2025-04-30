@@ -45,6 +45,7 @@ compute.AUCi <- function(time, measure) {
 study2.df <- study2.raw.df %>% 
   janitor::clean_names() %>% 
   rename_with(~ gsub("_", ".", .x)) %>%
+  mutate(participant.id = str_pad(str_sub(as.character(participant.id), -3), width = 3, pad = "0")) %>% 
   mutate(
     height = height / 100,                     # Convert height from cm to m
     bmi = weight / (height^2)                   # Calculate BMI
@@ -190,6 +191,7 @@ remove(AUCg.results.cortisol, AUCg.results.perceived, AUCi.results.cortisol, AUC
 study3.df <- study3.raw.df %>% 
   janitor::clean_names() %>% 
   rename_with(~ gsub("_", ".", .x)) %>%
+  mutate(participant.id = str_pad(str_sub(as.character(participant.id), -3), width = 3, pad = "0")) %>% 
   mutate(
     height = height / 100,                     # Convert height from cm to m
     bmi = weight / (height^2)                   # Calculate BMI
@@ -311,7 +313,13 @@ study3.final.df <- AUCi.results.cortisol %>%
   left_join(AUCi.results.perceived, by = c("participant.id", "resource")) %>%
   left_join(AUCg.results.cortisol, by = c("participant.id", "resource")) %>%
   left_join(AUCg.results.perceived, by = c("participant.id", "resource")) %>%
-  left_join(study3.wide.df, by = c("participant.id", "resource"))
+  left_join(study3.wide.df, by = c("participant.id", "resource")) %>% 
+group_by(participant.id) %>%
+  filter(!any(is.na(AUCi.cortisol) | is.na(AUCi.perceived))) %>%            #Remove participants for whom there is NA
+  ungroup() %>%
+  select(-matches("^\\.groups")) %>% 
+  mutate(resource = factor(resource, levels = c("gain", "loss"))) %>%  # Set correct resource order
+  arrange(participant.id, resource)
 
 remove(AUCg.results.cortisol, AUCg.results.perceived, AUCi.results.cortisol, AUCi.results.perceived) # clean workspace
 
@@ -325,7 +333,8 @@ remove(AUCg.results.cortisol, AUCg.results.perceived, AUCi.results.cortisol, AUC
 #Survey data frame
 study4.df <- study4.raw.df %>% 
   janitor::clean_names() %>% 
-  rename_with(~ gsub("_", ".", .x)) %>%
+  rename_with(~ gsub("_", ".", .x))%>%
+  mutate(participant.id = str_pad(str_sub(as.character(participant.id), -3), width = 3, pad = "0")) %>%
   mutate(
     height = height / 100,                     # Convert height from cm to m
     bmi = weight / (height^2)                   # Calculate BMI
@@ -396,8 +405,8 @@ study4.long.df <- study4.df %>%
   mutate(
     resource = case_when(
       timepoint == 1 ~ "baseline",
-      timepoint >= 2 & timepoint <= 7 ~ "gain",
-      timepoint >= 8 & timepoint <= 13 ~ "loss"
+      timepoint >= 2 & timepoint <= 7 ~ "digital",
+      timepoint >= 8 & timepoint <= 13 ~ "traditional"
     )
   )
 
@@ -415,26 +424,26 @@ study4.long.df <- left_join(study4.long.df,
 
 # For Cortisol_log
 AUCg.results.cortisol <- study4.long.df %>%
-  group_by(participant.id) %>%
+  group_by(participant.id, resource) %>%
   reframe(AUCg.cortisol = compute.AUCg(time, cortisol.log), .groups = "drop")
 
 AUCi.results.cortisol <- study4.long.df %>%
-  group_by(participant.id) %>%
+  group_by(participant.id, resource) %>%
   reframe(AUCi.cortisol = compute.AUCi(time, cortisol.log), .groups = "drop")
 
 # For Perceived stress
 AUCg.results.perceived <- study4.long.df %>%
-  group_by(participant.id) %>%
+  group_by(participant.id, resource) %>%
   reframe(AUCg.perceived = compute.AUCg(time, perceived), .groups = "drop")
 
 AUCi.results.perceived <- study4.long.df %>%
-  group_by(participant.id) %>%
+  group_by(participant.id, resource) %>%
   reframe(AUCi.perceived = compute.AUCi(time, perceived), .groups = "drop")
 
 
 # Transform data to wide format
 study4.wide.df <- study4.long.df %>%
-  select(participant.id, timepoint, perceived, cortisol.log, gender, age, bmi, en.native, w.corr.lenses, experience.hololens) %>%
+  select(participant.id, timepoint, perceived, cortisol.log, resource, gender, age, bmi, en.native, w.corr.lenses, experience.hololens) %>%
   pivot_wider(
     names_from = timepoint, 
     values_from = c(cortisol.log, perceived),
@@ -443,13 +452,18 @@ study4.wide.df <- study4.long.df %>%
 
 # Merge AUCi results into wide-format data
 study4.final.df <- AUCi.results.cortisol %>%
-  left_join(AUCi.results.perceived, by = c("participant.id")) %>%
-  left_join(AUCg.results.cortisol, by = c("participant.id")) %>%
-  left_join(AUCg.results.perceived, by = c("participant.id")) %>%
-  left_join(study3.wide.df, by = c("participant.id"))
+  left_join(AUCi.results.perceived, by = c("participant.id", "resource")) %>%
+  left_join(AUCg.results.cortisol, by = c("participant.id", "resource")) %>%
+  left_join(AUCg.results.perceived, by = c("participant.id", "resource")) %>%
+  left_join(study4.wide.df, by = c("participant.id", "resource"))%>% 
+  group_by(participant.id) %>%
+  filter(!any(is.na(AUCi.cortisol) | is.na(AUCi.perceived))) %>%            #Remove participants for whom there is NA
+  ungroup() %>%
+  select(-matches("^\\.groups")) %>% 
+  mutate(resource = factor(resource, levels = c("digital", "traditional"))) %>%  # Set correct resource order
+  arrange(participant.id, resource)
 
 remove(AUCg.results.cortisol, AUCg.results.perceived, AUCi.results.cortisol, AUCi.results.perceived) # clean workspace
-
 
 ##############################
 #
