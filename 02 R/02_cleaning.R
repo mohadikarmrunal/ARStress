@@ -17,33 +17,32 @@ likert.4.labels <- c(
 )
 
 # Function to compute AUCg (Area Under the Curve - Ground)
-compute_AUCg <- function(Time, Measure) {
+compute.AUCg <- function(time, measure) {
   AUCg <- 0
-  for (i in 1:(length(Time) - 1)) {
-    # Convert difftime to numeric (in hours)
-    delta_time <- as.numeric(difftime(Time[i + 1], Time[i], units = "hours"))  
-    avg_measure <- (Measure[i + 1] + Measure[i]) / 2  # Trapezoidal rule for averaging the measures
-    AUCg <- AUCg + avg_measure * delta_time
+  for (i in 1:(length(time) - 1)) {     
+    delta.time <- as.numeric(difftime(time[i + 1], time[i], units = "hours"))  # Convert difftime to numeric (in hours)
+    avg.measure <- (measure[i + 1] + measure[i]) / 2  # Trapezoidal rule for averaging the measures
+    AUCg <- AUCg + avg.measure * delta.time
   }
   return(AUCg)
 }
 
 # Function to compute AUCi (Area Under the Curve - Increase)
-compute_AUCi <- function(Time, Measure) {
-  AUCg <- compute_AUCg(Time, Measure)  # Get the AUCg
-  total_time <- as.numeric(difftime(Time[length(Time)], Time[1], units = "hours"))  # Total time interval in hours
-  AUCi <- AUCg - Measure[1] * total_time  # Subtract the baseline area
+compute.AUCi <- function(time, measure) {
+  AUCg <- compute.AUCg(time, measure)  # Get the AUCg
+  total.time <- as.numeric(difftime(time[length(time)], time[1], units = "hours"))  # Total time interval in hours
+  AUCi <- AUCg - measure[1] * total.time  # Subtract the baseline area
   return(AUCi)
 }
 
 ###############################
 #
-#   clean and prepare study 1 data frame
+#   clean and prepare study 2 data frame
 #
 ###############################
 
 #Survey data frame
-study1.df <- study1.raw.df %>% 
+study2.df <- study2.raw.df %>% 
   janitor::clean_names() %>% 
   rename_with(~ gsub("_", ".", .x)) %>%
   mutate(
@@ -91,17 +90,16 @@ study1.df <- study1.raw.df %>%
     ~ as.factor(.x)
   ))
 
-Hmisc::label(study1.df$gender) <- "0 if Male, 1 if Female, 2 if Diverse"
-Hmisc::label(study1.df$en.native) <- "1 if native speaker, 0 if not"
-Hmisc::label(study1.df$learning.disorders) <- "0 if none, 1 if present"
+Hmisc::label(study2.df$gender) <- "0 if Male, 1 if Female, 2 if Diverse"
+Hmisc::label(study2.df$en.native) <- "1 if native speaker, 0 if not"
+Hmisc::label(study2.df$learning.disorders) <- "0 if none, 1 if present"
 
 ## Not run:
-# Hmisc::describe(study1.df) # Displays a summary of study1.df including labels
+# Hmisc::describe(study2.df) # Displays a summary of study2.df including labels
 ## End(Not run)
 
 #Experiment data frame
-
-study1.long.df <- study1.df %>%
+study2.long.df <- study2.df %>%
   pivot_longer(
     cols = c(
       c1, c2, c3, c4, c5, c6, c7, c8, c9,
@@ -130,8 +128,8 @@ study1.long.df <- study1.df %>%
     
 # Join the static variables with the long format data
 #Runit only once
-study1.long.df <- left_join(study1.long.df,
-    study1.df %>%
+study2.long.df <- left_join(study2.long.df,
+    study2.df %>%
       select(-c(c1, c2, c3, c4, c5, c6, c7, c8, c9,
                 s1, s2, s3, s4, s5, s6, s7, s8, s9,
                 t1, t2, t3, t4, t5, t6, t7, t8, t9)),
@@ -139,28 +137,27 @@ study1.long.df <- left_join(study1.long.df,
   )
 
 # Compute AUCg and AUCi for each participant for Cortisol_log and Perceived using actual time values
-
 # For Cortisol_log
-AUCg.results.cortisol <- study1.long.df %>%
+AUCg.results.cortisol <- study2.long.df %>%
   group_by(participant.id, resource) %>%
-  summarise(AUCg.cortisol = compute_AUCg(time, cortisol.log), .groups = "drop")
+  reframe(AUCg.cortisol = compute.AUCg(time, cortisol.log), .groups = "drop")
 
-AUCi.results.cortisol <- study1.long.df %>%
+AUCi.results.cortisol <- study2.long.df %>%
   group_by(participant.id, resource) %>%
-  summarise(AUCi.cortisol = compute_AUCi(time, cortisol.log), .groups = "drop")
+  reframe(AUCi.cortisol = compute.AUCi(time, cortisol.log), .groups = "drop")
 
 # For Perceived stress
-AUCg.results.perceived <- study1.long.df %>%
+AUCg.results.perceived <- study2.long.df %>%
   group_by(participant.id, resource) %>%
-  summarise(AUCg.perceived = compute_AUCg(time, perceived), .groups = "drop")
+  reframe(AUCg.perceived = compute.AUCg(time, perceived), .groups = "drop")
 
-AUCi.results.perceived <- study1.long.df %>%
+AUCi.results.perceived <- study2.long.df %>%
   group_by(participant.id, resource) %>%
-  summarise(AUCi.perceived = compute_AUCi(time, perceived), .groups = "drop")
+  reframe(AUCi.perceived = compute.AUCi(time, perceived), .groups = "drop")
 
 
 # Transform data to wide format
-study1.wide.df <- study1.long.df %>%
+study2.wide.df <- study2.long.df %>%
   select(participant.id, timepoint, perceived, cortisol.log, condition, resource, gender, age, bmi, learning.disorders, en.native, experience.gpt) %>%
   pivot_wider(
     names_from = timepoint, 
@@ -169,22 +166,28 @@ study1.wide.df <- study1.long.df %>%
   )
 
 # Merge AUCi results into wide-format data
-study1.final.df <- AUCi.results.cortisol %>%
+study2.final.df <- AUCi.results.cortisol %>%
   left_join(AUCi.results.perceived, by = c("participant.id", "resource")) %>%
   left_join(AUCg.results.cortisol, by = c("participant.id", "resource")) %>%
   left_join(AUCg.results.perceived, by = c("participant.id", "resource")) %>%
-  left_join(study1.wide.df, by = c("participant.id", "resource"))
+  left_join(study2.wide.df, by = c("participant.id", "resource")) %>%
+  group_by(participant.id) %>%
+  filter(!any(is.na(AUCi.cortisol) | is.na(AUCi.perceived))) %>%            #Remove participants for whom there is NA
+  ungroup() %>%
+  select(-matches("^\\.groups")) %>% 
+  mutate(resource = factor(resource, levels = c("lack", "gain", "loss"))) %>%  # Set correct resource order
+  arrange(participant.id, resource)
 
-remove(AUCg.results.cortisol, AUCg.results.perceived, AUCi.results.cortisol, AUCi.results.perceived) # clean workspace
+remove(AUCg.results.cortisol, AUCg.results.perceived, AUCi.results.cortisol, AUCi.results.perceived, study2.long.df, study2.wide.df) # clean workspace
 
 ###############################
 #
-#   clean and prepare study 2 data frame
+#   clean and prepare study 3 data frame
 #
 ###############################
 
 #Survey data frame
-study2.df <- study2.raw.df %>% 
+study3.df <- study3.raw.df %>% 
   janitor::clean_names() %>% 
   rename_with(~ gsub("_", ".", .x)) %>%
   mutate(
@@ -228,15 +231,15 @@ study2.df <- study2.raw.df %>%
     ~ as.factor(.x)
   ))
 
-Hmisc::label(study2.df$en.native) <- "1 if native speaker, 0 if not"
+Hmisc::label(study3.df$en.native) <- "1 if native speaker, 0 if not"
 
 ## Not run:
-# Hmisc::describe(study1.df) # Displays a summary of study1.df including labels
+# Hmisc::describe(study2.df) # Displays a summary of study2.df including labels
 ## End(Not run)
 
 #Experiment data frame
 
-study2.long.df <- study2.df %>%
+study3.long.df <- study3.df %>%
   pivot_longer(
     cols = c(
       c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13,
@@ -265,8 +268,8 @@ study2.long.df <- study2.df %>%
 
 # Join the static variables with the long format data
 #Runit only once
-study2.long.df <- left_join(study2.long.df,
-                            study2.df %>%
+study3.long.df <- left_join(study3.long.df,
+                            study3.df %>%
                               select(-c(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13,
                                         s1, s2, s3, s4, s5, s6, s7, s8, s9, s10, s11, s12, s13,
                                         t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13)),
@@ -276,26 +279,26 @@ study2.long.df <- left_join(study2.long.df,
 # Compute AUCg and AUCi for each participant for Cortisol_log and Perceived using actual time values
 
 # For Cortisol_log
-AUCg.results.cortisol <- study2.long.df %>%
+AUCg.results.cortisol <- study3.long.df %>%
   group_by(participant.id, resource) %>%
-  summarise(AUCg.cortisol = compute_AUCg(time, cortisol.log), .groups = "drop")
+  reframe(AUCg.cortisol = compute.AUCg(time, cortisol.log), .groups = "drop")
 
-AUCi.results.cortisol <- study2.long.df %>%
+AUCi.results.cortisol <- study3.long.df %>%
   group_by(participant.id, resource) %>%
-  summarise(AUCi.cortisol = compute_AUCi(time, cortisol.log), .groups = "drop")
+  reframe(AUCi.cortisol = compute.AUCi(time, cortisol.log), .groups = "drop")
 
 # For Perceived stress
-AUCg.results.perceived <- study2.long.df %>%
+AUCg.results.perceived <- study3.long.df %>%
   group_by(participant.id, resource) %>%
-  summarise(AUCg.perceived = compute_AUCg(time, perceived), .groups = "drop")
+  reframe(AUCg.perceived = compute.AUCg(time, perceived), .groups = "drop")
 
-AUCi.results.perceived <- study2.long.df %>%
+AUCi.results.perceived <- study3.long.df %>%
   group_by(participant.id, resource) %>%
-  summarise(AUCi.perceived = compute_AUCi(time, perceived), .groups = "drop")
+  reframe(AUCi.perceived = compute.AUCi(time, perceived), .groups = "drop")
 
 
 # Transform data to wide format
-study2.wide.df <- study2.long.df %>%
+study3.wide.df <- study3.long.df %>%
   select(participant.id, timepoint, perceived, cortisol.log, condition, resource, gender, age, bmi, en.native, w.corr.lenses, experience.hololens) %>%
   pivot_wider(
     names_from = timepoint, 
@@ -304,14 +307,148 @@ study2.wide.df <- study2.long.df %>%
   )
 
 # Merge AUCi results into wide-format data
-study2.final.df <- AUCi.results.cortisol %>%
+study3.final.df <- AUCi.results.cortisol %>%
   left_join(AUCi.results.perceived, by = c("participant.id", "resource")) %>%
   left_join(AUCg.results.cortisol, by = c("participant.id", "resource")) %>%
   left_join(AUCg.results.perceived, by = c("participant.id", "resource")) %>%
-  left_join(study2.wide.df, by = c("participant.id", "resource"))
+  left_join(study3.wide.df, by = c("participant.id", "resource"))
 
 remove(AUCg.results.cortisol, AUCg.results.perceived, AUCi.results.cortisol, AUCi.results.perceived) # clean workspace
 
+
+###############################
+#
+#   clean and prepare study 4 data frame
+#
+###############################
+
+#Survey data frame
+study4.df <- study4.raw.df %>% 
+  janitor::clean_names() %>% 
+  rename_with(~ gsub("_", ".", .x)) %>%
+  mutate(
+    height = height / 100,                     # Convert height from cm to m
+    bmi = weight / (height^2)                   # Calculate BMI
+  ) %>%
+  select(-height,-weight,-n) %>%
+  mutate(bmi.category = case_when(
+    bmi < 18.5 ~ "underweight",
+    bmi >= 18.5 & bmi < 25 ~ "normal.weight",
+    bmi >= 25 & bmi < 30 ~ "overweight",
+    bmi >= 30 & bmi < 35 ~ "obesity.class.i",
+    bmi >= 35 & bmi < 40 ~ "obesity.class.ii",
+    bmi >= 40 ~ "obesity.class.iii",
+    TRUE ~ "unknown"
+  )) %>% 
+  mutate(age.range = case_when(
+    age < 21.5 ~ "19-21",
+    age >= 21.5 & age < 24.5 ~ "22-24",
+    age >= 24.5 & age < 27.5 ~ "25-27",
+    age >= 27.5 & age < 30.5 ~ "28-30",
+    age >= 30.5 & age < 33.5 ~ "31-33",
+    age >= 33.5 ~ "34-36",
+    TRUE ~ "unknown"
+  )) %>% 
+  mutate(w.corr.lenses = ifelse(w.corr.lenses == "No, I don't wear corrective lenses", "No", "Yes")) %>%
+  mutate(across(
+    c(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13), as.numeric)) %>% # Ensure C1 to C9 are numeric
+  mutate(across(
+    c(s1, s2, s3, s4, s5, s6, s7, s8, s9, s10, s11, s12, s13), as.numeric)) %>% 
+  mutate(across(
+    c(t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13), as_hms)) %>% 
+  rename(experience.hololens = expertise) %>% 
+  mutate(across(
+    c(
+      gender,
+      en.native,
+      experience.hololens
+    ),
+    ~ as.factor(.x)
+  ))
+
+Hmisc::label(study4.df$en.native) <- "1 if native speaker, 0 if not"
+
+## Not run:
+# Hmisc::describe(study2.df) # Displays a summary of study2.df including labels
+## End(Not run)
+
+#Experiment data frame
+
+study4.long.df <- study4.df %>%
+  pivot_longer(
+    cols = c(
+      c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13,
+      s1, s2, s3, s4, s5, s6, s7, s8, s9, s10, s11, s12, s13,
+      t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13
+    ),
+    names_to = c(".value", "timepoint"),     # .value magic!
+    names_pattern = "([cst])(\\d+)",          # RegEx: capture C/S/T and the number
+    names_transform = list(timepoint = as.integer)
+  ) %>%
+  select(participant.id, timepoint, cortisol = c, perceived = s, time = t) %>% 
+  mutate(
+    cortisol.winsorized = { # Winsorize and log-transform Cortisol values
+      quantiles <- quantile(cortisol, probs = c(0.05, 0.95), na.rm = TRUE)
+      pmin(pmax(cortisol, quantiles[1]), quantiles[2])
+    },
+    cortisol.log = log(cortisol.winsorized) #Log-transform Cortisol values
+  ) %>%
+  mutate(
+    resource = case_when(
+      timepoint == 1 ~ "baseline",
+      timepoint >= 2 & timepoint <= 7 ~ "gain",
+      timepoint >= 8 & timepoint <= 13 ~ "loss"
+    )
+  )
+
+# Join the static variables with the long format data
+#Runit only once
+study4.long.df <- left_join(study4.long.df,
+                            study4.df %>%
+                              select(-c(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13,
+                                        s1, s2, s3, s4, s5, s6, s7, s8, s9, s10, s11, s12, s13,
+                                        t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13)),
+                            by = c("participant.id")
+)
+
+# Compute AUCg and AUCi for each participant for Cortisol_log and Perceived using actual time values
+
+# For Cortisol_log
+AUCg.results.cortisol <- study4.long.df %>%
+  group_by(participant.id) %>%
+  reframe(AUCg.cortisol = compute.AUCg(time, cortisol.log), .groups = "drop")
+
+AUCi.results.cortisol <- study4.long.df %>%
+  group_by(participant.id) %>%
+  reframe(AUCi.cortisol = compute.AUCi(time, cortisol.log), .groups = "drop")
+
+# For Perceived stress
+AUCg.results.perceived <- study4.long.df %>%
+  group_by(participant.id) %>%
+  reframe(AUCg.perceived = compute.AUCg(time, perceived), .groups = "drop")
+
+AUCi.results.perceived <- study4.long.df %>%
+  group_by(participant.id) %>%
+  reframe(AUCi.perceived = compute.AUCi(time, perceived), .groups = "drop")
+
+
+# Transform data to wide format
+study4.wide.df <- study4.long.df %>%
+  select(participant.id, timepoint, perceived, cortisol.log, gender, age, bmi, en.native, w.corr.lenses, experience.hololens) %>%
+  pivot_wider(
+    names_from = timepoint, 
+    values_from = c(cortisol.log, perceived),
+    names_sep = "_T"
+  )
+
+# Merge AUCi results into wide-format data
+study4.final.df <- AUCi.results.cortisol %>%
+  left_join(AUCi.results.perceived, by = c("participant.id")) %>%
+  left_join(AUCg.results.cortisol, by = c("participant.id")) %>%
+  left_join(AUCg.results.perceived, by = c("participant.id")) %>%
+  left_join(study3.wide.df, by = c("participant.id"))
+
+remove(AUCg.results.cortisol, AUCg.results.perceived, AUCi.results.cortisol, AUCi.results.perceived) # clean workspace
 
 
 ##############################
@@ -320,5 +457,5 @@ remove(AUCg.results.cortisol, AUCg.results.perceived, AUCi.results.cortisol, AUC
 #
 ###############################
 
-save(list = c("study1.final.df","study2.final.df"), file = "./02 RData/analysis.RData")
+save(list = c("study2.final.df","study3.final.df","study4.final.df"), file = "./02 RData/analysis.RData")
 
