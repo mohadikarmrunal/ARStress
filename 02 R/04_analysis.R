@@ -10,9 +10,77 @@ source(file.path(dirname(rstudioapi::getActiveDocumentContext()$path), "init.R")
 load(file = "./02 RData/analysis.RData")
 
 # Collect important t-test p-values
+pvals.study1 <- list()
 pvals.study2 <- list()
 pvals.study3 <- list()
 pvals.study4 <- list()
+
+############################
+#
+# Hypotheses tests - Study 1 
+# We do two sided t-tests to check if there is in general differences in means of two groups. We do not check here is one mean is less/greater than the other.)
+# We have already arranged the dataframe as per participant ID: so, no need for arrange(participant.id)
+# 
+############################
+
+############################
+#
+# H1b: the loss of digital resources increases stress.
+#
+############################
+#perceived for simple (marginally supported)
+pvals.study1$h1b.simple.perceived <- t.test(
+  study1.final.df %>% 
+    subset(condition == "Digital" & resource == "gain") %>%
+    pull(stress.delta.simple),
+  study1.final.df %>% 
+    subset(condition == "Digital" & resource == "loss") %>%
+    pull(stress.delta.simple),
+  paired = TRUE
+)$p.value #%>%
+#print.t.test
+
+#perceived for complex (supported)
+pvals.study1$h1b.complex.perceived <- t.test(
+  study1.final.df %>% 
+    subset(condition == "Digital" & resource == "gain") %>%
+  pull(stress.delta.complex),
+  study1.final.df %>% 
+    subset(condition == "Digital" & resource == "loss") %>%
+    pull(stress.delta.complex),
+  paired = TRUE
+)$p.value #%>%
+#print.t.test
+
+
+############################
+#
+# H2b: The loss of traditional resources increases stress. 
+#
+############################
+#perceived for simple (not supported)
+pvals.study1$h2b.simple.perceived <- t.test(
+  study1.final.df %>% 
+    subset(condition == "Traditional" & resource == "gain") %>%
+    pull(stress.delta.simple),
+  study1.final.df %>% 
+    subset(condition == "Traditional" & resource == "loss") %>%
+    pull(stress.delta.simple),
+  paired = TRUE
+)$p.value #%>%
+#print.t.test
+
+#perceived for complex (supported)
+pvals.study1$h2b.complex.perceived <- t.test(
+  study1.final.df %>% 
+    subset(condition == "Traditional" & resource == "gain") %>%
+    pull(stress.delta.complex),
+  study1.final.df %>% 
+    subset(condition == "Traditional" & resource == "loss") %>%
+    pull(stress.delta.complex),
+  paired = TRUE
+)$p.value #%>%
+#print.t.test
 
 
 ############################
@@ -578,4 +646,4 @@ pvals.study4$traditionalvsgaintraditional.perceived <- t.test(
 #print.t.test
 
 # Save the p-values to a file
-save(pvals.study2, pvals.study3, pvals.study4, file = "./02 RData/pvals.RData")
+save(pvals.study1, pvals.study2, pvals.study3, pvals.study4, file = "./02 RData/pvals.RData")

@@ -209,6 +209,154 @@ arrow_double <- arrow(length = unit(0.015, "npc"), type = "open", ends = "both",
 
 ################################
 #
+#   STUDY 1
+#
+################################
+
+# Create readable labels
+study1.final.df <- study1.final.df %>%
+  mutate(condition.label = ifelse(condition == "Digital", "DIGITAL", "TRADITIONAL"),
+         resource = factor(resource, levels = c("gain", "loss")))
+
+# Apply to whole list
+sigstars.study1 <- lapply(pvals.study1, get.significance.stars)
+
+############################
+#
+# H1b: the loss of digital resources increases stress; 
+# H2b: The loss of traditional resources increases stress; 
+#
+############################
+# Simple
+study1.perceived.simple.mean.df <- summarize.study.data(study1.final.df, "stress.delta.simple")  # Summarize mean and SE for plotting
+
+#Plot mean
+p.study1.perceived.simple.mean <-   
+  ggplot(study1.perceived.simple.mean.df,
+         aes(x = resource, y = mean, fill = condition.label)) +
+  geom_bar(stat = "identity", color = cbPalette[4], position = position_dodge(width = 0.9), alpha = 0.5) +
+  scale_fill_manual(values = c("DIGITAL" = cbPalette[2], "TRADITIONAL" = cbPalette[2]), guide = "none") +
+  geom_errorbar(aes(ymin = mean - std.err, ymax = mean + std.err),
+                width = 0.2, position = position_dodge(width = 0.9)) +
+  labs(x = "", y = "delta perceived stress") +
+  theme(panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.background = element_blank(),
+        strip.background = element_blank(),
+        strip.placement = "outside",
+        strip.text.x = element_text(size = 20, face = "bold"),
+        axis.line = element_line(colour = "black"),
+        plot.title = element_text(size = 26, face = "bold", hjust = 0.5),
+        text = element_text(size = 24, family = "latex")) +
+  facet_grid(. ~ condition.label, switch = "x") +
+  
+  # DIGITAL: gain vs loss
+  geom_segment(data = subset(study1.perceived.simple.mean.df, condition.label == "DIGITAL"),
+               aes(x = 1, xend = 1, yend = (study1.perceived.simple.mean.df %>% 
+                                              subset(condition.label == "DIGITAL" & resource == "gain") %>%
+                                              pull(mean)) , y = 45),
+               color = cbPalette[6], linewidth = 0.75, arrow = arrow_single) + 
+  geom_segment(data = subset(study1.perceived.simple.mean.df, condition.label == "DIGITAL"),
+               aes(x = 1, xend = 2, y = 45 , yend = 45),
+               color = cbPalette[6], linewidth = 0.75) +  
+  geom_segment(data = subset(study1.perceived.simple.mean.df, condition.label == "DIGITAL"),
+               aes(x = 2, xend = 2, yend = (study1.perceived.simple.mean.df %>% 
+                                              subset(condition.label == "DIGITAL" & resource == "loss") %>%
+                                              pull(mean)) , y = 45),
+               color = cbPalette[6], linewidth = 0.75, arrow = arrow_single)+
+  geom_text(data = subset(study1.perceived.simple.mean.df, condition.label == "DIGITAL"),
+            aes(x = 1.5, y = 47, label = paste0("H1b ", sigstars.study1$h1b.simple.perceived)),
+            color = cbPalette[6], size = 5, family = "latex") + 
+  
+  # TRADITIONAL: gain vs loss
+  geom_segment(data = subset(study1.perceived.simple.mean.df, condition.label == "TRADITIONAL"),
+               aes(x = 1, xend = 1, yend = (study1.perceived.simple.mean.df %>% 
+                                              subset(condition.label == "TRADITIONAL" & resource == "gain") %>%
+                                              pull(mean)) , y = 45),
+               color = cbPalette[6], linewidth = 0.75, arrow = arrow_single) + 
+  geom_segment(data = subset(study1.perceived.simple.mean.df, condition.label == "TRADITIONAL"),
+               aes(x = 1, xend = 2, y = 45 , yend = 45),
+               color = cbPalette[6], linewidth = 0.75) +  
+  geom_segment(data = subset(study1.perceived.simple.mean.df, condition.label == "TRADITIONAL"),
+               aes(x = 2, xend = 2, yend = (study1.perceived.simple.mean.df %>% 
+                                              subset(condition.label == "TRADITIONAL" & resource == "loss") %>%
+                                              pull(mean)) , y = 45),
+               color = cbPalette[6], linewidth = 0.75, arrow = arrow_single)+
+  geom_text(data = subset(study1.perceived.simple.mean.df, condition.label == "TRADITIONAL"),
+            aes(x = 1.5, y = 47, label = paste0("H2b ", sigstars.study1$h2b.simple.perceived)),
+            color = cbPalette[6], size = 5, family = "latex")
+
+print(p.study1.perceived.simple.mean)
+
+############################
+# Complex
+study1.perceived.complex.mean.df <- summarize.study.data(study1.final.df, "stress.delta.complex")  # Summarize mean and SE for plotting
+
+#Plot mean
+p.study1.perceived.complex.mean <-   
+  ggplot(study1.perceived.complex.mean.df,
+         aes(x = resource, y = mean, fill = condition.label)) +
+  geom_bar(stat = "identity", color = cbPalette[4], position = position_dodge(width = 0.9), alpha = 0.5) +
+  scale_fill_manual(values = c("DIGITAL" = cbPalette[2], "TRADITIONAL" = cbPalette[2]), guide = "none") +
+  geom_errorbar(aes(ymin = mean - std.err, ymax = mean + std.err),
+                width = 0.2, position = position_dodge(width = 0.9)) +
+  labs(x = "", y = "delta perceived stress") +
+  theme(panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.background = element_blank(),
+        strip.background = element_blank(),
+        strip.placement = "outside",
+        strip.text.x = element_text(size = 20, face = "bold"),
+        axis.line = element_line(colour = "black"),
+        plot.title = element_text(size = 26, face = "bold", hjust = 0.5),
+        text = element_text(size = 24, family = "latex")) +
+  facet_grid(. ~ condition.label, switch = "x") +
+  
+    # DIGITAL: gain vs loss
+    geom_segment(data = subset(study1.perceived.complex.mean.df, condition.label == "DIGITAL"),
+                 aes(x = 1, xend = 1, yend = (study1.perceived.complex.mean.df %>% 
+                       subset(condition.label == "DIGITAL" & resource == "gain") %>%
+                       pull(mean)) , y = 45),
+                     color = cbPalette[6], linewidth = 0.75, arrow = arrow_single) + 
+    geom_segment(data = subset(study1.perceived.complex.mean.df, condition.label == "DIGITAL"),
+               aes(x = 1, xend = 2, y = 45 , yend = 45),
+               color = cbPalette[6], linewidth = 0.75) +  
+    geom_segment(data = subset(study1.perceived.complex.mean.df, condition.label == "DIGITAL"),
+               aes(x = 2, xend = 2, yend = (study1.perceived.complex.mean.df %>% 
+                                           subset(condition.label == "DIGITAL" & resource == "loss") %>%
+                                           pull(mean)) , y = 45),
+               color = cbPalette[6], linewidth = 0.75, arrow = arrow_single)+
+    geom_text(data = subset(study1.perceived.complex.mean.df, condition.label == "DIGITAL"),
+              aes(x = 1.5, y = 47, label = paste0("H1b ", sigstars.study1$h1b.complex.perceived)),
+              color = cbPalette[6], size = 5, family = "latex") + 
+  
+  # TRADITIONAL: gain vs loss
+  geom_segment(data = subset(study1.perceived.complex.mean.df, condition.label == "TRADITIONAL"),
+             aes(x = 1, xend = 1, yend = (study1.perceived.complex.mean.df %>% 
+                                            subset(condition.label == "TRADITIONAL" & resource == "gain") %>%
+                                            pull(mean)) , y = 45),
+             color = cbPalette[6], linewidth = 0.75, arrow = arrow_single) + 
+  geom_segment(data = subset(study1.perceived.complex.mean.df, condition.label == "TRADITIONAL"),
+               aes(x = 1, xend = 2, y = 45 , yend = 45),
+               color = cbPalette[6], linewidth = 0.75) +  
+  geom_segment(data = subset(study1.perceived.complex.mean.df, condition.label == "TRADITIONAL"),
+               aes(x = 2, xend = 2, yend = (study1.perceived.complex.mean.df %>% 
+                                              subset(condition.label == "TRADITIONAL" & resource == "loss") %>%
+                                              pull(mean)) , y = 45),
+               color = cbPalette[6], linewidth = 0.75, arrow = arrow_single)+
+  geom_text(data = subset(study1.perceived.complex.mean.df, condition.label == "TRADITIONAL"),
+            aes(x = 1.5, y = 47, label = paste0("H2b ", sigstars.study1$h2b.complex.perceived)),
+            color = cbPalette[6], size = 5, family = "latex")
+
+print(p.study1.perceived.complex.mean)
+
+# Save the plot to a PDF file
+ggsave(file.path(artwork.dir, "p.study1.perceived.simple.mean.pdf"), plot = p.study1.perceived.simple.mean, width = 20, height = 20, units = "cm") 
+ggsave(file.path(artwork.dir, "p.study1.perceived.complex.mean.pdf"), plot = p.study1.perceived.complex.mean, width = 20, height = 20, units = "cm")
+
+
+################################
+#
 #   STUDY 2
 #
 ################################
@@ -698,14 +846,450 @@ p.study3.perceived.mean <- create.mean.plot(study3.perceived.mean.df, sigstars.s
 
 print(p.study3.perceived.mean)
 
+############################
+#
+# H4: The stress increase associated with the loss of digital resources is larger than the stress increase associated with the loss of traditional resources. 
+#
+############################
+# Cortisol
+study3.cortisol.delta.df <- study3.final.df %>%
+  filter(resource %in% c("gain", "loss")) %>%
+  select(participant.id, condition.label, resource, AUCi.cortisol) %>%
+  pivot_wider(names_from = resource, values_from = AUCi.cortisol) %>%
+  mutate(
+    delta.loss = loss - gain
+  ) %>% 
+  group_by(condition.label) %>%
+  reframe(
+    mean.delta.loss = mean(delta.loss, na.rm = TRUE),
+    std.err.delta.loss = sd(delta.loss, na.rm = TRUE) / sqrt(n()),
+    sd.delta.loss = sd(delta.loss, na.rm = TRUE),
+    n.delta.loss = n(),
+    
+    .groups = "drop"
+  )
+
+# Compute comparison bars directly from study2.cortisol.df
+study3.cortisol.delta.coordinate.df <- study3.cortisol.mean.df %>%
+  filter(resource %in% c("gain", "loss")) %>%
+  select(condition.label, resource, mean, std.err) %>%
+  pivot_wider(names_from = resource, values_from = c(mean, std.err)) %>%
+  mutate(
+    # Calculate difference bar positions (for gain vs loss)
+    diffbar.gain.loss.xmin = 1.25,
+    diffbar.gain.loss.xmax = 1.75,
+    diffbar.gain.loss.ymin = pmin(mean_gain, mean_loss),
+    diffbar.gain.loss.ymax = pmax(mean_gain, mean_loss)
+  ) %>%
+  left_join(
+    study3.cortisol.delta.df %>%
+      select(condition.label,
+             se.gain.loss = std.err.delta.loss),
+    by = "condition.label"
+  )
+
+study3.cortisol.mean.df <- study3.cortisol.mean.df %>%
+  mutate(
+    x = factor(paste(resource, condition.label, sep = "_"),
+               levels = c("gain_DIGITAL", "loss_DIGITAL",
+                          "gain_TRADITIONAL", "loss_TRADITIONAL")),
+    x.label = c("gain", "loss", "gain", "loss")  # 4 in total
+  )
+
+# Plot delta
+p.study3.cortisol.delta <-  
+  ggplot(study3.cortisol.mean.df,
+         aes(x = x, y = mean, fill = condition.label)) +
+  
+  # Standard bar plot (no error bars)
+  geom_bar(stat = "identity", 
+           color = cbPalette[2], 
+           position = position_dodge(width = 0.9), 
+           alpha = 0.5) +
+  
+  scale_fill_manual(values = c("DIGITAL" = cbPalette[1], "TRADITIONAL" = cbPalette[1]), guide = "none") +
+  
+  scale_x_discrete(labels = setNames(study3.cortisol.mean.df$x.label, #Labels
+                                     study3.cortisol.mean.df$x)) +
+  
+  labs(x = "", y = expression(AUCi[cortisol])) +
+  
+  theme(panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.background = element_blank(),
+        strip.background = element_blank(),
+        strip.placement = "outside",
+        strip.text.x = element_text(size = 20, face = "bold"), 
+        axis.line = element_line(colour = "black"),
+        plot.title = element_text(size = 26, face = "bold", hjust = 0.5),
+        text = element_text(size = 24, family = "latex")) +
+  
+  #Digital
+  #Difference bar (gain to loss) 
+  geom_rect(data = subset(study3.cortisol.delta.coordinate.df, condition.label == "DIGITAL"),
+            aes(xmin = 1.25, xmax = 1.75,
+                ymin = diffbar.gain.loss.ymin, ymax = diffbar.gain.loss.ymax),
+            fill = cbPalette[2], color = "black", inherit.aes = FALSE) + 
+  geom_errorbar(data = subset(study3.cortisol.delta.coordinate.df, condition.label == "DIGITAL"),
+                aes(x = (1.25 + 1.75)/2,
+                    ymin = diffbar.gain.loss.ymax - se.gain.loss,
+                    ymax = diffbar.gain.loss.ymax + se.gain.loss),
+                width = 0.1, inherit.aes = FALSE) +
+
+  
+  #Traditional
+  #Difference bar (gain to loss) 
+  geom_rect(data = subset(study3.cortisol.delta.coordinate.df, condition.label == "TRADITIONAL"),
+            aes(xmin = 3.25, xmax = 3.75,
+                ymin = diffbar.gain.loss.ymin, ymax = diffbar.gain.loss.ymax),
+            fill = cbPalette[2], color = "black", inherit.aes = FALSE) + 
+  geom_errorbar(data = subset(study3.cortisol.delta.coordinate.df, condition.label == "TRADITIONAL"),
+                aes(x = (3.25 + 3.75)/2,
+                    ymin = diffbar.gain.loss.ymax - se.gain.loss,
+                    ymax = diffbar.gain.loss.ymax + se.gain.loss),
+                width = 0.1, inherit.aes = FALSE) +
+  
+  # H4: loss-gain (DIGITAL vs TRADITIONAL)
+  geom_segment(aes(x = 1.5, xend = 3.5, y = 0.05, yend = 0.05),
+               color = cbPalette[7], linewidth = 0.75, inherit.aes = FALSE) +
+  geom_segment(aes(x = 1.5, xend = 1.5, y = 0.05, yend = study3.cortisol.mean.df$mean[study3.cortisol.mean.df$x == "loss_DIGITAL"]),
+               color = cbPalette[7], linewidth = 0.75, arrow = arrow_single, inherit.aes = FALSE) +
+  geom_segment(aes(x = 3.5, xend = 3.5, y = 0.05, yend = study3.cortisol.mean.df$mean[study3.cortisol.mean.df$x == "loss_TRADITIONAL"]),
+               color = cbPalette[7], linewidth = 0.75, arrow = arrow_single, inherit.aes = FALSE) +
+  geom_text(aes(x = 2.5, y = 0.06,
+                label = paste0("H4 ", sigstars.study3$h4.cortisol)),
+            color = cbPalette[7], size = 5, family = "latex", inherit.aes = FALSE)  +
+  
+  annotate("text", x = 1.5, y = -0.225, 
+                         label = "DIGITAL", size = 6, fontface = "bold", family = "latex") +
+  annotate("text", x = 3.5, y = -0.225, 
+                         label = "TRADITIONAL", size = 6, fontface = "bold", family = "latex") 
+
+print(p.study3.cortisol.delta)
+
+# perceived
+study3.perceived.delta.df <- study3.final.df %>%
+  filter(resource %in% c("gain", "loss")) %>%
+  select(participant.id, condition.label, resource, AUCi.perceived) %>%
+  pivot_wider(names_from = resource, values_from = AUCi.perceived) %>%
+  mutate(
+    delta.loss = loss - gain
+  ) %>% 
+  group_by(condition.label) %>%
+  reframe(
+    mean.delta.loss = mean(delta.loss, na.rm = TRUE),
+    std.err.delta.loss = sd(delta.loss, na.rm = TRUE) / sqrt(n()),
+    sd.delta.loss = sd(delta.loss, na.rm = TRUE),
+    n.delta.loss = n(),
+    
+    .groups = "drop"
+  )
+
+# Compute comparison bars directly from study2.perceived.df
+study3.perceived.delta.coordinate.df <- study3.perceived.mean.df %>%
+  filter(resource %in% c("gain", "loss")) %>%
+  select(condition.label, resource, mean, std.err) %>%
+  pivot_wider(names_from = resource, values_from = c(mean, std.err)) %>%
+  mutate(
+    # Calculate difference bar positions (for gain vs loss)
+    diffbar.gain.loss.xmin = 1.25,
+    diffbar.gain.loss.xmax = 1.75,
+    diffbar.gain.loss.ymin = pmin(mean_gain, mean_loss),
+    diffbar.gain.loss.ymax = pmax(mean_gain, mean_loss)
+  ) %>%
+  left_join(
+    study3.perceived.delta.df %>%
+      select(condition.label,
+             se.gain.loss = std.err.delta.loss),
+    by = "condition.label"
+  )
+
+study3.perceived.mean.df <- study3.perceived.mean.df %>%
+  mutate(
+    x = factor(paste(resource, condition.label, sep = "_"),
+               levels = c("gain_DIGITAL", "loss_DIGITAL",
+                          "gain_TRADITIONAL", "loss_TRADITIONAL")),
+    x.label = c("gain", "loss", "gain", "loss")  # 4 in total
+  )
+
+# Plot delta
+p.study3.perceived.delta <-  
+  ggplot(study3.perceived.mean.df,
+         aes(x = x, y = mean, fill = condition.label)) +
+  
+  # Standard bar plot (no error bars)
+  geom_bar(stat = "identity", 
+           color = cbPalette[2], 
+           position = position_dodge(width = 0.9), 
+           alpha = 0.5) +
+  
+  scale_fill_manual(values = c("DIGITAL" = cbPalette[1], "TRADITIONAL" = cbPalette[1]), guide = "none") +
+  
+  scale_x_discrete(labels = setNames(study3.perceived.mean.df$x.label, #Labels
+                                     study3.perceived.mean.df$x)) +
+  
+  labs(x = "", y = expression(AUCi[perceived])) +
+  
+  theme(panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.background = element_blank(),
+        strip.background = element_blank(),
+        strip.placement = "outside",
+        strip.text.x = element_text(size = 20, face = "bold"), 
+        axis.line = element_line(colour = "black"),
+        plot.title = element_text(size = 26, face = "bold", hjust = 0.5),
+        text = element_text(size = 24, family = "latex")) +
+  
+  #Digital
+  #Difference bar (gain to loss) 
+  geom_rect(data = subset(study3.perceived.delta.coordinate.df, condition.label == "DIGITAL"),
+            aes(xmin = 1.25, xmax = 1.75,
+                ymin = diffbar.gain.loss.ymin, ymax = diffbar.gain.loss.ymax),
+            fill = cbPalette[2], color = "black", inherit.aes = FALSE) + 
+  geom_errorbar(data = subset(study3.perceived.delta.coordinate.df, condition.label == "DIGITAL"),
+                aes(x = (1.25 + 1.75)/2,
+                    ymin = diffbar.gain.loss.ymax - se.gain.loss,
+                    ymax = diffbar.gain.loss.ymax + se.gain.loss),
+                width = 0.1, inherit.aes = FALSE) +
+  
+  
+  #Traditional
+  #Difference bar (gain to loss) 
+  geom_rect(data = subset(study3.perceived.delta.coordinate.df, condition.label == "TRADITIONAL"),
+            aes(xmin = 3.25, xmax = 3.75,
+                ymin = diffbar.gain.loss.ymin, ymax = diffbar.gain.loss.ymax),
+            fill = cbPalette[2], color = "black", inherit.aes = FALSE) + 
+  geom_errorbar(data = subset(study3.perceived.delta.coordinate.df, condition.label == "TRADITIONAL"),
+                aes(x = (3.25 + 3.75)/2,
+                    ymin = diffbar.gain.loss.ymax - se.gain.loss,
+                    ymax = diffbar.gain.loss.ymax + se.gain.loss),
+                width = 0.1, inherit.aes = FALSE) +
+  
+  # H4: loss-gain (DIGITAL vs TRADITIONAL)
+  geom_segment(aes(x = 1.5, xend = 3.5, y = 7, yend = 7),
+               color = cbPalette[7], linewidth = 0.75, inherit.aes = FALSE) +
+  geom_segment(aes(x = 1.5, xend = 1.5, y = 7, yend = study3.perceived.mean.df$mean[study3.perceived.mean.df$x == "loss_DIGITAL"]),
+               color = cbPalette[7], linewidth = 0.75, arrow = arrow_single, inherit.aes = FALSE) +
+  geom_segment(aes(x = 3.5, xend = 3.5, y = 7, yend = study3.perceived.mean.df$mean[study3.perceived.mean.df$x == "loss_TRADITIONAL"]),
+               color = cbPalette[7], linewidth = 0.75, arrow = arrow_single, inherit.aes = FALSE) +
+  geom_text(aes(x = 2.5, y = 7.5,
+                label = paste0("H4 ", sigstars.study3$h4.perceived)),
+            color = cbPalette[7], size = 5, family = "latex", inherit.aes = FALSE) +
+  
+  annotate("text", x = 1.5, y = -9, 
+           label = "DIGITAL", size = 6, fontface = "bold", family = "latex") +
+  annotate("text", x = 3.5, y = -9, 
+           label = "TRADITIONAL", size = 6, fontface = "bold", family = "latex") 
+
+print(p.study3.perceived.delta)
+
 # Save the plot to a PDF file
 ggsave(file.path(artwork.dir, "p.study3.cortisol.mean.pdf"), plot = p.study3.cortisol.mean, width = 20, height = 20, units = "cm") 
 ggsave(file.path(artwork.dir, "p.study3.perceived.mean.pdf"), plot = p.study3.perceived.mean, width = 20, height = 20, units = "cm")
+ggsave(file.path(artwork.dir, "p.study3.cortisol.delta.pdf"), plot = p.study3.cortisol.delta, width = 20, height = 20, units = "cm") 
+ggsave(file.path(artwork.dir, "p.study3.perceived.delta.pdf"), plot = p.study3.perceived.delta, width = 20, height = 20, units = "cm")
 
-remove(study3.cortisol.mean.df, study3.perceived.mean.df) # clean workspace
+remove(study3.cortisol.delta.df, study3.perceived.delta.df, study3.cortisol.delta.coordinate.df, study3.perceived.delta.coordinate.df) # clean workspace
 
 ################################
 #
 #   STUDY 4
 #
 ################################
+
+# Apply to whole list
+sigstars.study4 <- lapply(pvals.study4, get.significance.stars)
+
+# Cortisol
+study4.cortisol.mean.df <- study4.final.df %>%
+  filter(resource %in% c("digital", "traditional")) %>%
+  group_by(resource) %>%
+  reframe(
+    mean = mean(AUCi.cortisol, na.rm = TRUE),
+    std.err = sd(AUCi.cortisol, na.rm = TRUE) / sqrt(n()),
+    sd = sd(AUCi.cortisol, na.rm = TRUE),
+    n = n(),
+    .groups = "drop"
+  ) %>% 
+  mutate(
+    x = factor(paste(resource),
+               levels = c("digital", "traditional")),
+    x.label = c("\nDIGITAL", "\nTRADITIONAL"),  # 2 in total
+    condition.label = c("DIGITAL", "TRADITIONAL")
+  )
+
+combined.cortisol.df <- bind_rows(study4.cortisol.mean.df, study3.cortisol.mean.df)
+
+# Plot mean
+p.study4.cortisol <-  
+  ggplot(combined.cortisol.df,
+         aes(x = x, y = mean, fill = condition.label)) +
+  
+  # Standard bar plot (no error bars)
+  geom_bar(stat = "identity", 
+           color = cbPalette[4], 
+           position = position_dodge(width = 0.9), 
+           alpha = 0.5) +
+  
+  geom_errorbar(aes(ymin = mean - std.err, ymax = mean + std.err),
+                width = 0.2, position = position_dodge(width = 0.9)) +
+  
+  scale_fill_manual(values = c("DIGITAL" = cbPalette[2], "TRADITIONAL" = cbPalette[2]), guide = "none") +
+  
+  scale_x_discrete(labels = setNames(combined.cortisol.df$x.label, #Labels
+                                     combined.cortisol.df$x)) +
+  
+  labs(x = "", y = expression(AUCi[cortisol])) +
+  
+  theme(panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.background = element_blank(),
+        strip.background = element_blank(),
+        strip.placement = "outside",
+        strip.text.x = element_text(size = 20, face = "bold"), 
+        axis.line = element_line(colour = "black"),
+        plot.title = element_text(size = 26, face = "bold", hjust = 0.5),
+        text = element_text(size = 24, family = "latex")) +
+  
+  annotate("segment", x = 1, xend = 2, y = 0.014, yend = 0.014,
+               color = cbPalette[7], linewidth = 0.75) +
+  annotate("segment", x = 1, xend = 1, y = 0.014, yend = combined.cortisol.df$mean[combined.cortisol.df$x== "digital"],
+               color = cbPalette[7], linewidth = 0.75, arrow = arrow_single) +
+  annotate("segment", x = 2, xend = 2, y = 0.014, yend = combined.cortisol.df$mean[combined.cortisol.df$x == "traditional"],
+               color = cbPalette[7], linewidth = 0.75, arrow = arrow_single) +
+  annotate("text", x = 1.5, y = 0.02,
+                label = paste0(sigstars.study4$cortisol),
+            color = cbPalette[7], size = 5, family = "latex") +
+  
+  annotate("segment", x = 3, xend = 4, y = 0.014, yend = 0.014,
+           color = cbPalette[7], linewidth = 0.75) +
+  annotate("segment", x = 3, xend = 3, y = 0.014, yend = combined.cortisol.df$mean[combined.cortisol.df$x== "gain_DIGITAL"],
+           color = cbPalette[7], linewidth = 0.75, arrow = arrow_single) +
+  annotate("segment", x = 4, xend = 4, y = 0.014, yend = combined.cortisol.df$mean[combined.cortisol.df$x == "loss_DIGITAL"],
+           color = cbPalette[7], linewidth = 0.75, arrow = arrow_single) +
+  annotate("text", x = 3.5, y = 0.02,
+           label = paste0(sigstars.study3$h1b.cortisol),
+           color = cbPalette[7], size = 5, family = "latex") +
+  
+  annotate("segment", x = 5, xend = 6, y = 0.014, yend = 0.014,
+           color = cbPalette[7], linewidth = 0.75) +
+  annotate("segment", x = 5, xend = 5, y = 0.014, yend = combined.cortisol.df$mean[combined.cortisol.df$x== "gain_TRADITIONAL"],
+           color = cbPalette[7], linewidth = 0.75, arrow = arrow_single) +
+  annotate("segment", x = 6, xend = 6, y = 0.014, yend = combined.cortisol.df$mean[combined.cortisol.df$x == "loss_TRADITIONAL"],
+           color = cbPalette[7], linewidth = 0.75, arrow = arrow_single) +
+  annotate("text", x = 5.5, y = 0.02,
+           label = paste0(sigstars.study3$h2b.cortisol),
+           color = cbPalette[7], size = 5, family = "latex") +
+  
+  annotate("segment", x = 2, xend = 4, y = 0.04, yend = 0.04,
+           color = cbPalette[7], linewidth = 0.75) +
+  annotate("segment", x = 2, xend = 2, y = 0.04, yend = combined.cortisol.df$mean[combined.cortisol.df$x== "traditional"],
+           color = cbPalette[7], linewidth = 0.75, arrow = arrow_single) +
+  annotate("segment", x = 4, xend = 4, y = 0.04, yend = combined.cortisol.df$mean[combined.cortisol.df$x == "loss_DIGITAL"],
+           color = cbPalette[7], linewidth = 0.75, arrow = arrow_single) +
+  annotate("text", x = 3, y = 0.05,
+           label = paste0(sigstars.study4$traditionalvslossdigital.cortisol),
+           color = cbPalette[7], size = 5, family = "latex")
+
+print(p.study4.cortisol)
+
+# perceived
+study4.perceived.mean.df <- study4.final.df %>%
+  filter(resource %in% c("digital", "traditional")) %>%
+  group_by(resource) %>%
+  reframe(
+    mean = mean(AUCi.perceived, na.rm = TRUE),
+    std.err = sd(AUCi.perceived, na.rm = TRUE) / sqrt(n()),
+    sd = sd(AUCi.perceived, na.rm = TRUE),
+    n = n(),
+    .groups = "drop"
+  ) %>% 
+  mutate(
+    x = factor(paste(resource),
+               levels = c("digital", "traditional")),
+    x.label = c("\nDIGITAL", "\nTRADITIONAL"),  # 2 in total
+    condition.label = c("DIGITAL", "TRADITIONAL")
+  )
+
+study3.perceived.mean.df <- study3.perceived.mean.df %>%
+  mutate(
+    x = factor(paste(resource, condition.label, sep = "_"),
+               levels = c("gain_DIGITAL", "loss_DIGITAL",
+                          "gain_TRADITIONAL", "loss_TRADITIONAL")),
+    x.label = c("gain", "loss", "gain", "loss")
+  )
+
+combined.perceived.df <- bind_rows(study4.perceived.mean.df, study3.perceived.mean.df)
+
+# Plot mean
+p.study4.perceived <-  
+  ggplot(combined.perceived.df,
+         aes(x = x, y = mean, fill = condition.label)) +
+  
+  # Standard bar plot (no error bars)
+  geom_bar(stat = "identity", 
+           color = cbPalette[4], 
+           position = position_dodge(width = 0.9), 
+           alpha = 0.5) +
+  
+  geom_errorbar(aes(ymin = mean - std.err, ymax = mean + std.err),
+                width = 0.2, position = position_dodge(width = 0.9)) +
+  
+  scale_fill_manual(values = c("DIGITAL" = cbPalette[2], "TRADITIONAL" = cbPalette[2]), guide = "none") +
+  
+  scale_x_discrete(labels = setNames(combined.cortisol.df$x.label, #Labels
+                                     combined.cortisol.df$x)) +
+  
+  labs(x = "", y = expression(AUCi[perceived])) +
+  
+  theme(panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.background = element_blank(),
+        strip.background = element_blank(),
+        strip.placement = "outside",
+        strip.text.x = element_text(size = 20, face = "bold"), 
+        axis.line = element_line(colour = "black"),
+        plot.title = element_text(size = 26, face = "bold", hjust = 0.5),
+        text = element_text(size = 24, family = "latex")) +
+  
+  annotate("segment", x = 1, xend = 2, y = 6, yend = 6,
+           color = cbPalette[7], linewidth = 0.75) +
+  annotate("segment", x = 1, xend = 1, y = 6, yend = combined.perceived.df$mean[combined.perceived.df$resource== "digital"],
+           color = cbPalette[7], linewidth = 0.75, arrow = arrow_single) +
+  annotate("segment", x = 2, xend = 2, y = 6, yend = combined.perceived.df$mean[combined.perceived.df$resource == "traditional"],
+           color = cbPalette[7], linewidth = 0.75, arrow = arrow_single) +
+  annotate("text", x = 1.5, y = 6.5,
+           label = paste0(sigstars.study4$perceived),
+           color = cbPalette[7], size = 5, family = "latex") +
+  
+  annotate("segment", x = 3, xend = 4, y = 6, yend = 6,
+           color = cbPalette[7], linewidth = 0.75) +
+  annotate("segment", x = 3, xend = 3, y = 6, yend = combined.perceived.df$mean[combined.perceived.df$resource == "gain" & combined.perceived.df$condition.label == "DIGITAL"],
+           color = cbPalette[7], linewidth = 0.75, arrow = arrow_single) +
+  annotate("segment", x = 4, xend = 4, y = 6, yend = combined.perceived.df$mean[combined.perceived.df$resource == "loss" & combined.perceived.df$condition.label == "DIGITAL"],
+           color = cbPalette[7], linewidth = 0.75, arrow = arrow_single) +
+  annotate("text", x = 3.5, y = 6.5,
+           label = paste0(sigstars.study3$h1b.perceived),
+           color = cbPalette[7], size = 5, family = "latex") +
+  
+  annotate("segment", x = 5, xend = 6, y = 6, yend = 6,
+           color = cbPalette[7], linewidth = 0.75) +
+  annotate("segment", x = 5, xend = 5, y = 6, yend = combined.perceived.df$mean[combined.perceived.df$resource == "gain" & combined.perceived.df$condition.label == "TRADITIONAL"],
+           color = cbPalette[7], linewidth = 0.75, arrow = arrow_single) +
+  annotate("segment", x = 6, xend = 6, y = 6, yend = combined.perceived.df$mean[combined.perceived.df$resource == "loss" & combined.perceived.df$condition.label == "TRADITIONAL"],
+           color = cbPalette[7], linewidth = 0.75, arrow = arrow_single) +
+  annotate("text", x = 5.5, y = 6.5,
+           label = paste0(sigstars.study3$h2b.perceived),
+           color = cbPalette[7], size = 5, family = "latex") #+
+  
+  annotate("segment", x = 2, xend = 4, y = 7.5, yend = 7.5,
+           color = cbPalette[7], linewidth = 0.75) +
+  annotate("segment", x = 2, xend = 2, y = 7.5, yend = combined.perceived.df$mean[combined.perceived.df$resource == "traditional"],
+           color = cbPalette[7], linewidth = 0.75, arrow = arrow_single) +
+  annotate("segment", x = 4, xend = 4, y = 7.5, yend = combined.perceived.df$mean[combined.perceived.df$resource == "loss" & combined.perceived.df$condition.label == "DIGITAL"],
+           color = cbPalette[7], linewidth = 0.75, arrow = arrow_single) +
+  annotate("text", x = 3, y = 8,
+           label = paste0(sigstars.study4$traditionalvslossdigital.perceived),
+           color = cbPalette[7], size = 5, family = "latex")
+
+print(p.study4.perceived)

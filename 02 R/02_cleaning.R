@@ -35,6 +35,27 @@ compute.AUCi <- function(time, measure) {
   return(AUCi)
 }
 
+
+###############################
+#
+#   clean and prepare study 1 data frame
+#
+###############################
+
+#Survey data frame
+study1.final.df <- study1.raw.df %>% 
+  mutate(condition = case_when(
+    treatment == "AR" ~ "Digital",
+    treatment == "paper" ~ "Traditional",
+    TRUE ~ "unknown"
+  )) %>% 
+  mutate(resource = case_when(
+    instruction == "with" ~ "gain",
+    instruction == "without" ~ "loss",
+    TRUE ~ "unknown"
+  )) %>%
+  select(-instruction, -treatment) 
+
 ###############################
 #
 #   clean and prepare study 2 data frame
@@ -471,5 +492,4 @@ remove(AUCg.results.cortisol, AUCg.results.perceived, AUCi.results.cortisol, AUC
 #
 ###############################
 
-save(list = c("study2.final.df","study3.final.df","study4.final.df"), file = "./02 RData/analysis.RData")
-
+save(list = c("study1.final.df","study2.final.df","study3.final.df","study4.final.df"), file = "./02 RData/analysis.RData")
