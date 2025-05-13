@@ -10,7 +10,7 @@ if(dir.exists(file.path(mrunal.wd, "."))){
 } 
 
 if(dir.exists(file.path(michela.wd, "."))){
-    setwd(david.wd)
+    setwd(michela.wd)
     github.dir = " "
 }
 

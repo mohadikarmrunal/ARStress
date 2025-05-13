@@ -163,8 +163,7 @@ create.mean.plot <- function(summary.df, sigstars, y.label, measure.label) {
           axis.line = element_line(colour = "black"),
           plot.title = element_text(size = 26, face = "bold", hjust = 0.5),
           text = element_text(size = 24, family = "latex")) +
-    facet_grid(. ~ condition.label, switch = "x") +
-    add.mean.hypothesis.annotations(summary.df, sigstars, measure.label)
+    facet_grid(. ~ condition.label, switch = "x") 
 }
 
 create.mean.plot <- function(summary.df, sigstars, y.label, measure.label) {
@@ -310,7 +309,7 @@ p.study1.perceived.complex.mean <-
         axis.line = element_line(colour = "black"),
         plot.title = element_text(size = 26, face = "bold", hjust = 0.5),
         text = element_text(size = 24, family = "latex")) +
-  facet_grid(. ~ condition.label, switch = "x") +
+  facet_grid(. ~ condition.label, switch = "x") 
   
     # DIGITAL: gain vs loss
     geom_segment(data = subset(study1.perceived.complex.mean.df, condition.label == "DIGITAL"),
@@ -328,7 +327,7 @@ p.study1.perceived.complex.mean <-
                color = cbPalette[6], linewidth = 0.75, arrow = arrow_single)+
     geom_text(data = subset(study1.perceived.complex.mean.df, condition.label == "DIGITAL"),
               aes(x = 1.5, y = 47, label = paste0("H1b ", sigstars.study1$h1b.complex.perceived)),
-              color = cbPalette[6], size = 5, family = "latex") + 
+              color = cbPalette[6], size = 5, family = "latex") +
   
   # TRADITIONAL: gain vs loss
   geom_segment(data = subset(study1.perceived.complex.mean.df, condition.label == "TRADITIONAL"),
