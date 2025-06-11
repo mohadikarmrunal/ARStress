@@ -18,6 +18,13 @@ likert.4.labels <- c(
 
 # Function to compute AUCg (Area Under the Curve - Ground)
 compute.AUCg <- function(time, measure) {
+  # Remove time/measure pairs where measure is NA
+  valid <- !is.na(measure) & !is.na(time)
+  time <- time[valid]
+  measure <- measure[valid]
+  
+  if (length(time) < 2) return(NA)# Need at least 2 points to compute AUC
+  
   AUCg <- 0
   for (i in 1:(length(time) - 1)) {     
     delta.time <- as.numeric(difftime(time[i + 1], time[i], units = "hours"))  # Convert difftime to numeric (in hours)
@@ -29,6 +36,15 @@ compute.AUCg <- function(time, measure) {
 
 # Function to compute AUCi (Area Under the Curve - Increase)
 compute.AUCi <- function(time, measure) {
+  # Remove NA pairs, but ensure first value is available
+  if (is.na(measure[1]) | is.na(time[1])) return(NA)
+  
+  valid <- !is.na(measure) & !is.na(time)
+  time <- time[valid]
+  measure <- measure[valid]
+  
+  if (length(time) < 2) return(NA) # Need at least 2 points to compute AUC
+  
   AUCg <- compute.AUCg(time, measure)  # Get the AUCg
   total.time <- as.numeric(difftime(time[length(time)], time[1], units = "hours"))  # Total time interval in hours
   AUCi <- AUCg - measure[1] * total.time  # Subtract the baseline area
@@ -193,9 +209,9 @@ study2.final.df <- AUCi.results.cortisol %>%
   left_join(AUCg.results.cortisol, by = c("participant.id", "resource")) %>%
   left_join(AUCg.results.perceived, by = c("participant.id", "resource")) %>%
   left_join(study2.wide.df, by = c("participant.id", "resource")) %>%
-  group_by(participant.id) %>%
-  filter(!any(is.na(AUCi.cortisol) | is.na(AUCi.perceived))) %>%            #Remove participants for whom there is NA
-  ungroup() %>%
+ # group_by(participant.id) %>%
+#  filter(!any(is.na(AUCi.cortisol) | is.na(AUCi.perceived))) %>%            #Remove participants for whom there is NA
+#  ungroup() %>%
   select(-matches("^\\.groups")) %>% 
   mutate(resource = factor(resource, levels = c("lack", "gain", "loss"))) %>%  # Set correct resource order
   arrange(participant.id, resource)
@@ -316,6 +332,7 @@ AUCg.results.perceived <- study3.long.df %>%
   reframe(AUCg.perceived = compute.AUCg(time, perceived), .groups = "drop")
 
 AUCi.results.perceived <- study3.long.df %>%
+  filter(resource != "baseline") %>%
   group_by(participant.id, resource) %>%
   reframe(AUCi.perceived = compute.AUCi(time, perceived), .groups = "drop")
 
@@ -335,11 +352,17 @@ study3.final.df <- AUCi.results.cortisol %>%
   left_join(AUCg.results.cortisol, by = c("participant.id", "resource")) %>%
   left_join(AUCg.results.perceived, by = c("participant.id", "resource")) %>%
   left_join(study3.wide.df, by = c("participant.id", "resource")) %>% 
-group_by(participant.id) %>%
-  filter(!any(is.na(AUCi.cortisol) | is.na(AUCi.perceived))) %>%            #Remove participants for whom there is NA
-  ungroup() %>%
+  mutate(
+    AUCi.cortisol = if_else(resource == "baseline", cortisol.log_T1, AUCi.cortisol),
+    AUCg.cortisol = if_else(resource == "baseline", cortisol.log_T1, AUCg.cortisol),
+    AUCi.perceived = if_else(resource == "baseline", perceived_T1, AUCi.perceived),
+    AUCg.perceived = if_else(resource == "baseline", perceived_T1, AUCg.perceived)
+  ) %>%
+ # group_by(participant.id) %>%
+#   filter(!any(is.na(AUCi.cortisol) | is.na(AUCi.perceived))) %>%            #Remove participants for whom there is NA
+#  ungroup() %>%
   select(-matches("^\\.groups")) %>% 
-  mutate(resource = factor(resource, levels = c("gain", "loss"))) %>%  # Set correct resource order
+  mutate(resource = factor(resource, levels = c("baseline", "gain", "loss"))) %>%  # Set correct resource order
   arrange(participant.id, resource)
 
 remove(AUCg.results.cortisol, AUCg.results.perceived, AUCi.results.cortisol, AUCi.results.perceived) # clean workspace
@@ -477,12 +500,19 @@ study4.final.df <- AUCi.results.cortisol %>%
   left_join(AUCg.results.cortisol, by = c("participant.id", "resource")) %>%
   left_join(AUCg.results.perceived, by = c("participant.id", "resource")) %>%
   left_join(study4.wide.df, by = c("participant.id", "resource"))%>% 
+  mutate(
+    AUCi.cortisol = if_else(resource == "baseline", cortisol.log_T1, AUCi.cortisol),
+    AUCg.cortisol = if_else(resource == "baseline", cortisol.log_T1, AUCg.cortisol),
+    AUCi.perceived = if_else(resource == "baseline", perceived_T1, AUCi.perceived),
+    AUCg.perceived = if_else(resource == "baseline", perceived_T1, AUCg.perceived)
+  ) %>%
   group_by(participant.id) %>%
   filter(!any(is.na(AUCi.cortisol) | is.na(AUCi.perceived))) %>%            #Remove participants for whom there is NA
   ungroup() %>%
   select(-matches("^\\.groups")) %>% 
-  mutate(resource = factor(resource, levels = c("digital", "traditional"))) %>%  # Set correct resource order
+  mutate(resource = factor(resource, levels = c("baseline", "digital", "traditional"))) %>%  # Set correct resource order
   arrange(participant.id, resource)
+
 
 remove(AUCg.results.cortisol, AUCg.results.perceived, AUCi.results.cortisol, AUCi.results.perceived) # clean workspace
 

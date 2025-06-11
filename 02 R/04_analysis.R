@@ -99,10 +99,12 @@ pvals.study1$h2b.complex.perceived <- t.test(
 #cortisol (supported)
 pvals.study2$h1a.cortisol <- t.test(
   study2.final.df %>% 
+    filter(participant.id != 801) %>%
     subset(resource == "lack")      %>%  # this is the task for hypothesis testing
     subset(condition == "Digital")     %>%  # condition in hypothesis
     pull(AUCi.cortisol),
   study2.final.df %>% 
+    filter(participant.id != 801) %>%
     subset(resource == "gain")      %>%  # this is the task for hypothesis testing
     subset(condition == "Digital")     %>%  # condition in hypothesis
     pull(AUCi.cortisol),
@@ -113,10 +115,12 @@ pvals.study2$h1a.cortisol <- t.test(
 #perceived (supported)
 pvals.study2$h1a.perceived <- t.test(
   study2.final.df %>% 
+    filter(participant.id != 103) %>%
     subset(resource == "lack")      %>%  # this is the task for hypothesis testing
     subset(condition == "Digital")     %>%  # condition in hypothesis
     pull(AUCi.perceived),
   study2.final.df %>% 
+    filter(participant.id != 103) %>%
     subset(resource == "gain")      %>%  # this is the task for hypothesis testing
     subset(condition == "Digital")     %>%  # condition in hypothesis
     pull(AUCi.perceived),
@@ -132,10 +136,12 @@ pvals.study2$h1a.perceived <- t.test(
 #Cortisol (supported)
 pvals.study2$h1b.cortisol <- t.test(
   study2.final.df %>% 
+    filter(participant.id != 801) %>%
     subset(resource == "loss")      %>%  # this is the task for hypothesis testing
     subset(condition == "Digital")     %>%  # condition in hypothesis
     pull(AUCi.cortisol),
   study2.final.df %>% 
+    filter(participant.id != 801) %>%
     subset(resource == "gain")      %>%  # this is the task for hypothesis testing
     subset(condition == "Digital")     %>%  # condition in hypothesis
     pull(AUCi.cortisol),
@@ -146,10 +152,12 @@ pvals.study2$h1b.cortisol <- t.test(
 #Perceived (not supported)
 pvals.study2$h1b.perceived <- t.test(
   study2.final.df %>% 
+    filter(participant.id != 103) %>%
     subset(resource == "loss")      %>%  # this is the task for hypothesis testing
     subset(condition == "Digital")     %>%  # condition in hypothesis
     pull(AUCi.perceived),
   study2.final.df %>% 
+    filter(participant.id != 103) %>%
     subset(resource == "gain")      %>%  # this is the task for hypothesis testing
     subset(condition == "Digital")     %>%  # condition in hypothesis
     pull(AUCi.perceived),
@@ -165,19 +173,23 @@ pvals.study2$h1b.perceived <- t.test(
 #cortisol (supported)
 pvals.study2$h1c.cortisol <- t.test(
   study2.final.df %>% 
+    filter(participant.id != 801) %>%
     subset(resource == "lack")      %>%  # 
     subset(condition == "Digital")     %>%  # condition in hypothesis
     pull(AUCi.cortisol)-
     study2.final.df %>% 
+    filter(participant.id != 801) %>%
     subset(resource == "gain")      %>%  #
     subset(condition == "Digital")     %>%  # condition in hypothesis
     pull(AUCi.cortisol)
   ,
   study2.final.df %>% 
+    filter(participant.id != 801) %>%
     subset(resource == "loss")      %>%  # Since gain is already -ve, that is why loss-(-gain)
     subset(condition == "Digital")     %>%  # condition in hypothesis
     pull(AUCi.cortisol)-
     study2.final.df %>% 
+    filter(participant.id != 801) %>%
     subset(resource == "gain")      %>%  #
     subset(condition == "Digital")     %>%  # condition in hypothesis
     pull(AUCi.cortisol),
@@ -188,19 +200,23 @@ pvals.study2$h1c.cortisol <- t.test(
 #perceived (supported)
 pvals.study2$h1c.perceived <- t.test(
   study2.final.df %>% 
+    filter(participant.id != 103) %>%
     subset(resource == "lack")      %>%  # 
     subset(condition == "Digital")     %>%  # condition in hypothesis
     pull(AUCi.perceived)-
-    study2.final.df %>% 
+  study2.final.df %>% 
+    filter(participant.id != 103) %>%
     subset(resource == "gain")      %>%  #
     subset(condition == "Digital")     %>%  # condition in hypothesis
     pull(AUCi.perceived)
   ,
   study2.final.df %>% 
+    filter(participant.id != 103) %>%
     subset(resource == "loss")      %>%  #
     subset(condition == "Digital")     %>%  # condition in hypothesis
     pull(AUCi.perceived)-
-    study2.final.df %>% 
+  study2.final.df %>% 
+    filter(participant.id != 103) %>%
     subset(resource == "gain")      %>%  #
     subset(condition == "Digital")     %>%  # condition in hypothesis
     pull(AUCi.perceived),
@@ -216,10 +232,12 @@ pvals.study2$h1c.perceived <- t.test(
 #cortisol (supported)
 pvals.study2$h2a.cortisol <- t.test(
   study2.final.df %>% 
+    filter(participant.id != 801) %>%
     subset(resource == "lack")      %>%  # this is the task for hypothesis testing
     subset(condition == "Traditional")     %>%  # condition in hypothesis
     pull(AUCi.cortisol),
   study2.final.df %>% 
+    filter(participant.id != 801) %>%
     subset(resource == "gain")      %>%  # this is the task for hypothesis testing
     subset(condition == "Traditional")     %>%  # condition in hypothesis
     pull(AUCi.cortisol),
@@ -230,10 +248,12 @@ pvals.study2$h2a.cortisol <- t.test(
 #perceived (supported)
 pvals.study2$h2a.perceived <- t.test(
   study2.final.df %>% 
+    filter(participant.id != 103) %>%
     subset(resource == "lack")      %>%  # this is the task for hypothesis testing
     subset(condition == "Traditional")     %>%  # condition in hypothesis
     pull(AUCi.perceived),
   study2.final.df %>% 
+    filter(participant.id != 103) %>%
     subset(resource == "gain")      %>%  # this is the task for hypothesis testing
     subset(condition == "Traditional")     %>%  # condition in hypothesis
     pull(AUCi.perceived),
@@ -249,10 +269,12 @@ pvals.study2$h2a.perceived <- t.test(
 #Cortisol (supported)
 pvals.study2$h2b.cortisol <- t.test(
   study2.final.df %>% 
+    filter(participant.id != 801) %>%
     subset(resource == "loss")      %>%  # this is the task for hypothesis testing
     subset(condition == "Traditional")     %>%  # condition in hypothesis
     pull(AUCi.cortisol),
   study2.final.df %>% 
+    filter(participant.id != 801) %>%
     subset(resource == "gain")      %>%  # this is the task for hypothesis testing
     subset(condition == "Traditional")     %>%  # condition in hypothesis
     pull(AUCi.cortisol),
@@ -263,10 +285,12 @@ pvals.study2$h2b.cortisol <- t.test(
 #perceived (not supported)
 pvals.study2$h2b.perceived <- t.test(
   study2.final.df %>% 
+    filter(participant.id != 103) %>%
     subset(resource == "loss")      %>%  # this is the task for hypothesis testing
     subset(condition == "Traditional")     %>%  # condition in hypothesis
     pull(AUCi.perceived),
   study2.final.df %>% 
+    filter(participant.id != 103) %>%
     subset(resource == "gain")      %>%  # this is the task for hypothesis testing
     subset(condition == "Traditional")     %>%  # condition in hypothesis
     pull(AUCi.perceived),
@@ -282,19 +306,23 @@ pvals.study2$h2b.perceived <- t.test(
 #cortisol (marginally supported)
 pvals.study2$h2c.cortisol <- t.test(
   study2.final.df %>% 
+    filter(participant.id != 801) %>%
     subset(resource == "lack")      %>%  # 
     subset(condition == "Traditional")     %>%  # condition in hypothesis
     pull(AUCi.cortisol)-
-    study2.final.df %>% 
+  study2.final.df %>% 
+    filter(participant.id != 801) %>%
     subset(resource == "gain")      %>%  #
     subset(condition == "Traditional")     %>%  # condition in hypothesis
     pull(AUCi.cortisol)
   ,
   study2.final.df %>% 
+    filter(participant.id != 801) %>%
     subset(resource == "loss")      %>%  # Since gain is already -ve, that is why loss-(-gain)
     subset(condition == "Traditional")     %>%  # condition in hypothesis
     pull(AUCi.cortisol)-
-    study2.final.df %>% 
+  study2.final.df %>% 
+    filter(participant.id != 801) %>%
     subset(resource == "gain")      %>%  #
     subset(condition == "Traditional")     %>%  # condition in hypothesis
     pull(AUCi.cortisol),
@@ -305,19 +333,23 @@ pvals.study2$h2c.cortisol <- t.test(
 #perceived (supported)
 pvals.study2$h2c.perceived <- t.test(
   study2.final.df %>% 
+    filter(participant.id != 103) %>%
     subset(resource == "lack")      %>%  # 
     subset(condition == "Traditional")     %>%  # condition in hypothesis
     pull(AUCi.perceived)-
-    study2.final.df %>% 
+  study2.final.df %>% 
+    filter(participant.id != 103) %>%
     subset(resource == "gain")      %>%  #
     subset(condition == "Traditional")     %>%  # condition in hypothesis
     pull(AUCi.perceived)
   ,
   study2.final.df %>% 
+    filter(participant.id != 103) %>%
     subset(resource == "loss")      %>%  #
     subset(condition == "Traditional")     %>%  # condition in hypothesis
     pull(AUCi.perceived) -
-    study2.final.df %>% 
+  study2.final.df %>% 
+    filter(participant.id != 103) %>%
     subset(resource == "gain")      %>%  #
     subset(condition == "Traditional")     %>%  # condition in hypothesis
     pull(AUCi.perceived),
@@ -334,19 +366,23 @@ pvals.study2$h2c.perceived <- t.test(
 #cortisol (not supported)
 pvals.study2$h3.cortisol <- t.test(
   study2.final.df %>% 
+    filter(participant.id != 801) %>%
     subset(resource == "lack")      %>%  # 
     subset(condition == "Digital")     %>%  # condition in hypothesis
     pull(AUCi.cortisol)-
-    study2.final.df %>% 
+  study2.final.df %>% 
+    filter(participant.id != 801) %>%
     subset(resource == "gain")      %>%  #
     subset(condition == "Digital")     %>%  # condition in hypothesis
     pull(AUCi.cortisol)
   ,
   study2.final.df %>% 
+    filter(participant.id != 801) %>%
     subset(resource == "lack")      %>%  # Since gain is already -ve, that is why loss-(-gain)
     subset(condition == "Traditional")     %>%  # condition in hypothesis
     pull(AUCi.cortisol)-
-    study2.final.df %>% 
+  study2.final.df %>% 
+    filter(participant.id != 801) %>%
     subset(resource == "gain")      %>%  #
     subset(condition == "Traditional")     %>%  # condition in hypothesis
     pull(AUCi.cortisol)
@@ -356,19 +392,23 @@ pvals.study2$h3.cortisol <- t.test(
 #perceived (not supported)
 pvals.study2$h3.perceived <- t.test(
   study2.final.df %>% 
+    filter(participant.id != 103) %>%
     subset(resource == "lack")      %>%  # 
     subset(condition == "Digital")     %>%  # condition in hypothesis
     pull(AUCi.perceived)-
-    study2.final.df %>% 
+  study2.final.df %>% 
+    filter(participant.id != 103) %>%
     subset(resource == "gain")      %>%  #
     subset(condition == "Digital")     %>%  # condition in hypothesis
     pull(AUCi.perceived)
   ,
   study2.final.df %>% 
+    filter(participant.id != 103) %>%
     subset(resource == "lack")      %>%  #
     subset(condition == "Traditional")     %>%  # condition in hypothesis
     pull(AUCi.perceived) -
-    study2.final.df %>% 
+  study2.final.df %>% 
+    filter(participant.id != 103) %>%
     subset(resource == "gain")      %>%  #
     subset(condition == "Traditional")     %>%  # condition in hypothesis
     pull(AUCi.perceived)
@@ -383,21 +423,25 @@ pvals.study2$h3.perceived <- t.test(
 #cortisol (not supported)
 pvals.study2$h4.cortisol <- t.test(
   study2.final.df %>% 
+    filter(participant.id != 801) %>%
     subset(resource == "loss")      %>%  # 
     subset(condition == "Digital")     %>%  # condition in hypothesis
     arrange(participant.id) %>%           # ensure matching order
     pull(AUCi.cortisol)-
-    study2.final.df %>% 
+  study2.final.df %>% 
+    filter(participant.id != 801) %>%
     subset(resource == "gain")      %>%  #
     subset(condition == "Digital")     %>%  # condition in hypothesis
     arrange(participant.id) %>%           # ensure matching order
     pull(AUCi.cortisol)
   ,
   study2.final.df %>% 
+    filter(participant.id != 801) %>%
     subset(resource == "loss")      %>%  # Since gain is already -ve, that is why loss-(-gain)
     subset(condition == "Traditional")     %>%  # condition in hypothesis
     pull(AUCi.cortisol)-
-    study2.final.df %>% 
+  study2.final.df %>% 
+    filter(participant.id != 801) %>%
     subset(resource == "gain")      %>%  #
     subset(condition == "Traditional")     %>%  # condition in hypothesis
     pull(AUCi.cortisol),
@@ -407,19 +451,23 @@ pvals.study2$h4.cortisol <- t.test(
 #perceived (not supported)
 pvals.study2$h4.perceived <- t.test(
   study2.final.df %>% 
+    filter(participant.id != 103) %>%
     subset(resource == "loss")      %>%  # 
     subset(condition == "Digital")     %>%  # condition in hypothesis
     pull(AUCi.perceived)-
-    study2.final.df %>% 
+  study2.final.df %>% 
+    filter(participant.id != 103) %>%
     subset(resource == "gain")      %>%  #
     subset(condition == "Digital")     %>%  # condition in hypothesis
     pull(AUCi.perceived)
   ,
   study2.final.df %>% 
+    filter(participant.id != 103) %>%
     subset(resource == "loss")      %>%  #
     subset(condition == "Traditional")     %>%  # condition in hypothesis
     pull(AUCi.perceived) -
-    study2.final.df %>% 
+  study2.final.df %>% 
+    filter(participant.id != 103) %>%
     subset(resource == "gain")      %>%  #
     subset(condition == "Traditional")     %>%  # condition in hypothesis
     pull(AUCi.perceived),
@@ -441,10 +489,12 @@ pvals.study2$h4.perceived <- t.test(
 #Cortisol (supported)
 pvals.study3$h1b.cortisol <- t.test(
   study3.final.df %>% 
+    filter(!participant.id %in% c(394, 451)) %>%
     subset(resource == "loss")      %>%  # this is the task for hypothesis testing
     subset(condition == "Digital")     %>%  # condition in hypothesis
     pull(AUCi.cortisol),
   study3.final.df %>% 
+    filter(!participant.id %in% c(394, 451)) %>%
     subset(resource == "gain")      %>%  # this is the task for hypothesis testing
     subset(condition == "Digital")     %>%  # condition in hypothesis
     pull(AUCi.cortisol),
@@ -455,10 +505,12 @@ pvals.study3$h1b.cortisol <- t.test(
 #Perceived (supported)
 pvals.study3$h1b.perceived <- t.test(
   study3.final.df %>% 
+    filter(participant.id != 341) %>%
     subset(resource == "loss")      %>%  # this is the task for hypothesis testing
     subset(condition == "Digital")     %>%  # condition in hypothesis
     pull(AUCi.perceived),
   study3.final.df %>% 
+    filter(participant.id != 341) %>%
     subset(resource == "gain")      %>%  # this is the task for hypothesis testing
     subset(condition == "Digital")     %>%  # condition in hypothesis
     pull(AUCi.perceived),
@@ -474,10 +526,12 @@ pvals.study3$h1b.perceived <- t.test(
 #Cortisol (not supported)
 pvals.study3$h2b.cortisol <- t.test(
   study3.final.df %>% 
+    filter(!participant.id %in% c(394, 451)) %>%
     subset(resource == "loss")      %>%  # this is the task for hypothesis testing
     subset(condition == "Traditional")     %>%  # condition in hypothesis
     pull(AUCi.cortisol),
   study3.final.df %>% 
+    filter(!participant.id %in% c(394, 451)) %>%
     subset(resource == "gain")      %>%  # this is the task for hypothesis testing
     subset(condition == "Traditional")     %>%  # condition in hypothesis
     pull(AUCi.cortisol),
@@ -488,10 +542,12 @@ pvals.study3$h2b.cortisol <- t.test(
 #perceived (marginally supported)
 pvals.study3$h2b.perceived <- t.test(
   study3.final.df %>% 
+    filter(participant.id != 341) %>%
     subset(resource == "loss")      %>%  # this is the task for hypothesis testing
     subset(condition == "Traditional")     %>%  # condition in hypothesis
     pull(AUCi.perceived),
   study3.final.df %>% 
+    filter(participant.id != 341) %>%
     subset(resource == "gain")      %>%  # this is the task for hypothesis testing
     subset(condition == "Traditional")     %>%  # condition in hypothesis
     pull(AUCi.perceived),
@@ -507,21 +563,25 @@ pvals.study3$h2b.perceived <- t.test(
 #cortisol (not supported)
 pvals.study3$h4.cortisol <- t.test(
   study3.final.df %>% 
+    filter(!participant.id %in% c(394, 451)) %>%
     subset(resource == "loss")      %>%  # Since gain and loss are already -ve, that is why loss-(-gain)
     subset(condition == "Digital")     %>%  # condition in hypothesis
     arrange(participant.id) %>%           # ensure matching order
     pull(AUCi.cortisol)-
   study3.final.df %>% 
+    filter(!participant.id %in% c(394, 451)) %>%
     subset(resource == "gain")      %>%  #
     subset(condition == "Digital")     %>%  # condition in hypothesis
     arrange(participant.id) %>%           # ensure matching order
     pull(AUCi.cortisol)
   ,
   study3.final.df %>% 
+    filter(!participant.id %in% c(394, 451)) %>%
     subset(resource == "loss")      %>% 
     subset(condition == "Traditional")     %>%  # condition in hypothesis
     pull(AUCi.cortisol)-
   study3.final.df %>% 
+    filter(!participant.id %in% c(394, 451)) %>%
     subset(resource == "gain")      %>%  #
     subset(condition == "Traditional")     %>%  # condition in hypothesis
     pull(AUCi.cortisol),
@@ -531,19 +591,23 @@ pvals.study3$h4.cortisol <- t.test(
 #perceived (supported)
 pvals.study3$h4.perceived <- t.test(
   study3.final.df %>% 
+    filter(participant.id != 341) %>%
     subset(resource == "loss")      %>%  # 
     subset(condition == "Digital")     %>%  # condition in hypothesis
     pull(AUCi.perceived)+
   study3.final.df %>% 
+    filter(participant.id != 341) %>%
     subset(resource == "gain")      %>%  #
     subset(condition == "Digital")     %>%  # condition in hypothesis
     pull(AUCi.perceived)
   ,
   study3.final.df %>% 
+    filter(participant.id != 341) %>%
     subset(resource == "loss")      %>%  #
     subset(condition == "Traditional")     %>%  # condition in hypothesis
     pull(AUCi.perceived)+
   study3.final.df %>% 
+    filter(participant.id != 341) %>%
     subset(resource == "gain")      %>%  #
     subset(condition == "Traditional")     %>%  # condition in hypothesis
     pull(AUCi.perceived),
