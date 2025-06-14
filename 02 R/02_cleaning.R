@@ -196,7 +196,7 @@ AUCi.results.perceived <- study2.long.df %>%
 
 # Transform data to wide format
 study2.wide.df <- study2.long.df %>%
-  select(participant.id, timepoint, perceived, cortisol.log, condition, resource, gender, age, bmi, learning.disorders, en.native, experience.gpt) %>%
+  select(participant.id, timepoint, perceived, cortisol.log, condition, resource, gender, age.range, bmi.category, learning.disorders, en.native, experience.gpt, experience.nreal) %>%
   pivot_wider(
     names_from = timepoint, 
     values_from = c(cortisol.log, perceived),
@@ -213,7 +213,10 @@ study2.final.df <- AUCi.results.cortisol %>%
 #  filter(!any(is.na(AUCi.cortisol) | is.na(AUCi.perceived))) %>%            #Remove participants for whom there is NA
 #  ungroup() %>%
   select(-matches("^\\.groups")) %>% 
-  mutate(resource = factor(resource, levels = c("lack", "gain", "loss"))) %>%  # Set correct resource order
+  mutate(
+    resource = factor(resource, levels = c("lack", "gain", "loss")),
+    missing = is.na(AUCi.cortisol) | is.na(AUCi.perceived)
+    ) %>%  # Set correct resource order
   arrange(participant.id, resource)
 
 remove(AUCg.results.cortisol, AUCg.results.perceived, AUCi.results.cortisol, AUCi.results.perceived, study2.long.df, study2.wide.df) # clean workspace
@@ -339,7 +342,7 @@ AUCi.results.perceived <- study3.long.df %>%
 
 # Transform data to wide format
 study3.wide.df <- study3.long.df %>%
-  select(participant.id, timepoint, perceived, cortisol.log, condition, resource, gender, age, bmi, en.native, w.corr.lenses, experience.hololens) %>%
+  select(participant.id, timepoint, perceived, cortisol.log, condition, resource, gender, age.range, bmi.category, en.native, w.corr.lenses, experience.hololens, medications.pills) %>%
   pivot_wider(
     names_from = timepoint, 
     values_from = c(cortisol.log, perceived),
@@ -362,11 +365,13 @@ study3.final.df <- AUCi.results.cortisol %>%
 #   filter(!any(is.na(AUCi.cortisol) | is.na(AUCi.perceived))) %>%            #Remove participants for whom there is NA
 #  ungroup() %>%
   select(-matches("^\\.groups")) %>% 
-  mutate(resource = factor(resource, levels = c("baseline", "gain", "loss"))) %>%  # Set correct resource order
+  mutate(
+    resource = factor(resource, levels = c("baseline", "gain", "loss")),
+    missing = is.na(AUCi.cortisol) | is.na(AUCi.perceived)
+  ) %>%  # Set correct resource order
   arrange(participant.id, resource)
 
 remove(AUCg.results.cortisol, AUCg.results.perceived, AUCi.results.cortisol, AUCi.results.perceived) # clean workspace
-
 
 ###############################
 #
@@ -510,7 +515,10 @@ study4.final.df <- AUCi.results.cortisol %>%
   filter(!any(is.na(AUCi.cortisol) | is.na(AUCi.perceived))) %>%            #Remove participants for whom there is NA
   ungroup() %>%
   select(-matches("^\\.groups")) %>% 
-  mutate(resource = factor(resource, levels = c("baseline", "digital", "traditional"))) %>%  # Set correct resource order
+  mutate(
+    resource = factor(resource, levels = c("baseline", "digital", "traditional")),
+    missing = is.na(AUCi.cortisol) | is.na(AUCi.perceived)
+    ) %>%  # Set correct resource order
   arrange(participant.id, resource)
 
 
@@ -523,3 +531,4 @@ remove(AUCg.results.cortisol, AUCg.results.perceived, AUCi.results.cortisol, AUC
 ###############################
 
 save(list = c("study1.final.df","study2.final.df","study3.final.df","study4.final.df"), file = "./02 RData/analysis.RData")
+

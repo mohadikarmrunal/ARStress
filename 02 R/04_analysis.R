@@ -91,6 +91,15 @@ pvals.study1$h2b.complex.perceived <- t.test(
 # 
 ############################
 
+# Probit Model to check if there is a pattern in the missing values
+probit.study2 <- glm(
+  missing ~ gender + age.range + bmi.category + learning.disorders + en.native + experience.gpt + experience.nreal, 
+  data = study2.final.df,
+  family = binomial(link = "probit")
+)
+
+#summary(probit.study2) 
+
 ############################
 #
 # H1a: The gain of digital resources reduces stress.
@@ -363,6 +372,16 @@ pvals.study2$h2c.perceived <- t.test(
 # H3: The stress reduction associated with the gain of digital resources is smaller than the stress increase associated with the gain of traditional resources.
 #
 ############################
+
+# Probit Model to check if there is a pattern in the missing values
+probit.study3 <- glm(
+  missing ~ gender + age.range + bmi.category + en.native + w.corr.lenses + experience.hololens + medications.pills, 
+  data = study3.final.df,
+  family = binomial(link = "probit")
+)
+
+#summary(probit.study3) 
+
 #cortisol (not supported)
 pvals.study2$h3.cortisol <- t.test(
   study2.final.df %>% 
