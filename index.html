@@ -46,6 +46,12 @@ select{font:inherit;padding:6px}
 .ar-banner{position:absolute;left:50%;top:12px;transform:translateX(-50%);background:rgba(160,25,25,.92);color:#fff;font-weight:700;padding:8px 16px;border-radius:8px;letter-spacing:.02em;pointer-events:none;box-shadow:0 2px 10px rgba(0,0,0,.3)}
 @keyframes flick{0%,100%{opacity:.95}50%{opacity:.82}}
 .holo{animation:flick 2.4s ease-in-out infinite}
+.bbar{height:14px;background:#d9dedb;border-radius:7px;overflow:hidden;margin-bottom:10px}
+.bbar div{height:100%;width:100%;background:#2e7d4f;transition:width .2s linear}
+.bbar div.mid{background:#b7791f}.bbar div.low{background:#c0392b}
+.hud .un{color:#ff8a7a;font-weight:700}
+.toast{position:fixed;top:70px;left:50%;transform:translateX(-50%);z-index:70;background:#1c2226;color:#fff;padding:10px 18px;border-radius:8px;font-weight:700;box-shadow:0 4px 18px rgba(0,0,0,.35);max-width:90vw;text-align:center}
+.toast.bad{background:#c0392b}.toast.audit{background:#7a4a00}
 /* popover */
 .pop{position:fixed;z-index:50;background:#fff;border:1px solid var(--line);border-radius:10px;box-shadow:0 6px 24px rgba(0,0,0,.2);padding:6px;width:220px}
 .pop button{display:block;width:100%;text-align:left;border:none;padding:8px 10px;border-radius:6px}
@@ -93,7 +99,8 @@ function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a
 const fmt=ms=>{const s=Math.max(0,Math.ceil(ms/1000));return String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0')};
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 
-const S={arm:null,armKey:null,blockMs:180000,outageMs:20000,restMs:20000,sound:true,tester:true,
+const P=new URLSearchParams(location.search);
+const S={pace:'cal',dl:30000,dlMin:14000,dlMax:45000,arm:null,armKey:null,blockMs:180000,outageMs:20000,restMs:20000,sound:true,tester:true,
   boards:[],events:[],qs:[],vas:[],review:null,start:Date.now(),drawn:null};
 const ARMS={
   A:{name:'A · AR, removed in Block 3',res:'ar',withdrawn:true},
@@ -132,7 +139,7 @@ function makeBoard(fam,n){
   const comps=fam.comps.map(c=>({...c})),truth={};
   const ids=fam.comps.map(c=>c.id).sort(()=>Math.random()-.5).slice(0,n);
   for(const id of ids){const c=comps[id];const spec={C:'REV',D:'REV',U:'ROT',R:'VAL'}[c.t];
-    const d=Math.random()<.6?spec:pick(['MIS','BRG','BRN']);truth[id]=d;
+    const d=Math.random()<.8?spec:pick(['MIS','BRG','BRN']);truth[id]=d;
     if(d==='REV')c.a=(c.a+180)%360;else if(d==='ROT')c.a=(c.a+pick([90,180,270]))%360;
     else if(d==='VAL')c.v=(c.v+1+Math.floor(Math.random()*(RV.length-1)))%RV.length;
     else if(d==='MIS')c.missing=true;else if(d==='BRG')c.bridge=true;else c.burn=true}
@@ -238,6 +245,8 @@ async function setup(){
   ${['R','A','B','C','D'].map(k=>`<label class="opt"><input type="radio" name="arm" value="${k}" ${k==='R'?'checked':''}> <span>${k==='R'?'<b>Random</b> (as a participant would be assigned)':ARMS[k].name}</span></label>`).join('')}
   <h3>Length</h3>
   <select id="len"><option value="90">Quick check: 1.5-minute blocks</option><option value="180" selected>Demo: 3-minute blocks</option><option value="900">Full: 15-minute blocks (as in the protocol)</option></select>
+  <h3>Pace</h3>
+  <select id="pace"><option value="cal" selected>Deadline per board, calibrated to you in Block 1</option><option value="f30">Fixed 30 seconds per board</option><option value="f20">Fixed 20 seconds per board</option><option value="off">No deadline per board (first version)</option></select>
   <h3>Options</h3>
   <label class="opt"><input type="checkbox" id="snd" checked> <span>Sound and spoken reminders (use headphones, as in the lab)</span></label>
   <label class="opt"><input type="checkbox" id="tst" checked> <span>Tester controls (skip buttons for rests and training)</span></label>
@@ -246,8 +255,9 @@ async function setup(){
   await waitClick('#go');
   let k=document.querySelector('input[name=arm]:checked').value;if(k==='R')k=pick(['A','B','C','D']);
   S.armKey=k;S.arm=ARMS[k];S.blockMs=+$('#len').value*1000;S.outageMs=S.blockMs>=900000?45000:Math.round(S.blockMs*0.11);
-  S.restMs=S.blockMs>=900000?300000:Math.min(30000,S.blockMs/6);S.sound=$('#snd').checked;S.tester=$('#tst').checked;
-  logEvent('setup',{arm:k,blockMs:S.blockMs});
+  S.restMs=S.blockMs>=900000?300000:Math.min(30000,S.blockMs/6);{const pv=$('#pace').value,d0=(+P.get('dl')||30)*1000;S.pace=pv==='off'?'off':pv==='cal'?'cal':'fix';S.dl=pv==='f30'?30000:pv==='f20'?20000:d0;S.dlMin=Math.min(14000,d0)}
+  S.sound=$('#snd').checked;S.tester=$('#tst').checked;
+  logEvent('setup',{arm:k,blockMs:S.blockMs,pace:S.pace,dl:S.dl});
   if(S.sound){beep(440,.05,.02)}
 }
 async function intro(){
@@ -255,8 +265,10 @@ async function intro(){
   <p>You will work as a quality inspector for printed circuit boards. Each board shows 18 components in six zones. Some boards are correct; others have one or more defects.</p>
   <p><b>Your job:</b> click every defective component and choose the defect type. If you find nothing wrong, submit the board without marks.</p>
   <h3>Pay rule (identical in every block)</h3>
-  <ul><li>+ €0.10 for each correct board verdict (correct / flawed)</li><li>+ €0.10 for each defect found and correctly named (+ €0.05 if the type is wrong)</li><li>− €0.05 for each missed defect and for each mark on a component that is fine</li></ul>
-  <p class="muted">Your earnings are shown only at the end of the session. Work as accurately and as quickly as you can: each block runs on a countdown.</p>
+  <ul><li>+ €0.10 for each correct board verdict (correct / flawed)</li><li>+ €0.10 for each defect found and correctly named (+ €0.05 if the type is wrong)</li><li>− €0.05 for each missed defect and for each mark on a component that is fine</li><li>− €0.10 for each board that leaves your station unchecked</li></ul>
+  <h3>The line does not wait</h3>
+  <p>Boards arrive on a production clock. <b>Each board has its own deadline</b>, shown as a bar above the board. When the bar runs out, the board is taken away and <b>ships unchecked</b> under your name. Boards can be pulled for sign-off review at any time.</p>
+  <p class="muted">Your earnings are shown only at the end of the session. The pace is the same in every block.</p>
   <div class="row"><button class="primary big" id="n">Continue to training</button></div></div>`);
   await waitClick('#n');
 }
@@ -349,18 +361,21 @@ async function midVAS(){return new Promise(res=>{const m=document.createElement(
   m.innerHTML=`<div class="card"><h2>Quick rating</h2><p class="muted">The clock is paused.</p>${sliderQ('mvas','How stressed do you feel right now?','Not at all','Extremely')}<button class="primary" id="mv">Back to work</button></div>`;
   document.body.appendChild(m);m.querySelector('#mv').onclick=()=>{const v=+m.querySelector('#mvas').value;m.remove();res(v)}})}
 
+function toast(txt,ms,cls){const t=document.createElement('div');t.className='toast '+(cls||'');t.textContent=txt;document.body.appendChild(t);setTimeout(()=>t.remove(),ms)}
 async function runBlock(n,fam,guidance,outages){
   closePop();
   const dur=S.blockMs;let elapsed=0,last=performance.now(),paused=false,ended=false,midDone=false,lastSec=-1;
-  let available=guidance!=='none',outIdx=-1,page=0,boardNo=0;
+  let available=guidance!=='none',page=0,boardNo=0,submitted=0,unchecked=0;
+  const paced=S.pace!=='off',calib=S.pace==='cal'&&n===1;let dl=S.dl;const dlHist=[];
+  const audits=[.2+Math.random()*.25,.6+Math.random()*.3].map(f=>f*dur);
   let b,marks,bStart,bOut;
-  const newBoard=()=>{b=makeBoard(fam);marks={};bStart=elapsed;bOut=!available&&guidance!=='none';boardNo++};
+  const newBoard=()=>{b=makeBoard(fam);marks={};bStart=elapsed;bOut=!available&&guidance!=='none';boardNo++;lastSec=-1};
   newBoard();
-  logEvent('block_start',{block:n,guidance,family:fam.name});
-  show(`<div class="hud"><span class="pill">Block ${n} of 3</span><span class="pill timer" id="tm">${fmt(dur)}</span><span class="pill" id="cnt">Boards submitted: 0</span><span class="pill" id="gd"></span></div>
+  logEvent('block_start',{block:n,guidance,family:fam.name,deadline_ms:paced?Math.round(dl):null});
+  show(`<div class="hud"><span class="pill">Block ${n} of 3</span><span class="pill timer" id="tm">${fmt(dur)}</span><span class="pill" id="cnt">Checked: 0</span>${paced?'<span class="pill" id="un">Shipped unchecked: 0</span>':''}<span class="pill" id="gd"></span></div>
+    ${paced?'<div class="bbar"><div id="bb"></div></div>':''}
     <div class="work"><div class="boardwrap" id="bw"></div><div id="mw"></div></div>
     <div class="actions"><button class="primary big" id="sb">Submit board</button><button id="cl">Clear marks</button><span class="hint">Click a component to mark a defect. Submit without marks if the board is correct.</span></div>`);
-  let submitted=0;
   const drawGuidanceLabel=()=>{const g=$('#gd');if(!g)return;
     if(guidance==='none'){g.className='pill gd-none';g.textContent=n===3?'Guidance: not available':'Guidance: none'}
     else if(!available){g.className='pill gd-off';g.textContent='⚠ Guidance unavailable'}
@@ -372,25 +387,35 @@ async function runBlock(n,fam,guidance,outages){
       mw.querySelectorAll('.tabs button').forEach(t=>t.onclick=()=>{page=+t.dataset.p;drawBoard()})}else{mw.className='';mw.innerHTML=''}
     drawGuidanceLabel()};
   drawBoard();
-  $('#cl').onclick=()=>{marks={};drawBoard()};
-  $('#sb').onclick=()=>{if(ended||paused)return;const sc=scoreBoard(b,marks);
+  const finish=(timedOut)=>{
+    const sc=timedOut?{found:0,typed:0,miss:b.n,fa:0,verdictCorrect:false,earn:-.10}:scoreBoard(b,marks);
     S.boards.push({block:n,board:boardNo,family:fam.name,guidance,start_s:+(bStart/1000).toFixed(2),time_s:+((elapsed-bStart)/1000).toFixed(2),
-      defects:b.n,truth:JSON.stringify(b.truth),marks:JSON.stringify(marks),during_outage:bOut,...sc,_b:b,_m:{...marks}});
-    submitted++;$('#cnt').textContent='Boards submitted: '+submitted;beep(880,.04,.02);newBoard();drawBoard()};
+      deadline_s:paced?+(dl/1000).toFixed(1):null,timed_out:timedOut,defects:b.n,truth:JSON.stringify(b.truth),marks:JSON.stringify(timedOut?{}:marks),during_outage:bOut,...sc,_b:b,_m:timedOut?{}:{...marks}});
+    if(timedOut){unchecked++;const u=$('#un');if(u){u.textContent='Shipped unchecked: '+unchecked;u.classList.add('un')}
+      beep(150,.35,.09,'sawtooth');toast('Board '+boardNo+' shipped unchecked',1400,'bad');logEvent('timeout',{block:n,board:boardNo})}
+    else{submitted++;$('#cnt').textContent='Checked: '+submitted;beep(880,.04,.02)}
+    if(calib){dl=Math.min(S.dlMax,Math.max(S.dlMin,dl*(timedOut?1.10:.95)));dlHist.push(dl)}
+    closePop();newBoard();drawBoard()};
+  $('#cl').onclick=()=>{marks={};drawBoard()};
+  $('#sb').onclick=()=>{if(ended||paused)return;finish(false)};
   await new Promise(res=>{const iv=setInterval(async()=>{
     const now=performance.now();if(!paused)elapsed+=now-last;last=now;
-    if(ended)return;
-    // outages
+    if(ended||paused)return;
     let active=-1;outages.forEach((f,i)=>{const s=f*dur;if(elapsed>=s&&elapsed<s+S.outageMs)active=i});
     if(guidance!=='none'){const nowAvail=active<0;if(nowAvail!==available){available=nowAvail;
         if(!available){bOut=true;logEvent('outage_start',{block:n,idx:active});beep(220,.25,.08,'square');setTimeout(()=>beep(180,.3,.08,'square'),280)}
         else{logEvent('outage_end',{block:n});beep(660,.12,.04)}
         drawBoard()}}
     const left=dur-elapsed;const tm=$('#tm');if(tm){tm.textContent=fmt(left);tm.classList.toggle('low',left<60000)}
-    const sec=Math.ceil(left/1000);if(left<20000&&sec!==lastSec&&!paused){lastSec=sec;beep(1200,.02,.025,'square')}
+    if(paced){const bl=dl-(elapsed-bStart),bb=$('#bb');
+      if(bb){bb.style.width=Math.max(0,100*bl/dl)+'%';bb.className=bl<dl*.25?'low':bl<dl*.5?'mid':''}
+      const sec=Math.ceil(bl/1000);if(bl<5000&&bl>0&&sec!==lastSec){lastSec=sec;beep(1200,.03,.035,'square')}
+      if(bl<=0&&elapsed<dur)finish(true)}
+    if(audits.length&&elapsed>=audits[0]){audits.shift();if(boardNo>1){beep(500,.12,.05);toast('⚑ Board '+(boardNo-1)+' has been pulled for sign-off review',3500,'audit');logEvent('audit_notice',{block:n,board:boardNo-1})}}
     if(!midDone&&elapsed>=dur*.5&&available===(guidance!=='none')){midDone=true;paused=true;closePop();const v=await midVAS();S.vas.push({block:n,tag:'mid',v,t:Date.now()-S.start});last=performance.now();paused=false}
-    if(elapsed>=dur){ended=true;clearInterval(iv);closePop();logEvent('block_end',{block:n,submitted});res()}
+    if(elapsed>=dur){ended=true;clearInterval(iv);closePop();logEvent('block_end',{block:n,submitted,unchecked});res()}
   },200)});
+  if(calib&&dlHist.length){const h=dlHist.slice(-5);S.dl=h.reduce((a,x)=>a+x,0)/h.length;logEvent('pace_set',{deadline_ms:Math.round(S.dl)})}
   show(`<div class="card"><h2>Block ${n} is over</h2><p>Please stop working.</p><div class="labnote"><b>Lab note:</b> saliva sample at the end of the block, and again five minutes later.</div><button class="primary big" id="n">Continue</button></div>`);
   beep(520,.4,.05);await waitClick('#n');
 }
@@ -425,7 +450,7 @@ async function drawAndReview(){
   $('#after').innerHTML=`<button class="primary big" id="n">Continue</button>${!S.drawn&&S.tester?'<button class="skip" id="force">Try the review anyway (tester)</button>':''}`;
   const doReview=await new Promise(r=>{$('#n').onclick=()=>r(S.drawn);if($('#force'))$('#force').onclick=()=>r(true)});
   if(!doReview)return;
-  const picks=[1,2,3].map(n=>{const bs=S.boards.filter(x=>x.block===n);return bs.length?pick(bs):null}).filter(Boolean);
+  const picks=[1,2,3].map(n=>{const bs=S.boards.filter(x=>x.block===n&&!x.timed_out);return bs.length?pick(bs):null}).filter(Boolean);
   S.review=[];
   for(const p of picks){const fam=FAMS[p.family];
     show(`<div class="card" style="max-width:900px"><span class="speaker">Sign-off review</span><h2>Block ${p.block}, board ${p.board}</h2>
@@ -443,7 +468,7 @@ function summarise(){
     const out=bs.filter(b=>b.during_outage),inn=bs.filter(b=>!b.during_outage);
     const det=a=>{const p=a.reduce((s,b)=>s+b.defects,0);return p?Math.round(100*a.reduce((s,b)=>s+b.found,0)/p)+'%':'–'};
     const tpb=a=>a.length?(a.reduce((s,b)=>s+b.time_s,0)/a.length).toFixed(1)+' s':'–';
-    return{n,g:bs[0]?bs[0].guidance:'–',boards:bs.length,det:present?Math.round(100*found/present)+'%':'–',fa:bs.length?(sum(b=>b.fa)/bs.length).toFixed(2):'–',
+    return{n,g:bs[0]?bs[0].guidance:'–',unchecked:bs.filter(b=>b.timed_out).length,dl:bs.length&&bs[bs.length-1].deadline_s?bs[bs.length-1].deadline_s+' s':'–',boards:bs.length,det:present?Math.round(100*found/present)+'%':'–',fa:bs.length?(sum(b=>b.fa)/bs.length).toFixed(2):'–',
       acc:bs.length?Math.round(100*sum(b=>b.verdictCorrect?1:0)/bs.length)+'%':'–',tpb:tpb(bs),earn:Math.max(0,sum(b=>b.earn)),
       vpre:v('pre'),vmid:v('mid'),vpost:v('post'),outN:out.length,detOut:det(out),detIn:det(inn),tOut:tpb(out),tIn:tpb(inn)}});
   return rows;
@@ -455,8 +480,8 @@ async function results(){
   show(`<div class="card" style="max-width:900px"><h1>Thank you – session complete</h1>
   <p>Arm: <b>${S.arm.name}</b>. Bonus earned: <b>€${total.toFixed(2)}</b>${S.drawn!=null?` · Sign-off draw: ${S.drawn?'selected':'not selected'}`:''}.</p>
   <h3>Performance and stress by block</h3>
-  <table class="res"><tr><th>Block</th><th>Guidance</th><th>Boards</th><th>Detection</th><th>False marks / board</th><th>Verdict accuracy</th><th>Time / board</th><th>Stress before · mid · after</th></tr>
-  ${R.map(r=>`<tr><td>${r.n}</td><td>${gname(r.g)}</td><td>${r.boards}</td><td>${r.det}</td><td>${r.fa}</td><td>${r.acc}</td><td>${r.tpb}</td><td>${r.vpre} · ${r.vmid} · ${r.vpost}</td></tr>`).join('')}</table>
+  <table class="res"><tr><th>Block</th><th>Guidance</th><th>Boards</th><th>Unchecked</th><th>Deadline</th><th>Detection</th><th>False marks / board</th><th>Verdict accuracy</th><th>Time / board</th><th>Stress before · mid · after</th></tr>
+  ${R.map(r=>`<tr><td>${r.n}</td><td>${gname(r.g)}</td><td>${r.boards}</td><td>${r.unchecked}</td><td>${r.dl}</td><td>${r.det}</td><td>${r.fa}</td><td>${r.acc}</td><td>${r.tpb}</td><td>${r.vpre} · ${r.vmid} · ${r.vpost}</td></tr>`).join('')}</table>
   <h3>Boards worked during an outage</h3>
   <table class="res"><tr><th>Block</th><th>Boards hit by outage</th><th>Detection: outage vs normal</th><th>Time / board: outage vs normal</th></tr>
   ${R.filter(r=>r.g!=='none').map(r=>`<tr><td>${r.n}</td><td>${r.outN}</td><td>${r.detOut} vs ${r.detIn}</td><td>${r.tOut} vs ${r.tIn}</td></tr>`).join('')||'<tr><td colspan="4">No outages in this arm.</td></tr>'}</table>
