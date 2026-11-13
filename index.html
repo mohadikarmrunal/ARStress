@@ -3,157 +3,501 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Three-block design: stress tied to removal</title>
+<title>Board Inspection Study – Test Version</title>
 <style>
-:root{
-  --bg:#f6f4ef; --ink:#1d2327; --muted:#5d666d; --line:#d9d4c8; --card:#fffdf8;
-  --ar:#2f6f8f; --paper:#b9853a; --none:#8a8f94; --loss:#b23a3a; --task:#9aa3a8;
-}
-@media (prefers-color-scheme: dark){
-  :root{ --bg:#15191c; --ink:#ecebe6; --muted:#a3abb1; --line:#333b41; --card:#1d2226;
-    --ar:#5aa7c9; --paper:#d9a85c; --none:#7b838a; --loss:#e06c6c; --task:#6c757b; }
-}
+:root{--bg:#eef0ee;--ink:#1c2226;--muted:#5f6970;--card:#fff;--line:#d5dad6;--accent:#1f5f8b;--danger:#c0392b;--ok:#2e7d4f;--warn:#b7791f}
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 Georgia,"Times New Roman",serif}
-main{max-width:860px;margin:0 auto;padding:28px 18px 60px}
-h1{font-size:1.7rem;line-height:1.2;margin:0 0 8px}
-h2{font-size:1.2rem;margin:38px 0 10px}
-p{margin:0 0 12px}
-.tag{font:600 .72rem/1 system-ui,sans-serif;letter-spacing:.08em;text-transform:uppercase;color:var(--loss)}
-.lead{color:var(--muted);font-size:1.05rem}
-.sans{font-family:system-ui,-apple-system,"Segoe UI",sans-serif}
-.principle{border-left:4px solid var(--loss);background:var(--card);padding:14px 16px;margin:18px 0;border-radius:0 8px 8px 0}
-.tabs{display:flex;gap:8px;margin:14px 0}
-.tabs button{flex:1;padding:10px 6px;border:1px solid var(--line);background:var(--card);color:var(--ink);
-  border-radius:8px;font:600 .9rem system-ui,sans-serif;cursor:pointer}
-.tabs button[aria-selected="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
-.panel{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px}
-.panel h3{margin:0 0 4px;font-size:1.1rem}
-.panel .sub{color:var(--muted);margin-bottom:12px}
-.meter{margin:12px 0 4px}
-.meter .bar{display:flex;height:22px;border-radius:6px;overflow:hidden;border:1px solid var(--line)}
-.meter .bar span{display:block}
-.meter .t{background:var(--task)} .meter .l{background:var(--loss)}
-.meter .cap{display:flex;justify-content:space-between;font:.78rem system-ui,sans-serif;color:var(--muted);margin-top:4px}
-ul{padding-left:20px;margin:8px 0}
-li{margin:4px 0}
-.grid{display:grid;grid-template-columns:minmax(92px,1.3fr) repeat(3,1fr);gap:6px;margin-top:10px;font:.82rem system-ui,sans-serif}
-.grid .h{font-weight:700;color:var(--muted);text-align:center;padding:4px 0}
-.grid .arm{padding:8px 4px;font-weight:600;line-height:1.25}
-.cell{border-radius:6px;padding:8px 4px;text-align:center;color:#fff;font-weight:600;position:relative;min-height:44px;
-  display:flex;flex-direction:column;justify-content:center;line-height:1.2}
-.cell small{font-weight:400;opacity:.9}
-.c-none{background:var(--none)} .c-ar{background:var(--ar)} .c-paper{background:var(--paper)}
-.c-gone{background:repeating-linear-gradient(45deg,var(--loss),var(--loss) 8px,#0000 8px,#0000 9px),var(--loss)}
-.out{position:absolute;top:0;bottom:0;width:5px;background:var(--loss)}
-.legend{display:flex;flex-wrap:wrap;gap:10px 16px;font:.8rem system-ui,sans-serif;color:var(--muted);margin-top:10px}
-.legend i{display:inline-block;width:14px;height:14px;border-radius:3px;vertical-align:-2px;margin-right:5px}
-table{width:100%;border-collapse:collapse;font:.9rem system-ui,sans-serif}
-th,td{text-align:left;padding:8px 6px;border-bottom:1px solid var(--line);vertical-align:top}
-th{color:var(--muted);font-weight:600}
-.note{font:.85rem system-ui,sans-serif;color:var(--muted);margin-top:36px;border-top:1px solid var(--line);padding-top:14px}
+html,body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+#app{max-width:1180px;margin:0 auto;padding:16px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:22px;margin:0 auto 16px;max-width:760px}
+h1{font-size:1.5rem;margin:0 0 10px}h2{font-size:1.2rem;margin:0 0 10px}h3{font-size:1rem;margin:16px 0 6px}
+p{margin:0 0 10px}.muted{color:var(--muted)}
+button{font:inherit;cursor:pointer;border-radius:8px;border:1px solid var(--line);background:#fff;padding:9px 16px}
+button.primary{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:600}
+button.big{padding:12px 26px;font-size:1.05rem}
+button:disabled{opacity:.45;cursor:default}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.labnote{background:#f3f0e6;border-left:4px solid #b89b4a;padding:8px 12px;border-radius:0 8px 8px 0;font-size:.85rem;color:#5a4d24;margin:10px 0}
+.skip{font-size:.8rem;padding:5px 10px;color:var(--muted)}
+label.opt{display:flex;gap:8px;align-items:flex-start;padding:6px 0}
+select{font:inherit;padding:6px}
+/* HUD */
+.hud{display:flex;gap:10px;flex-wrap:wrap;align-items:center;background:#1c2226;color:#e9eef0;border-radius:10px;padding:8px 14px;margin-bottom:10px;font-variant-numeric:tabular-nums}
+.hud .pill{background:#2b3439;border-radius:6px;padding:4px 10px}
+.hud .timer{font-size:1.25rem;font-weight:700;letter-spacing:.03em}
+.hud .timer.low{color:#ff7b6b}
+.hud .gd-on{color:#7fe3ff}.hud .gd-paper{color:#f3d08a}.hud .gd-off{color:#ff8a7a;font-weight:700}.hud .gd-none{color:#aab3b8}
+.work{display:flex;gap:12px;align-items:flex-start}
+.boardwrap{flex:1;min-width:0;position:relative}
+.boardwrap svg{width:100%;height:auto;display:block;border-radius:10px;user-select:none}
+.manual{width:330px;flex:none;background:#fbf6e9;border:1px solid #dccfaa;border-radius:6px;box-shadow:2px 3px 10px rgba(0,0,0,.12);font-family:Georgia,serif;position:relative;min-height:300px}
+.manual .mhead{padding:10px 12px;border-bottom:1px solid #e3d7b5;font-weight:700;font-size:.95rem}
+.manual .tabs{display:flex;border-bottom:1px solid #e3d7b5}
+.manual .tabs button{flex:1;border:none;border-radius:0;background:transparent;padding:7px 4px;font-family:Georgia,serif;font-size:.82rem;color:#6b5b2e}
+.manual .tabs button.on{background:#efe4c5;font-weight:700}
+.manual .mbody{padding:10px 12px;font-size:.84rem}
+.manual table{width:100%;border-collapse:collapse}
+.manual td{padding:4px 3px;border-bottom:1px dotted #d8c99f;vertical-align:top}
+.manual td:first-child{font-family:ui-monospace,monospace;font-weight:700;width:42px}
+.chip{display:inline-block;width:10px;height:10px;border:1px solid #555;border-radius:2px;vertical-align:-1px;margin-right:1px}
+.shutter{position:absolute;inset:0;background:repeating-linear-gradient(45deg,#3b3f42,#3b3f42 10px,#45494c 10px,#45494c 20px);color:#ffd2cc;display:flex;align-items:center;justify-content:center;text-align:center;font:700 1rem system-ui;border-radius:6px;padding:20px}
+.actions{display:flex;gap:10px;margin-top:10px;align-items:center;flex-wrap:wrap}
+.hint{font-size:.85rem;color:var(--muted)}
+.ar-banner{position:absolute;left:50%;top:12px;transform:translateX(-50%);background:rgba(160,25,25,.92);color:#fff;font-weight:700;padding:8px 16px;border-radius:8px;letter-spacing:.02em;pointer-events:none;box-shadow:0 2px 10px rgba(0,0,0,.3)}
+@keyframes flick{0%,100%{opacity:.95}50%{opacity:.82}}
+.holo{animation:flick 2.4s ease-in-out infinite}
+/* popover */
+.pop{position:fixed;z-index:50;background:#fff;border:1px solid var(--line);border-radius:10px;box-shadow:0 6px 24px rgba(0,0,0,.2);padding:6px;width:220px}
+.pop button{display:block;width:100%;text-align:left;border:none;padding:8px 10px;border-radius:6px}
+.pop button:hover{background:#eef3f7}
+.pop .t{font-size:.75rem;color:var(--muted);padding:4px 10px}
+/* modal */
+.modal{position:fixed;inset:0;background:rgba(20,25,28,.6);display:flex;align-items:center;justify-content:center;z-index:60;padding:16px}
+.modal .card{max-width:520px;width:100%}
+/* sliders */
+.q{margin:14px 0}
+.q .ql{font-weight:600;margin-bottom:4px}
+.q input[type=range]{width:100%}
+.q .ends{display:flex;justify-content:space-between;font-size:.78rem;color:var(--muted)}
+.likert{display:flex;gap:4px}
+.likert label{flex:1;text-align:center;border:1px solid var(--line);border-radius:6px;padding:6px 0;cursor:pointer;font-size:.85rem}
+.likert input{display:none}
+.likert input:checked+span{font-weight:700;color:#fff}
+.likert label:has(input:checked){background:var(--accent);border-color:var(--accent);color:#fff}
+/* drum */
+.drumbox{display:flex;align-items:center;gap:18px;margin:14px 0}
+.drum{width:110px;height:110px;border-radius:50%;border:6px solid #7a5c2e;background:radial-gradient(circle,#fff8e6,#e9d9b0);position:relative;flex:none}
+.drum.spin{animation:spin .6s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.ball{position:absolute;width:20px;height:20px;border-radius:50%;font:700 10px/20px system-ui;text-align:center;color:#fff}
+.gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;margin:12px 0}
+.gal{border:1px solid var(--line);border-radius:8px;padding:8px;font-size:.85rem}
+.gal svg{width:100%;height:auto;background:#1f6b3a;border-radius:6px}
+table.res{width:100%;border-collapse:collapse;font-size:.88rem;margin:8px 0}
+table.res th,table.res td{border-bottom:1px solid var(--line);padding:6px;text-align:left}
+.rest{font-size:2.4rem;font-weight:700;text-align:center;margin:18px 0;font-variant-numeric:tabular-nums}
+.speaker{display:inline-block;padding:3px 8px;background:#e7eef4;border-radius:6px;font-size:.8rem;color:var(--accent);margin-bottom:8px}
+@media (max-width:820px){.work{flex-direction:column}.manual{width:100%}}
 </style>
 </head>
 <body>
-<main>
-<div class="tag">Draft for discussion</div>
-<h1>Three blocks, one stressor: losing the resource</h1>
-<p class="lead">A sketch of the laboratory session in which stress comes from the removal of the AR overlay or the paper manual, and not from the inspection task.</p>
-
-<div class="principle">
-<strong>The principle.</strong> The task stays the same in every block: same pace, same pay rule, same board difficulty, no audience. What changes is whether guidance is there, and how sure people can be that it stays. Block 1 tells us how stressful the task is by itself. Anything above that level in Blocks 2 and 3 can be traced to the resource.
-</div>
-
-<h2>The four arms across the session</h2>
-<div class="grid" aria-label="Arms by block">
-  <div></div><div class="h">Block 1</div><div class="h">Block 2</div><div class="h">Block 3</div>
-
-  <div class="arm">A · AR removed</div>
-  <div class="cell c-none">none</div>
-  <div class="cell c-ar">AR<small>2 outages</small><span class="out" style="left:30%"></span><span class="out" style="left:68%"></span></div>
-  <div class="cell c-gone">removed</div>
-
-  <div class="arm">B · paper removed</div>
-  <div class="cell c-none">none</div>
-  <div class="cell c-paper">paper<small>2 outages</small><span class="out" style="left:30%"></span><span class="out" style="left:68%"></span></div>
-  <div class="cell c-gone">removed</div>
-
-  <div class="arm">C · AR kept</div>
-  <div class="cell c-none">none</div>
-  <div class="cell c-ar">AR<small>2 outages</small><span class="out" style="left:30%"></span><span class="out" style="left:68%"></span></div>
-  <div class="cell c-ar">AR<small>2 outages</small><span class="out" style="left:42%"></span><span class="out" style="left:80%"></span></div>
-
-  <div class="arm">D · paper kept</div>
-  <div class="cell c-none">none</div>
-  <div class="cell c-paper">paper<small>2 outages</small><span class="out" style="left:30%"></span><span class="out" style="left:68%"></span></div>
-  <div class="cell c-paper">paper<small>2 outages</small><span class="out" style="left:42%"></span><span class="out" style="left:80%"></span></div>
-</div>
-<div class="legend">
-  <span><i style="background:var(--none)"></i>no resource</span>
-  <span><i style="background:var(--ar)"></i>AR overlay</span>
-  <span><i style="background:var(--paper)"></i>paper manual</span>
-  <span><i style="background:var(--loss)"></i>guidance gone (short outage or full removal)</span>
-</div>
-
-<h2>What happens in each block</h2>
-<div class="tabs" role="tablist">
-  <button role="tab" aria-selected="true" data-b="0">Block 1</button>
-  <button role="tab" aria-selected="false" data-b="1">Block 2</button>
-  <button role="tab" aria-selected="false" data-b="2">Block 3</button>
-</div>
-<div class="panel" id="panel" role="tabpanel"></div>
-
-<h2>How the comparisons read</h2>
-<table>
-<tr><th>Question</th><th>Comparison</th></tr>
-<tr><td>How stressful is the task alone?</td><td>Block 1, all arms pooled. Nobody has a resource and nothing can be taken away.</td></tr>
-<tr><td>Does a short loss hurt more with AR than with paper?</td><td>Block 2: heart rate and performance in the minute after an outage against the minute before, AR arms against paper arms.</td></tr>
-<tr><td>Does full removal raise stress?</td><td>A against C, and B against D, at Block 3. C and D carry the effect of time and practice.</td></tr>
-<tr><td>Is losing AR worse than losing paper? (H2)</td><td>A against B at Block 3, adjusted for Block 1. Both are unaided on the same clock and differ only in what they lost.</td></tr>
-<tr><td>Is it removal, or just working unaided?</td><td>A and B at Block 3 against their own Block 1. Same task, same lack of guidance; the difference is that something was taken away.</td></tr>
-</table>
-
-<h2>Open points</h2>
-<ul>
-<li><strong>Paper outages.</strong> The overlay can be switched off by software. The manual needs an equivalent that works for a group, for example a covered document holder or a desk lamp switched by the PC.</li>
-<li><strong>Outages may teach coping.</strong> Practising short losses in Block 2 could soften the full removal in Block 3. Few and short outages limit this; the pilot data should show whether it happens.</li>
-<li><strong>Removal only matters if the task matters.</strong> The pay rule stays constant across blocks so that guidance is worth having, but it is never raised or announced anew.</li>
-<li><strong>Block 3 outages in C and D.</strong> They keep the threat alive in the control arms. Dropping them would give a calmer control but a less equal one.</li>
-<li><strong>Performance still carries part of the effect.</strong> Perceived performance and confidence after each block show how much.</li>
-</ul>
-
-<p class="note">Working sketch, not a protocol. Timings, counts and wording are placeholders.</p>
-</main>
+<div id="app"></div>
 <script>
-const blocks=[
- {t:"Block 1 · Unaided baseline",s:"No resource in any arm. Nothing can be lost.",task:100,loss:0,
-  items:["Everyone inspects boards with the board and nothing else.",
-         "No announcement about guidance, so there is no threat of loss yet.",
-         "Gives each person's own level of task stress and unaided performance.",
-         "Measured: stress rating, heart rate, saliva, detection rate."]},
- {t:"Block 2 · Guidance arrives, and is not guaranteed",s:"All arms get AR or paper. All are told it may drop out.",task:60,loss:40,
-  items:["Before the block: “Guidance may become unavailable at any time.” Same sentence in every arm.",
-         "Two short outages of about 45 seconds at moments nobody can predict, on the same schedule in all four arms.",
-         "The task does not change during an outage, so a jump in heart rate at that moment belongs to the loss.",
-         "Measured around each outage: heart rate before and after, errors, time per board, and one quick stress rating."]},
- {t:"Block 3 · Removal against continuation",s:"A and B lose guidance for the whole block. C and D keep it.",task:35,loss:65,
-  items:["A and B hear: “Guidance is not available for this block.” The headset stays on; the manual is taken away.",
-         "C and D continue exactly as in Block 2, outages included, and show what time alone does.",
-         "A and B now face the same unaided task as in Block 1. The extra stress over Block 1 is the removal.",
-         "Measured: the same outcomes, plus how much guidance was missed and the dependence items in all arms."]}
-];
-const panel=document.getElementById('panel');
-function show(i){
-  const b=blocks[i];
-  panel.innerHTML=`<h3>${b.t}</h3><div class="sub">${b.s}</div>
-  <div class="meter sans"><div class="bar"><span class="t" style="width:${b.task}%"></span><span class="l" style="width:${b.loss}%"></span></div>
-  <div class="cap"><span>stress from the task</span><span>stress from loss or threat of loss</span></div></div>
-  <ul>${b.items.map(x=>`<li>${x}</li>`).join('')}</ul>
-  ${i>0?'<p class="sans" style="font-size:.8rem;color:var(--muted);margin:8px 0 0">Bar shows the intended source of stress in the removal arms, not data.</p>':''}`;
-  document.querySelectorAll('.tabs button').forEach((x,j)=>x.setAttribute('aria-selected',j===i));
+"use strict";
+/* ============================== helpers ============================== */
+const $=s=>document.querySelector(s);
+const app=()=>$('#app');
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+const pick=(a,r=Math.random)=>a[Math.floor(r()*a.length)];
+function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+const fmt=ms=>{const s=Math.max(0,Math.ceil(ms/1000));return String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0')};
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+const S={arm:null,armKey:null,blockMs:180000,outageMs:20000,restMs:20000,sound:true,tester:true,
+  boards:[],events:[],qs:[],vas:[],review:null,start:Date.now(),drawn:null};
+const ARMS={
+  A:{name:'A · AR, removed in Block 3',res:'ar',withdrawn:true},
+  B:{name:'B · Paper, removed in Block 3',res:'paper',withdrawn:true},
+  C:{name:'C · AR, kept in Block 3',res:'ar',withdrawn:false},
+  D:{name:'D · Paper, kept in Block 3',res:'paper',withdrawn:false}};
+function logEvent(type,data={}){S.events.push({t:Date.now()-S.start,type,...data})}
+
+/* sound */
+let AC=null;
+function beep(f=660,d=.15,v=.08,type='sine'){if(!S.sound)return;try{AC=AC||new (window.AudioContext||window.webkitAudioContext)();const o=AC.createOscillator(),g=AC.createGain();o.type=type;o.frequency.value=f;g.gain.value=v;o.connect(g);g.connect(AC.destination);o.start();g.gain.exponentialRampToValueAtTime(.0001,AC.currentTime+d);o.stop(AC.currentTime+d+.02)}catch(e){}}
+function speak(text){return new Promise(res=>{if(!S.sound||!('speechSynthesis' in window)){res();return}
+  try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(text);u.lang='en-GB';u.rate=.95;u.onend=res;u.onerror=res;speechSynthesis.speak(u);setTimeout(res,25000)}catch(e){res()}})}
+
+/* ============================== boards ============================== */
+const W=780,H=482;
+const RV=[{c:['brown','black','red'],l:'1 kΩ',s:'1k'},{c:['red','red','red'],l:'2.2 kΩ',s:'2.2k'},{c:['yellow','violet','red'],l:'4.7 kΩ',s:'4.7k'},
+  {c:['brown','black','orange'],l:'10 kΩ',s:'10k'},{c:['orange','orange','brown'],l:'330 Ω',s:'330'},{c:['green','blue','brown'],l:'560 Ω',s:'560'}];
+const COL={black:'#111',brown:'#7a4a1e',red:'#d12b2b',orange:'#f08a1c',yellow:'#f2d21b',green:'#2f9e44',blue:'#2a62d6',violet:'#8a3fd1',gold:'#c9a227'};
+const DEF={REV:'Reversed polarity',ROT:'IC rotated',VAL:'Wrong resistor value',MIS:'Missing part',BRG:'Solder bridge',BRN:'Burn mark'};
+const POS=[[62,64],[178,70],[116,160]];
+const DIR={0:'right',90:'bottom',180:'left',270:'top'};
+const zoneXY=z=>[22+(z%3)*248,22+Math.floor(z/3)*224];
+
+function makeFamily(name,seed){
+  const r=mulberry32(seed),comps=[],cnt={R:0,C:0,D:0,U:0};
+  for(let z=0;z<6;z++){const[zx,zy]=zoneXY(z);let hasU=false;
+    for(let p=0;p<3;p++){let t=pick(['R','R','C','C','D','U'],r);if(t==='U'&&hasU)t=pick(['R','C','D'],r);if(t==='U')hasU=true;
+      cnt[t]++;comps.push({id:comps.length,t,label:t+cnt[t],zone:z,x:zx+POS[p][0],y:zy+POS[p][1],
+        a:t==='R'?pick([0,90],r):pick([0,90,180,270],r),v:t==='R'?Math.floor(r()*RV.length):null})}}
+  const traces=[];for(let i=0;i<22;i++){const x1=20+r()*740,y1=20+r()*440,x2=x1+(r()-.5)*260,y2=y1;traces.push(`M${x1|0},${y1|0} H${x2|0} V${(y1+(r()-.5)*160)|0}`)}
+  return{name,comps,traces};
 }
-document.querySelectorAll('.tabs button').forEach(b=>b.onclick=()=>show(+b.dataset.b));
-show(0);
+function makeBoard(fam,n){
+  if(n==null){const u=Math.random();n=u<.2?0:u<.55?1:u<.85?2:3}
+  const comps=fam.comps.map(c=>({...c})),truth={};
+  const ids=fam.comps.map(c=>c.id).sort(()=>Math.random()-.5).slice(0,n);
+  for(const id of ids){const c=comps[id];const spec={C:'REV',D:'REV',U:'ROT',R:'VAL'}[c.t];
+    const d=Math.random()<.6?spec:pick(['MIS','BRG','BRN']);truth[id]=d;
+    if(d==='REV')c.a=(c.a+180)%360;else if(d==='ROT')c.a=(c.a+pick([90,180,270]))%360;
+    else if(d==='VAL')c.v=(c.v+1+Math.floor(Math.random()*(RV.length-1)))%RV.length;
+    else if(d==='MIS')c.missing=true;else if(d==='BRG')c.bridge=true;else c.burn=true}
+  return{fam:fam.name,comps,truth,n};
+}
+function padsSVG(t){if(t==='U'){let s='';for(let i=0;i<4;i++){const x=-21+i*14;s+=`<rect x="${x-3}" y="-27" width="6" height="9" fill="#c9a24a"/><rect x="${x-3}" y="18" width="6" height="9" fill="#c9a24a"/>`}return s}
+  return`<rect x="-40" y="-6" width="11" height="12" rx="2" fill="#c9a24a"/><rect x="29" y="-6" width="11" height="12" rx="2" fill="#c9a24a"/>`}
+function bodySVG(c){
+  if(c.t==='R'){const b=RV[c.v].c;return`<line x1="-31" y1="0" x2="31" y2="0" stroke="#c8ccd0" stroke-width="2.5"/><rect x="-22" y="-8" width="44" height="16" rx="6" fill="#dcc79f" stroke="#a8916a"/>`+
+    b.map((k,i)=>`<rect x="${-15+i*8}" y="-8" width="4.5" height="16" fill="${COL[k]}"/>`).join('')+`<rect x="12" y="-8" width="3.5" height="16" fill="${COL.gold}"/>`}
+  if(c.t==='C')return`<line x1="-31" y1="0" x2="31" y2="0" stroke="#c8ccd0" stroke-width="2.5"/><rect x="-20" y="-11" width="40" height="22" rx="5" fill="#2c4f9e" stroke="#1b346e"/><rect x="9" y="-11" width="11" height="22" rx="3" fill="#cfd8ea"/><text x="14.5" y="4" font-size="12" text-anchor="middle" fill="#1b346e" font-weight="700">−</text>`;
+  if(c.t==='D')return`<line x1="-31" y1="0" x2="31" y2="0" stroke="#c8ccd0" stroke-width="2.5"/><rect x="-18" y="-7" width="36" height="14" rx="3" fill="#1b1b1b"/><rect x="9" y="-7" width="5" height="14" fill="#cfcfcf"/>`;
+  let pins='';for(let i=0;i<4;i++){const x=-21+i*14;pins+=`<rect x="${x-2.5}" y="-25" width="5" height="7" fill="#b9bec3"/><rect x="${x-2.5}" y="18" width="5" height="7" fill="#b9bec3"/>`}
+  return pins+`<rect x="-32" y="-20" width="64" height="40" rx="3" fill="#232526"/><circle cx="32" cy="0" r="6" fill="#1f6b3a"/><circle cx="23" cy="11" r="2.5" fill="#777"/>`;
+}
+function compSVG(c){
+  const vert=c.a%180===90,ly=vert?(c.t==='U'?46:50):(c.t==='U'?40:26);
+  let s=`<g transform="translate(${c.x},${c.y}) rotate(${c.a})">${padsSVG(c.t)}${c.missing?'':bodySVG(c)}`;
+  if(c.bridge)s+=c.t==='U'?`<ellipse cx="-14" cy="-24" rx="12" ry="5" fill="#dfe3e7" stroke="#9aa3aa"/>`:`<ellipse cx="34" cy="10" rx="8" ry="13" fill="#dfe3e7" stroke="#9aa3aa"/>`;
+  s+='</g>';
+  if(c.burn)s+=`<circle cx="${c.x-3}" cy="${c.y-2}" r="25" fill="url(#burn)"/>`;
+  s+=`<text x="${c.x}" y="${c.y+ly}" font-size="11" text-anchor="middle" fill="#e6f2e6" font-family="ui-monospace,monospace">${c.label}</text>`;
+  return s;
+}
+function overlaySVG(fam){
+  const cy='#4fe3ff';let s=`<g class="holo" pointer-events="none">`;
+  for(let z=0;z<6;z++){const[zx,zy]=zoneXY(z);s+=`<rect x="${zx+3}" y="${zy+3}" width="234" height="208" rx="10" fill="none" stroke="${cy}" stroke-width="1.5" stroke-dasharray="6 5" opacity=".75"/><rect x="${zx+8}" y="${zy+8}" width="58" height="17" rx="8" fill="${cy}" opacity=".85"/><text x="${zx+37}" y="${zy+20.5}" font-size="10.5" font-weight="700" text-anchor="middle" fill="#05313b">ZONE ${z+1}</text>`}
+  for(const c of fam.comps){const dim={R:[48,20],C:[44,26],D:[40,18],U:[68,44]}[c.t];
+    s+=`<g transform="translate(${c.x},${c.y}) rotate(${c.a})"><rect x="${-dim[0]/2}" y="${-dim[1]/2}" width="${dim[0]}" height="${dim[1]}" rx="5" fill="${cy}" fill-opacity=".08" stroke="${cy}" stroke-width="1.6"/>`;
+    if(c.t!=='R')s+=`<path d="M${dim[0]/2+4},-6 L${dim[0]/2+13},0 L${dim[0]/2+4},6 Z" fill="${cy}"/>`;
+    s+='</g>';
+    const rad=c.a*Math.PI/180,off=(c.t==='U'?52:40),tx=c.x+Math.cos(rad)*off,ty=c.y+Math.sin(rad)*off+4;
+    if(c.t==='C')s+=`<text x="${tx}" y="${ty}" font-size="13" font-weight="700" text-anchor="middle" fill="${cy}">−</text>`;
+    if(c.t==='D')s+=`<text x="${tx}" y="${ty}" font-size="11" font-weight="700" text-anchor="middle" fill="${cy}">K</text>`;
+    if(c.t==='U')s+=`<text x="${tx}" y="${ty}" font-size="11" font-weight="700" text-anchor="middle" fill="${cy}">1</text>`;
+    if(c.t==='R'){const hx=c.a===0?c.x-30:c.x+16,hy=c.a===0?c.y-15:c.y-24;
+      s+=`<rect x="${hx-2}" y="${hy-10}" width="62" height="14" rx="4" fill="#05313b" opacity=".75"/><text x="${hx+2}" y="${hy+1}" font-size="10.5" font-weight="700" fill="${cy}">${RV[c.v].s}</text>`+
+      RV[c.v].c.map((k,i)=>`<rect x="${hx+34+i*8}" y="${hy-7}" width="6" height="9" fill="${COL[k]}" stroke="${cy}" stroke-width=".6"/>`).join('')}}
+  s+=`<text x="${W-14}" y="${H-10}" font-size="10" text-anchor="end" fill="${cy}" opacity=".8">GUIDANCE · FAMILY ${fam.name}</text></g>`;
+  return s;
+}
+function boardSVG(fam,b,opt={}){
+  let s=`<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg"><defs><radialGradient id="burn"><stop offset="0" stop-color="#0b0704" stop-opacity=".95"/><stop offset=".55" stop-color="#3b2410" stop-opacity=".8"/><stop offset="1" stop-color="#3b2410" stop-opacity="0"/></radialGradient></defs>`;
+  s+=`<rect width="${W}" height="${H}" rx="14" fill="#1f6b3a"/>`;
+  s+=fam.traces.map(d=>`<path d="${d}" stroke="#2c8a4c" stroke-width="3" fill="none" opacity=".7"/>`).join('');
+  [[14,14],[W-14,14],[14,H-14],[W-14,H-14]].forEach(([x,y])=>s+=`<circle cx="${x}" cy="${y}" r="6" fill="#0f3a1f" stroke="#c9a24a" stroke-width="2"/>`);
+  for(let z=0;z<6;z++){const[zx,zy]=zoneXY(z);s+=`<text x="${zx+228}" y="${zy+206}" font-size="10" text-anchor="end" fill="#cfe3cf" opacity=".55" font-family="ui-monospace,monospace">Z${z+1}</text>`}
+  s+=`<text x="${W/2}" y="${H-6}" font-size="10" text-anchor="middle" fill="#cfe3cf" opacity=".6" font-family="ui-monospace,monospace">FAMILY ${fam.name}${opt.boardNo?' · BOARD '+String(opt.boardNo).padStart(2,'0'):''}</text>`;
+  s+=b.comps.map(compSVG).join('');
+  if(opt.overlay)s+=overlaySVG(fam);
+  if(opt.feedback){for(const c of b.comps){const tr=b.truth[c.id],mk=opt.marks[c.id];
+      if(tr){s+=`<circle cx="${c.x}" cy="${c.y}" r="37" fill="none" stroke="${mk?'#3ddc84':'#ffd166'}" stroke-width="3.5" ${mk?'':'stroke-dasharray="7 5"'}/><rect x="${c.x-62}" y="${c.y-58}" width="124" height="17" rx="8" fill="${mk?'#3ddc84':'#ffd166'}"/><text x="${c.x}" y="${c.y-45.5}" font-size="10.5" font-weight="700" text-anchor="middle" fill="#123">${DEF[tr]}${mk?(mk===tr?' ✓':' (type?)'):' – missed'}</text>`}
+      else if(mk){s+=`<path d="M${c.x-22},${c.y-22} L${c.x+22},${c.y+22} M${c.x+22},${c.y-22} L${c.x-22},${c.y+22}" stroke="#ff5c5c" stroke-width="5"/><text x="${c.x}" y="${c.y-34}" font-size="10.5" font-weight="700" text-anchor="middle" fill="#ff8f8f">no defect here</text>`}}}
+  else if(opt.marks){for(const id in opt.marks){const c=b.comps[id];s+=`<circle cx="${c.x}" cy="${c.y}" r="36" fill="none" stroke="#ff3b3b" stroke-width="3.5"/><rect x="${c.x+14}" y="${c.y-46}" width="36" height="16" rx="7" fill="#ff3b3b"/><text x="${c.x+32}" y="${c.y-34.5}" font-size="10" font-weight="700" text-anchor="middle" fill="#fff">${opt.marks[id]}</text>`}}
+  if(opt.interactive)s+=b.comps.map(c=>`<rect class="hit" data-id="${c.id}" x="${c.x-42}" y="${c.y-42}" width="84" height="84" fill="transparent" style="cursor:pointer"/>`).join('');
+  return s+'</svg>';
+}
+function scoreBoard(b,marks){
+  let found=0,typed=0,miss=0,fa=0;
+  for(const id in b.truth){if(marks[id]){found++;if(marks[id]===b.truth[id])typed++}else miss++}
+  for(const id in marks)if(!b.truth[id])fa++;
+  const verdictFlawed=Object.keys(marks).length>0,verdictCorrect=verdictFlawed===(b.n>0);
+  const earn=(verdictCorrect?.10:0)+typed*.10+(found-typed)*.05-miss*.05-fa*.05;
+  return{found,typed,miss,fa,verdictCorrect,earn};
+}
+/* paper manual */
+function ruleHTML(c){const d=DIR[c.a];
+  if(c.t==='R')return`${c.a===0?'Horizontal':'Vertical'}, ${RV[c.v].l}<br>`+RV[c.v].c.map(k=>`<span class="chip" style="background:${COL[k]}"></span>`).join('')+` ${RV[c.v].c.join('–')}`;
+  if(c.t==='C')return`Negative stripe toward the <b>${d}</b> edge`;
+  if(c.t==='D')return`Cathode band toward the <b>${d}</b> edge`;
+  return`Pin-1 notch toward the <b>${d}</b> edge`}
+function manualHTML(fam,page){
+  const zs=[page*2,page*2+1];
+  let map=`<svg viewBox="0 0 150 70" width="150" height="70">`;for(let z=0;z<6;z++){const x=4+(z%3)*48,y=4+Math.floor(z/3)*32,on=zs.includes(z);map+=`<rect x="${x}" y="${y}" width="44" height="28" fill="${on?'#e6d39c':'#fff'}" stroke="#8a7a4a"/><text x="${x+22}" y="${y+18}" font-size="11" text-anchor="middle" fill="#4a3f1f">${z+1}</text>`}map+='</svg>';
+  let body=`<div class="row" style="gap:8px;margin-bottom:6px">${map}<div style="font-size:.78rem;color:#6b5b2e">Board seen from the front.<br>Zones 1–3 top row, 4–6 bottom row.</div></div>`;
+  for(const z of zs){body+=`<div style="font-weight:700;margin:8px 0 2px">Zone ${z+1}</div><table>`+fam.comps.filter(c=>c.zone===z).map(c=>`<tr><td>${c.label}</td><td>${ruleHTML(c)}</td></tr>`).join('')+`</table>`}
+  return`<div class="mhead">Inspection Manual – Board Family ${fam.name}</div><div class="tabs">${[0,1,2].map(p=>`<button data-p="${p}" class="${p===page?'on':''}">p.${p+1} · Zones ${p*2+1}–${p*2+2}</button>`).join('')}</div><div class="mbody">${body}</div>`;
+}
+
+/* ============================== UI building blocks ============================== */
+function show(html){app().innerHTML=html;window.scrollTo(0,0)}
+function waitClick(sel){return new Promise(r=>{const el=$(sel);el.onclick=()=>r()})}
+function skipBtn(){return S.tester?`<button class="skip" id="skip">Skip (tester)</button>`:''}
+function sliderQ(id,label,l,r){return`<div class="q"><div class="ql">${label}</div><input type="range" min="0" max="100" value="50" id="${id}"><div class="ends"><span>${l}</span><span>${r}</span></div></div>`}
+function likertQ(id,label,l='Not at all',r='Completely'){return`<div class="q"><div class="ql">${label}</div><div class="likert">${[1,2,3,4,5,6,7].map(v=>`<label><input type="radio" name="${id}" value="${v}"><span>${v}</span></label>`).join('')}</div><div class="ends"><span>${l}</span><span>${r}</span></div></div>`}
+function readQs(ids){const o={};for(const id of ids){const el=$('#'+id);if(el)o[id]=+el.value;else{const r=document.querySelector(`input[name="${id}"]:checked`);o[id]=r?+r.value:null}}return o}
+function popover(x,y,onPick){
+  closePop();const d=document.createElement('div');d.className='pop';d.id='pop';
+  d.innerHTML=`<div class="t">Mark a defect</div>`+Object.entries(DEF).map(([k,v])=>`<button data-k="${k}">${v}</button>`).join('')+`<div class="t" style="border-top:1px solid #eee;margin-top:4px"></div><button data-k="CLEAR">Remove mark</button><button data-k="X">Cancel</button>`;
+  document.body.appendChild(d);const w=230,h=d.offsetHeight;d.style.left=Math.min(Math.max(8,x+8),innerWidth-w-8)+'px';d.style.top=Math.min(Math.max(8,y-20),innerHeight-h-8)+'px';
+  d.onclick=e=>{const k=e.target.dataset.k;if(!k)return;closePop();if(k!=='X')onPick(k)};
+  setTimeout(()=>document.addEventListener('pointerdown',outside,{once:true}),0);
+  function outside(e){if(!d.contains(e.target))closePop();else document.addEventListener('pointerdown',outside,{once:true})}
+}
+function closePop(){const p=$('#pop');if(p)p.remove()}
+
+/* ============================== screens ============================== */
+async function setup(){
+  show(`<div class="card"><h1>Board Inspection Study – test version</h1>
+  <p>This is a playable version of the planned lab session, for the author team to try. You work through three blocks of a circuit-board inspection task under time pressure, with an evaluation rule hanging over every block. Depending on the arm, you get AR guidance or a paper manual in Block 2, and you may lose it in Block 3.</p>
+  <div class="labnote"><b>Differences from the lab:</b> the AR overlay is drawn on screen instead of in the HoloLens; the manual is a panel instead of a printed booklet; no saliva or heart rate is recorded; rest periods are shortened. Grey "Lab note" boxes mark what would happen in the lab at that point.</div>
+  <h3>Arm</h3>
+  ${['R','A','B','C','D'].map(k=>`<label class="opt"><input type="radio" name="arm" value="${k}" ${k==='R'?'checked':''}> <span>${k==='R'?'<b>Random</b> (as a participant would be assigned)':ARMS[k].name}</span></label>`).join('')}
+  <h3>Length</h3>
+  <select id="len"><option value="90">Quick check: 1.5-minute blocks</option><option value="180" selected>Demo: 3-minute blocks</option><option value="900">Full: 15-minute blocks (as in the protocol)</option></select>
+  <h3>Options</h3>
+  <label class="opt"><input type="checkbox" id="snd" checked> <span>Sound and spoken reminders (use headphones, as in the lab)</span></label>
+  <label class="opt"><input type="checkbox" id="tst" checked> <span>Tester controls (skip buttons for rests and training)</span></label>
+  <div class="row" style="margin-top:14px"><button class="primary big" id="go">Start session</button></div>
+  <p class="muted" style="margin-top:14px;font-size:.85rem">At the end you can download your data (JSON and CSV) and send it to the team. <a href="design.html">Design notes</a></p></div>`);
+  await waitClick('#go');
+  let k=document.querySelector('input[name=arm]:checked').value;if(k==='R')k=pick(['A','B','C','D']);
+  S.armKey=k;S.arm=ARMS[k];S.blockMs=+$('#len').value*1000;S.outageMs=S.blockMs>=900000?45000:Math.round(S.blockMs*0.11);
+  S.restMs=S.blockMs>=900000?300000:Math.min(30000,S.blockMs/6);S.sound=$('#snd').checked;S.tester=$('#tst').checked;
+  logEvent('setup',{arm:k,blockMs:S.blockMs});
+  if(S.sound){beep(440,.05,.02)}
+}
+async function intro(){
+  show(`<div class="card"><h1>Welcome</h1>
+  <p>You will work as a quality inspector for printed circuit boards. Each board shows 18 components in six zones. Some boards are correct; others have one or more defects.</p>
+  <p><b>Your job:</b> click every defective component and choose the defect type. If you find nothing wrong, submit the board without marks.</p>
+  <h3>Pay rule (identical in every block)</h3>
+  <ul><li>+ €0.10 for each correct board verdict (correct / flawed)</li><li>+ €0.10 for each defect found and correctly named (+ €0.05 if the type is wrong)</li><li>− €0.05 for each missed defect and for each mark on a component that is fine</li></ul>
+  <p class="muted">Your earnings are shown only at the end of the session. Work as accurately and as quickly as you can: each block runs on a countdown.</p>
+  <div class="row"><button class="primary big" id="n">Continue to training</button></div></div>`);
+  await waitClick('#n');
+}
+function galleryItem(title,desc,a,b){
+  const one=(c)=>`<svg viewBox="-60 -45 120 90"><g>${compSVG({...c,x:0,y:0,label:''})}</g></svg>`;
+  return`<div class="gal"><b>${title}</b><div class="row" style="flex-wrap:nowrap;gap:6px;margin:6px 0"><div style="flex:1">${one(a)}<div class="muted" style="font-size:.75rem;text-align:center">as specified</div></div><div style="flex:1">${one(b)}<div class="muted" style="font-size:.75rem;text-align:center">defect</div></div></div>${desc}</div>`;
+}
+async function training(famT){
+  show(`<div class="card" style="max-width:900px"><h1>Training: the six defect types</h1>
+  <p>Some defects you can see directly. Others only show up when you compare a component with the board's specification: which way it should face, or which value it should have. <b>Each board family has its own specification.</b></p>
+  <div class="gallery">
+  ${galleryItem('Reversed polarity','Capacitor stripe (−) or diode band on the wrong side.',{t:'C',a:0},{t:'C',a:180})}
+  ${galleryItem('IC rotated','The chip\'s pin-1 notch faces the wrong way.',{t:'U',a:0},{t:'U',a:90})}
+  ${galleryItem('Wrong resistor value','The colour bands do not match the specified value.',{t:'R',a:0,v:2},{t:'R',a:0,v:3})}
+  ${galleryItem('Missing part','Empty pads where a component belongs.',{t:'D',a:0},{t:'D',a:0,missing:true})}
+  ${galleryItem('Solder bridge','A blob of solder joining a pad to its neighbour.',{t:'C',a:0},{t:'C',a:0,bridge:true})}
+  ${galleryItem('Burn mark','Scorching on or around a component.',{t:'R',a:0,v:0},{t:'R',a:0,v:0,burn:true})}
+  </div>
+  <p>Next you inspect two practice boards and see the solution after each. The practice boards have their own specification, so the correct orientations are shown in the feedback only.</p>
+  <div class="row"><button class="primary big" id="n">Start practice</button>${skipBtn()}</div></div>`);
+  const skip=await new Promise(r=>{$('#n').onclick=()=>r(false);if($('#skip'))$('#skip').onclick=()=>r(true)});
+  if(skip)return;
+  for(let i=0;i<2;i++){
+    const b=makeBoard(famT,i===0?2:1),marks={};
+    await new Promise(res=>{
+      const draw=(fb)=>{show(`<div class="hud"><span class="pill">Practice board ${i+1} of 2</span><span class="pill gd-none">No time limit</span></div>
+        <div class="work"><div class="boardwrap" id="bw">${boardSVG(famT,b,{interactive:!fb,marks,feedback:fb})}</div></div>
+        <div class="actions">${fb?`<button class="primary big" id="nx">${i===1?'Finish training':'Next practice board'}</button><span class="hint">Green: found. Yellow dashed: missed. Red cross: marked but fine.</span>`:`<button class="primary big" id="sb">Submit board</button><button id="cl">Clear marks</button><span class="hint">Click a component to mark a defect.</span>`}</div>`);
+        if(fb){$('#nx').onclick=res;return}
+        bindHits(()=>marks,()=>draw(false));$('#sb').onclick=()=>draw(true);$('#cl').onclick=()=>{for(const k in marks)delete marks[k];draw(false)}};
+      draw(false)});
+  }
+}
+function bindHits(getMarks,redraw){
+  document.querySelectorAll('.hit').forEach(h=>h.addEventListener('click',e=>{const id=h.dataset.id;
+    popover(e.clientX,e.clientY,k=>{const m=getMarks();if(k==='CLEAR')delete m[id];else m[id]=k;redraw()})}));
+}
+function drumHTML(){const cols=['#c0392b','#1f5f8b','#2e7d4f','#b7791f','#6c3483','#d35400','#117a65','#7f8c8d'];
+  return`<div class="drum" id="drum">${cols.map((c,i)=>{const a=i/8*2*Math.PI,r=30;return`<div class="ball" style="background:${c};left:${45+Math.cos(a)*r-10+5}px;top:${45+Math.sin(a)*r-10+5}px">${i+1}</div>`}).join('')}</div>`}
+async function announcement(){
+  show(`<div class="card"><h1>Batch sign-off review</h1>
+  <p>In inspection work, a batch is signed off by the inspector who checked it. In this session, <b>one board from each block</b> will be drawn for sign-off review at the end.</p>
+  <p><b>One in four participants</b> will be selected by lottery to present those boards and defend each decision they made: why a component was marked, and why others were not.</p>
+  <div class="drumbox">${drumHTML()}<div><b>The lottery drum</b><br><span class="muted">It is spun now to show how the draw works, and again at the end of the session.</span></div></div>
+  <h3>What a review looks like</h3>
+  <div class="labnote" style="background:#eef3f7;border-color:#1f5f8b;color:#1c2226">Board 14, Family B. <i>"You rejected this board for a reversed capacitor C3. What did you compare it with? Why did you not mark U2? How sure were you?"</i></div>
+  <div class="labnote"><b>Lab note:</b> here the experimenter demonstrates a short report on a practice board and spins the drum in front of the group.</div>
+  <div class="row"><button class="primary big" id="n" disabled>Continue</button></div></div>`);
+  const d=$('#drum');d.classList.add('spin');beep(300,.3,.03);await sleep(3000);d.classList.remove('spin');$('#n').disabled=false;
+  logEvent('announcement');await waitClick('#n');
+}
+async function rest(title,ms,labnote){
+  show(`<div class="card"><h2>${title}</h2><p class="muted">Please sit quietly and relax. Do not think about the task.</p><div class="rest" id="rt">${fmt(ms)}</div>${labnote?`<div class="labnote"><b>Lab note:</b> ${labnote}</div>`:''}<div class="row">${skipBtn()}</div></div>`);
+  const end=Date.now()+ms;await new Promise(res=>{const iv=setInterval(()=>{const left=end-Date.now();const el=$('#rt');if(el)el.textContent=fmt(left);if(left<=0){clearInterval(iv);res()}},250);if($('#skip'))$('#skip').onclick=()=>{clearInterval(iv);res()}});
+}
+async function vasScreen(tag,block){
+  show(`<div class="card"><h2>Quick rating</h2>${sliderQ('vas','How stressed do you feel right now?','Not at all','Extremely')}<div class="labnote"><b>Lab note:</b> saliva sample (baseline before the reminder).</div><button class="primary" id="n">Continue</button></div>`);
+  await waitClick('#n');S.vas.push({block,tag,v:+$('#vas').value,t:Date.now()-S.start});
+}
+async function reminder(block){
+  const base='Reminder. At the end of the session, one board from each block will be drawn for batch sign-off review. One in four participants will be selected to present and defend their decisions on those boards.';
+  let extra='',gd='';
+  if(block===1){extra='In this block, no guidance is available.';gd='none'}
+  if(block===2){extra=`In this block, you will work with ${S.arm.res==='ar'?'the AR guidance':'the inspection manual'}. Please note: guidance is not guaranteed. It may become unavailable at any time.`;gd='threat'}
+  if(block===3){if(S.arm.withdrawn){extra='Guidance is not available for this block.';gd='removed'}else{extra=`In this block, you continue with ${S.arm.res==='ar'?'the AR guidance':'the inspection manual'}. It may become unavailable at any time.`;gd='threat'}}
+  const txt=base+' '+extra;
+  show(`<div class="card"><span class="speaker">🔊 Recorded announcement</span><h2>Before Block ${block}</h2><p>${base}</p><p style="font-weight:700;${gd==='removed'?'color:#c0392b':''}">${extra}</p><div class="row"><button class="primary big" id="n" disabled>Start Block ${block}</button></div></div>`);
+  logEvent('reminder',{block,removed:gd==='removed'});
+  if(gd==='removed'){beep(240,.35,.06,'square');await sleep(400)}
+  await Promise.race([speak(txt),sleep(S.sound?25000:2500)]);await sleep(600);
+  $('#n').disabled=false;await waitClick('#n');
+}
+async function familiarise(famB){
+  const ar=S.arm.res==='ar';
+  show(`<div class="card"><h1>Your guidance for the next block</h1>
+  <p>${ar?'In the next block you will see <b>AR guidance</b> on top of each board. In the lab this appears in the HoloLens over the board; here it is drawn on the screen. Cyan outlines show each zone, where each component belongs and which way it should face (the arrow marks the − stripe, the cathode band K, or pin 1). For resistors it shows the specified value and colour bands.':'In the next block you will have an <b>inspection manual</b> for this board family. It lists, zone by zone, how each component should face and which value each resistor should have. Use the zone map and the component labels printed on the board to find what you need.'}</p>
+  <p><b>The guidance never tells you whether a board is correct.</b> You still decide. The next block also uses a <b>new board family</b> with its own specification.</p>
+  <p>Try it on two practice boards now. There is no time limit and no feedback.</p>
+  <div class="row"><button class="primary big" id="n">Start</button>${skipBtn()}</div></div>`);
+  const skip=await new Promise(r=>{$('#n').onclick=()=>r(false);if($('#skip'))$('#skip').onclick=()=>r(true)});if(skip)return;
+  for(let i=0;i<2;i++){const b=makeBoard(famB),marks={};let page=0;
+    await new Promise(res=>{const draw=()=>{show(`<div class="hud"><span class="pill">Familiarisation ${i+1} of 2</span><span class="pill ${ar?'gd-on':'gd-paper'}">${ar?'AR guidance on':'Manual on desk'}</span></div>
+      <div class="work"><div class="boardwrap">${boardSVG(famB,b,{interactive:true,marks,overlay:ar})}</div>${ar?'':`<div class="manual" id="man">${manualHTML(famB,page)}</div>`}</div>
+      <div class="actions"><button class="primary big" id="sb">${i===1?'Done':'Next board'}</button><span class="hint">Click a component to mark a defect.</span></div>`);
+      bindHits(()=>marks,draw);$('#sb').onclick=res;
+      if(!ar)document.querySelectorAll('#man .tabs button').forEach(t=>t.onclick=()=>{page=+t.dataset.p;draw()})};draw()})}
+  logEvent('familiarised');
+}
+async function midVAS(){return new Promise(res=>{const m=document.createElement('div');m.className='modal';
+  m.innerHTML=`<div class="card"><h2>Quick rating</h2><p class="muted">The clock is paused.</p>${sliderQ('mvas','How stressed do you feel right now?','Not at all','Extremely')}<button class="primary" id="mv">Back to work</button></div>`;
+  document.body.appendChild(m);m.querySelector('#mv').onclick=()=>{const v=+m.querySelector('#mvas').value;m.remove();res(v)}})}
+
+async function runBlock(n,fam,guidance,outages){
+  closePop();
+  const dur=S.blockMs;let elapsed=0,last=performance.now(),paused=false,ended=false,midDone=false,lastSec=-1;
+  let available=guidance!=='none',outIdx=-1,page=0,boardNo=0;
+  let b,marks,bStart,bOut;
+  const newBoard=()=>{b=makeBoard(fam);marks={};bStart=elapsed;bOut=!available&&guidance!=='none';boardNo++};
+  newBoard();
+  logEvent('block_start',{block:n,guidance,family:fam.name});
+  show(`<div class="hud"><span class="pill">Block ${n} of 3</span><span class="pill timer" id="tm">${fmt(dur)}</span><span class="pill" id="cnt">Boards submitted: 0</span><span class="pill" id="gd"></span></div>
+    <div class="work"><div class="boardwrap" id="bw"></div><div id="mw"></div></div>
+    <div class="actions"><button class="primary big" id="sb">Submit board</button><button id="cl">Clear marks</button><span class="hint">Click a component to mark a defect. Submit without marks if the board is correct.</span></div>`);
+  let submitted=0;
+  const drawGuidanceLabel=()=>{const g=$('#gd');if(!g)return;
+    if(guidance==='none'){g.className='pill gd-none';g.textContent=n===3?'Guidance: not available':'Guidance: none'}
+    else if(!available){g.className='pill gd-off';g.textContent='⚠ Guidance unavailable'}
+    else{g.className='pill '+(guidance==='ar'?'gd-on':'gd-paper');g.textContent=guidance==='ar'?'AR guidance on':'Manual on desk'}};
+  const drawBoard=()=>{const showOv=guidance==='ar'&&available;
+    $('#bw').innerHTML=boardSVG(fam,b,{interactive:true,marks,overlay:showOv,boardNo})+(guidance==='ar'&&!available?`<div class="ar-banner">GUIDANCE UNAVAILABLE</div>`:'');
+    bindHits(()=>marks,drawBoard);
+    const mw=$('#mw');if(guidance==='paper'){mw.className='manual';mw.innerHTML=manualHTML(fam,page)+(available?'':`<div class="shutter">Manual not available</div>`);
+      mw.querySelectorAll('.tabs button').forEach(t=>t.onclick=()=>{page=+t.dataset.p;drawBoard()})}else{mw.className='';mw.innerHTML=''}
+    drawGuidanceLabel()};
+  drawBoard();
+  $('#cl').onclick=()=>{marks={};drawBoard()};
+  $('#sb').onclick=()=>{if(ended||paused)return;const sc=scoreBoard(b,marks);
+    S.boards.push({block:n,board:boardNo,family:fam.name,guidance,start_s:+(bStart/1000).toFixed(2),time_s:+((elapsed-bStart)/1000).toFixed(2),
+      defects:b.n,truth:JSON.stringify(b.truth),marks:JSON.stringify(marks),during_outage:bOut,...sc,_b:b,_m:{...marks}});
+    submitted++;$('#cnt').textContent='Boards submitted: '+submitted;beep(880,.04,.02);newBoard();drawBoard()};
+  await new Promise(res=>{const iv=setInterval(async()=>{
+    const now=performance.now();if(!paused)elapsed+=now-last;last=now;
+    if(ended)return;
+    // outages
+    let active=-1;outages.forEach((f,i)=>{const s=f*dur;if(elapsed>=s&&elapsed<s+S.outageMs)active=i});
+    if(guidance!=='none'){const nowAvail=active<0;if(nowAvail!==available){available=nowAvail;
+        if(!available){bOut=true;logEvent('outage_start',{block:n,idx:active});beep(220,.25,.08,'square');setTimeout(()=>beep(180,.3,.08,'square'),280)}
+        else{logEvent('outage_end',{block:n});beep(660,.12,.04)}
+        drawBoard()}}
+    const left=dur-elapsed;const tm=$('#tm');if(tm){tm.textContent=fmt(left);tm.classList.toggle('low',left<60000)}
+    const sec=Math.ceil(left/1000);if(left<20000&&sec!==lastSec&&!paused){lastSec=sec;beep(1200,.02,.025,'square')}
+    if(!midDone&&elapsed>=dur*.5&&available===(guidance!=='none')){midDone=true;paused=true;closePop();const v=await midVAS();S.vas.push({block:n,tag:'mid',v,t:Date.now()-S.start});last=performance.now();paused=false}
+    if(elapsed>=dur){ended=true;clearInterval(iv);closePop();logEvent('block_end',{block:n,submitted});res()}
+  },200)});
+  show(`<div class="card"><h2>Block ${n} is over</h2><p>Please stop working.</p><div class="labnote"><b>Lab note:</b> saliva sample at the end of the block, and again five minutes later.</div><button class="primary big" id="n">Continue</button></div>`);
+  beep(520,.4,.05);await waitClick('#n');
+}
+async function questionnaire(n,guidance){
+  const used=guidance!=='none';
+  const dep=n===3;
+  show(`<div class="card"><h2>About Block ${n}</h2>
+  ${sliderQ('q_vas','How stressed do you feel right now?','Not at all','Extremely')}
+  ${sliderQ('q_mental','How mentally demanding was the block?','Very low','Very high')}
+  ${sliderQ('q_time','How hurried or rushed was the pace?','Very low','Very high')}
+  ${sliderQ('q_frus','How insecure, irritated or stressed did you feel during the block?','Very low','Very high')}
+  ${sliderQ('q_perf','What share of the defects do you think you found?','0%','100%')}
+  ${likertQ('q_conf','How confident are you in your decisions?')}
+  ${likertQ('q_chal','The block felt like a challenge I could meet.','Disagree','Agree')}
+  ${likertQ('q_threat','The block felt threatening.','Disagree','Agree')}
+  ${used?likertQ('q_rely','How much did you rely on the guidance?'):likertQ('q_miss','How much did you miss having guidance?')}
+  ${dep?`<h3>About the guidance in general</h3>
+  ${likertQ('d1','When guidance was unavailable, I felt lost.','Disagree','Agree')}
+  ${likertQ('d2','I could not do the task well without the guidance.','Disagree','Agree')}
+  ${likertQ('d3','Losing the guidance worried me more than the task itself.','Disagree','Agree')}
+  ${likertQ('d4','I would have preferred to keep the guidance at all times.','Disagree','Agree')}`:''}
+  <button class="primary big" id="n">Submit</button></div>`);
+  await waitClick('#n');
+  const ids=['q_vas','q_mental','q_time','q_frus','q_perf','q_conf','q_chal','q_threat',used?'q_rely':'q_miss'].concat(dep?['d1','d2','d3','d4']:[]);
+  const a=readQs(ids);S.qs.push({block:n,guidance,...a});S.vas.push({block:n,tag:'post',v:a.q_vas,t:Date.now()-S.start});
+}
+async function drawAndReview(){
+  show(`<div class="card"><h1>The draw</h1><p>The lottery decides now whether you are selected for the batch sign-off review.</p><div class="drumbox">${drumHTML()}<div id="dr" class="muted">Spinning…</div></div><div class="row" id="after"></div></div>`);
+  const d=$('#drum');d.classList.add('spin');await sleep(3500);d.classList.remove('spin');
+  S.drawn=Math.random()<.25;logEvent('draw',{drawn:S.drawn});
+  $('#dr').innerHTML=S.drawn?'<b style="color:#c0392b">You have been selected for the sign-off review.</b>':'<b>You have not been selected.</b> No review for you today.';
+  $('#after').innerHTML=`<button class="primary big" id="n">Continue</button>${!S.drawn&&S.tester?'<button class="skip" id="force">Try the review anyway (tester)</button>':''}`;
+  const doReview=await new Promise(r=>{$('#n').onclick=()=>r(S.drawn);if($('#force'))$('#force').onclick=()=>r(true)});
+  if(!doReview)return;
+  const picks=[1,2,3].map(n=>{const bs=S.boards.filter(x=>x.block===n);return bs.length?pick(bs):null}).filter(Boolean);
+  S.review=[];
+  for(const p of picks){const fam=FAMS[p.family];
+    show(`<div class="card" style="max-width:900px"><span class="speaker">Sign-off review</span><h2>Block ${p.block}, board ${p.board}</h2>
+    <p>Here is the board as you submitted it. In the lab you would present this to the group and answer the experimenter's questions.</p>
+    <div class="boardwrap">${boardSVG(fam,p._b,{marks:p._m,boardNo:p.board})}</div>
+    <div class="q"><div class="ql">${Object.keys(p._m).length?'Walk us through your marks. What did you compare each marked component with?':'You signed this board off as correct. What did you check before deciding that?'}</div><textarea id="ans" rows="3" style="width:100%;font:inherit;padding:8px"></textarea></div>
+    ${likertQ('rsure','How sure were you about this board?')}
+    <button class="primary" id="n">${p===picks[picks.length-1]?'Finish review':'Next board'}</button></div>`);
+    await waitClick('#n');S.review.push({block:p.block,board:p.board,answer:$('#ans').value,sure:readQs(['rsure']).rsure})}
+}
+function summarise(){
+  const rows=[1,2,3].map(n=>{const bs=S.boards.filter(b=>b.block===n);const sum=(f)=>bs.reduce((a,b)=>a+f(b),0);
+    const present=sum(b=>b.defects),found=sum(b=>b.found);
+    const v=t=>{const x=S.vas.find(z=>z.block===n&&z.tag===t);return x?x.v:'–'};
+    const out=bs.filter(b=>b.during_outage),inn=bs.filter(b=>!b.during_outage);
+    const det=a=>{const p=a.reduce((s,b)=>s+b.defects,0);return p?Math.round(100*a.reduce((s,b)=>s+b.found,0)/p)+'%':'–'};
+    const tpb=a=>a.length?(a.reduce((s,b)=>s+b.time_s,0)/a.length).toFixed(1)+' s':'–';
+    return{n,g:bs[0]?bs[0].guidance:'–',boards:bs.length,det:present?Math.round(100*found/present)+'%':'–',fa:bs.length?(sum(b=>b.fa)/bs.length).toFixed(2):'–',
+      acc:bs.length?Math.round(100*sum(b=>b.verdictCorrect?1:0)/bs.length)+'%':'–',tpb:tpb(bs),earn:Math.max(0,sum(b=>b.earn)),
+      vpre:v('pre'),vmid:v('mid'),vpost:v('post'),outN:out.length,detOut:det(out),detIn:det(inn),tOut:tpb(out),tIn:tpb(inn)}});
+  return rows;
+}
+function download(name,text,type){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([text],{type}));a.download=name;a.click()}
+async function results(){
+  const R=summarise(),total=R.reduce((a,r)=>a+r.earn,0);
+  const gname=g=>({none:'none',ar:'AR',paper:'paper'}[g]||g);
+  show(`<div class="card" style="max-width:900px"><h1>Thank you – session complete</h1>
+  <p>Arm: <b>${S.arm.name}</b>. Bonus earned: <b>€${total.toFixed(2)}</b>${S.drawn!=null?` · Sign-off draw: ${S.drawn?'selected':'not selected'}`:''}.</p>
+  <h3>Performance and stress by block</h3>
+  <table class="res"><tr><th>Block</th><th>Guidance</th><th>Boards</th><th>Detection</th><th>False marks / board</th><th>Verdict accuracy</th><th>Time / board</th><th>Stress before · mid · after</th></tr>
+  ${R.map(r=>`<tr><td>${r.n}</td><td>${gname(r.g)}</td><td>${r.boards}</td><td>${r.det}</td><td>${r.fa}</td><td>${r.acc}</td><td>${r.tpb}</td><td>${r.vpre} · ${r.vmid} · ${r.vpost}</td></tr>`).join('')}</table>
+  <h3>Boards worked during an outage</h3>
+  <table class="res"><tr><th>Block</th><th>Boards hit by outage</th><th>Detection: outage vs normal</th><th>Time / board: outage vs normal</th></tr>
+  ${R.filter(r=>r.g!=='none').map(r=>`<tr><td>${r.n}</td><td>${r.outN}</td><td>${r.detOut} vs ${r.detIn}</td><td>${r.tOut} vs ${r.tIn}</td></tr>`).join('')||'<tr><td colspan="4">No outages in this arm.</td></tr>'}</table>
+  <p class="muted" style="font-size:.85rem">Stress ratings are 0–100. In the lab, heart rate and alpha-amylase would sit beside these.</p>
+  <div class="row" style="margin-top:12px"><button class="primary" id="dj">Download data (JSON)</button><button id="dc">Download boards (CSV)</button><button id="re">Start again</button></div></div>`);
+  const clean=S.boards.map(({_b,_m,...r})=>r);
+  const stamp=new Date().toISOString().slice(0,16).replace(/[:T]/g,'-');
+  $('#dj').onclick=()=>download(`inspection_${S.armKey}_${stamp}.json`,JSON.stringify({arm:S.armKey,blockSeconds:S.blockMs/1000,boards:clean,questionnaires:S.qs,vas:S.vas,events:S.events,review:S.review,drawn:S.drawn,summary:R},null,2),'application/json');
+  $('#dc').onclick=()=>{const keys=Object.keys(clean[0]||{block:1});download(`inspection_${S.armKey}_${stamp}.csv`,[keys.join(',')].concat(clean.map(r=>keys.map(k=>JSON.stringify(r[k]??'')).join(','))).join('\n'),'text/csv')};
+  $('#re').onclick=()=>location.reload();
+}
+
+/* ============================== session flow ============================== */
+let FAMS={};
+async function run(){
+  await setup();
+  const seed=Math.floor(Math.random()*1e9),swap=Math.random()<.5;
+  const famT=makeFamily('T',seed+7),famX=makeFamily(swap?'B':'A',seed+101),famY=makeFamily(swap?'A':'B',seed+202);
+  FAMS={T:famT,[famX.name]:famX,[famY.name]:famY};
+  logEvent('families',{baseline:famX.name,test:famY.name});
+  const res=S.arm.res;
+  await intro();
+  await training(famT);
+  await announcement();
+  await rest('Quiet rest',S.restMs,'resting period before the first baseline sample; heart-rate strap already on.');
+  await vasScreen('pre',1);await reminder(1);
+  await runBlock(1,famX,'none',[]);
+  await questionnaire(1,'none');
+  await familiarise(famY);
+  await rest('Recovery',S.restMs,'quiet recovery with nature sounds; baseline 2 saliva sample at the end.');
+  await vasScreen('pre',2);await reminder(2);
+  await runBlock(2,famY,res,[.3,.68]);
+  await questionnaire(2,res);
+  await rest('Recovery',S.restMs,'recovery; baseline 3 saliva sample at the end.');
+  await vasScreen('pre',3);await reminder(3);
+  if(S.arm.withdrawn)await runBlock(3,famY,'none',[]);else await runBlock(3,famY,res,[.38,.78]);
+  await questionnaire(3,S.arm.withdrawn?'none':res);
+  await drawAndReview();
+  await results();
+}
+run();
 </script>
 </body>
 </html>

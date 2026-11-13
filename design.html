@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Three-block design: stress tied to removal</title>
+<style>
+:root{
+  --bg:#f6f4ef; --ink:#1d2327; --muted:#5d666d; --line:#d9d4c8; --card:#fffdf8;
+  --ar:#2f6f8f; --paper:#b9853a; --none:#8a8f94; --loss:#b23a3a; --task:#9aa3a8;
+}
+@media (prefers-color-scheme: dark){
+  :root{ --bg:#15191c; --ink:#ecebe6; --muted:#a3abb1; --line:#333b41; --card:#1d2226;
+    --ar:#5aa7c9; --paper:#d9a85c; --none:#7b838a; --loss:#e06c6c; --task:#6c757b; }
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 Georgia,"Times New Roman",serif}
+main{max-width:860px;margin:0 auto;padding:28px 18px 60px}
+h1{font-size:1.7rem;line-height:1.2;margin:0 0 8px}
+h2{font-size:1.2rem;margin:38px 0 10px}
+p{margin:0 0 12px}
+.tag{font:600 .72rem/1 system-ui,sans-serif;letter-spacing:.08em;text-transform:uppercase;color:var(--loss)}
+.lead{color:var(--muted);font-size:1.05rem}
+.sans{font-family:system-ui,-apple-system,"Segoe UI",sans-serif}
+.principle{border-left:4px solid var(--loss);background:var(--card);padding:14px 16px;margin:18px 0;border-radius:0 8px 8px 0}
+.tabs{display:flex;gap:8px;margin:14px 0}
+.tabs button{flex:1;padding:10px 6px;border:1px solid var(--line);background:var(--card);color:var(--ink);
+  border-radius:8px;font:600 .9rem system-ui,sans-serif;cursor:pointer}
+.tabs button[aria-selected="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px}
+.panel h3{margin:0 0 4px;font-size:1.1rem}
+.panel .sub{color:var(--muted);margin-bottom:12px}
+.meter{margin:12px 0 4px}
+.meter .bar{display:flex;height:22px;border-radius:6px;overflow:hidden;border:1px solid var(--line)}
+.meter .bar span{display:block}
+.meter .t{background:var(--task)} .meter .l{background:var(--loss)}
+.meter .cap{display:flex;justify-content:space-between;font:.78rem system-ui,sans-serif;color:var(--muted);margin-top:4px}
+ul{padding-left:20px;margin:8px 0}
+li{margin:4px 0}
+.grid{display:grid;grid-template-columns:minmax(92px,1.3fr) repeat(3,1fr);gap:6px;margin-top:10px;font:.82rem system-ui,sans-serif}
+.grid .h{font-weight:700;color:var(--muted);text-align:center;padding:4px 0}
+.grid .arm{padding:8px 4px;font-weight:600;line-height:1.25}
+.cell{border-radius:6px;padding:8px 4px;text-align:center;color:#fff;font-weight:600;position:relative;min-height:44px;
+  display:flex;flex-direction:column;justify-content:center;line-height:1.2}
+.cell small{font-weight:400;opacity:.9}
+.c-none{background:var(--none)} .c-ar{background:var(--ar)} .c-paper{background:var(--paper)}
+.c-gone{background:repeating-linear-gradient(45deg,var(--loss),var(--loss) 8px,#0000 8px,#0000 9px),var(--loss)}
+.out{position:absolute;top:0;bottom:0;width:5px;background:var(--loss)}
+.legend{display:flex;flex-wrap:wrap;gap:10px 16px;font:.8rem system-ui,sans-serif;color:var(--muted);margin-top:10px}
+.legend i{display:inline-block;width:14px;height:14px;border-radius:3px;vertical-align:-2px;margin-right:5px}
+table{width:100%;border-collapse:collapse;font:.9rem system-ui,sans-serif}
+th,td{text-align:left;padding:8px 6px;border-bottom:1px solid var(--line);vertical-align:top}
+th{color:var(--muted);font-weight:600}
+.note{font:.85rem system-ui,sans-serif;color:var(--muted);margin-top:36px;border-top:1px solid var(--line);padding-top:14px}
+</style>
+</head>
+<body>
+<main>
+<div class="tag">Draft for discussion</div>
+<h1>Three blocks, one stressor: losing the resource</h1>
+<p class="lead">A sketch of the laboratory session in which stress comes from the removal of the AR overlay or the paper manual, and not from the inspection task.</p>
+
+<div class="principle">
+<strong>The principle.</strong> The task stays the same in every block: same pace, same pay rule, same board difficulty, no audience. What changes is whether guidance is there, and how sure people can be that it stays. Block 1 tells us how stressful the task is by itself. Anything above that level in Blocks 2 and 3 can be traced to the resource.
+</div>
+
+<h2>The four arms across the session</h2>
+<div class="grid" aria-label="Arms by block">
+  <div></div><div class="h">Block 1</div><div class="h">Block 2</div><div class="h">Block 3</div>
+
+  <div class="arm">A · AR removed</div>
+  <div class="cell c-none">none</div>
+  <div class="cell c-ar">AR<small>2 outages</small><span class="out" style="left:30%"></span><span class="out" style="left:68%"></span></div>
+  <div class="cell c-gone">removed</div>
+
+  <div class="arm">B · paper removed</div>
+  <div class="cell c-none">none</div>
+  <div class="cell c-paper">paper<small>2 outages</small><span class="out" style="left:30%"></span><span class="out" style="left:68%"></span></div>
+  <div class="cell c-gone">removed</div>
+
+  <div class="arm">C · AR kept</div>
+  <div class="cell c-none">none</div>
+  <div class="cell c-ar">AR<small>2 outages</small><span class="out" style="left:30%"></span><span class="out" style="left:68%"></span></div>
+  <div class="cell c-ar">AR<small>2 outages</small><span class="out" style="left:42%"></span><span class="out" style="left:80%"></span></div>
+
+  <div class="arm">D · paper kept</div>
+  <div class="cell c-none">none</div>
+  <div class="cell c-paper">paper<small>2 outages</small><span class="out" style="left:30%"></span><span class="out" style="left:68%"></span></div>
+  <div class="cell c-paper">paper<small>2 outages</small><span class="out" style="left:42%"></span><span class="out" style="left:80%"></span></div>
+</div>
+<div class="legend">
+  <span><i style="background:var(--none)"></i>no resource</span>
+  <span><i style="background:var(--ar)"></i>AR overlay</span>
+  <span><i style="background:var(--paper)"></i>paper manual</span>
+  <span><i style="background:var(--loss)"></i>guidance gone (short outage or full removal)</span>
+</div>
+
+<h2>What happens in each block</h2>
+<div class="tabs" role="tablist">
+  <button role="tab" aria-selected="true" data-b="0">Block 1</button>
+  <button role="tab" aria-selected="false" data-b="1">Block 2</button>
+  <button role="tab" aria-selected="false" data-b="2">Block 3</button>
+</div>
+<div class="panel" id="panel" role="tabpanel"></div>
+
+<h2>How the comparisons read</h2>
+<table>
+<tr><th>Question</th><th>Comparison</th></tr>
+<tr><td>How stressful is the task alone?</td><td>Block 1, all arms pooled. Nobody has a resource and nothing can be taken away.</td></tr>
+<tr><td>Does a short loss hurt more with AR than with paper?</td><td>Block 2: heart rate and performance in the minute after an outage against the minute before, AR arms against paper arms.</td></tr>
+<tr><td>Does full removal raise stress?</td><td>A against C, and B against D, at Block 3. C and D carry the effect of time and practice.</td></tr>
+<tr><td>Is losing AR worse than losing paper? (H2)</td><td>A against B at Block 3, adjusted for Block 1. Both are unaided on the same clock and differ only in what they lost.</td></tr>
+<tr><td>Is it removal, or just working unaided?</td><td>A and B at Block 3 against their own Block 1. Same task, same lack of guidance; the difference is that something was taken away.</td></tr>
+</table>
+
+<h2>Open points</h2>
+<ul>
+<li><strong>Paper outages.</strong> The overlay can be switched off by software. The manual needs an equivalent that works for a group, for example a covered document holder or a desk lamp switched by the PC.</li>
+<li><strong>Outages may teach coping.</strong> Practising short losses in Block 2 could soften the full removal in Block 3. Few and short outages limit this; the pilot data should show whether it happens.</li>
+<li><strong>Removal only matters if the task matters.</strong> The pay rule stays constant across blocks so that guidance is worth having, but it is never raised or announced anew.</li>
+<li><strong>Block 3 outages in C and D.</strong> They keep the threat alive in the control arms. Dropping them would give a calmer control but a less equal one.</li>
+<li><strong>Performance still carries part of the effect.</strong> Perceived performance and confidence after each block show how much.</li>
+</ul>
+
+<p class="note">Working sketch, not a protocol. Timings, counts and wording are placeholders.</p>
+</main>
+<script>
+const blocks=[
+ {t:"Block 1 · Unaided baseline",s:"No resource in any arm. Nothing can be lost.",task:100,loss:0,
+  items:["Everyone inspects boards with the board and nothing else.",
+         "No announcement about guidance, so there is no threat of loss yet.",
+         "Gives each person's own level of task stress and unaided performance.",
+         "Measured: stress rating, heart rate, saliva, detection rate."]},
+ {t:"Block 2 · Guidance arrives, and is not guaranteed",s:"All arms get AR or paper. All are told it may drop out.",task:60,loss:40,
+  items:["Before the block: “Guidance may become unavailable at any time.” Same sentence in every arm.",
+         "Two short outages of about 45 seconds at moments nobody can predict, on the same schedule in all four arms.",
+         "The task does not change during an outage, so a jump in heart rate at that moment belongs to the loss.",
+         "Measured around each outage: heart rate before and after, errors, time per board, and one quick stress rating."]},
+ {t:"Block 3 · Removal against continuation",s:"A and B lose guidance for the whole block. C and D keep it.",task:35,loss:65,
+  items:["A and B hear: “Guidance is not available for this block.” The headset stays on; the manual is taken away.",
+         "C and D continue exactly as in Block 2, outages included, and show what time alone does.",
+         "A and B now face the same unaided task as in Block 1. The extra stress over Block 1 is the removal.",
+         "Measured: the same outcomes, plus how much guidance was missed and the dependence items in all arms."]}
+];
+const panel=document.getElementById('panel');
+function show(i){
+  const b=blocks[i];
+  panel.innerHTML=`<h3>${b.t}</h3><div class="sub">${b.s}</div>
+  <div class="meter sans"><div class="bar"><span class="t" style="width:${b.task}%"></span><span class="l" style="width:${b.loss}%"></span></div>
+  <div class="cap"><span>stress from the task</span><span>stress from loss or threat of loss</span></div></div>
+  <ul>${b.items.map(x=>`<li>${x}</li>`).join('')}</ul>
+  ${i>0?'<p class="sans" style="font-size:.8rem;color:var(--muted);margin:8px 0 0">Bar shows the intended source of stress in the removal arms, not data.</p>':''}`;
+  document.querySelectorAll('.tabs button').forEach((x,j)=>x.setAttribute('aria-selected',j===i));
+}
+document.querySelectorAll('.tabs button').forEach(b=>b.onclick=()=>show(+b.dataset.b));
+show(0);
+</script>
+</body>
+</html>
