@@ -123,13 +123,13 @@ const fmt=ms=>{const s=Math.max(0,Math.ceil(ms/1000));return String(Math.floor(s
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 
 const P=new URLSearchParams(location.search);
-const S={draw:8,layout:'b23',pace:'cal',dl:30000,dlMin:14000,dlMax:45000,arm:null,armKey:null,blockMs:180000,outageMs:20000,restMs:20000,sound:true,tester:true,
+const S={draw:8,layout:'b23',pace:'cal',dl:60000,dlMin:14000,dlMax:150000,arm:null,armKey:null,blockMs:180000,outageMs:20000,restMs:20000,sound:true,tester:true,
   boards:[],events:[],qs:[],vas:[],review:null,start:Date.now(),drawn:null};
 const ARMS={
   A:{name:'A · AR, removed in Block 3',res:'ar',withdrawn:true},
-  B:{name:'B · Paper, removed in Block 3',res:'paper',withdrawn:true},
+  B:{name:'B · On-screen manual, removed in Block 3',res:'paper',withdrawn:true},
   C:{name:'C · AR, kept in Block 3',res:'ar',withdrawn:false},
-  D:{name:'D · Paper, kept in Block 3',res:'paper',withdrawn:false}};
+  D:{name:'D · On-screen manual, kept in Block 3',res:'paper',withdrawn:false}};
 function logEvent(type,data={}){S.events.push({t:Date.now()-S.start,type,...data})}
 
 /* sound */
@@ -268,18 +268,19 @@ function closePop(){const p=$('#pop');if(p)p.remove()}
 /* ============================== screens ============================== */
 async function setup(){
   show(`<div class="card"><h1>Board Inspection Study – test version</h1>
-  <p>This is a playable version of the planned lab session. You work through three blocks of a circuit-board inspection task under time pressure, with an evaluation rule hanging over every block. Depending on the treatment condition, you get AR guidance or a paper manual in Block 2, and you may lose it in Block 3.</p>
+  <p>This is a playable version of the planned lab session. You work through three blocks of a circuit-board inspection task under time pressure, with an evaluation rule hanging over every block. Everyone has a printed reference sheet for the whole session. Depending on the treatment condition, you also get AR guidance or an on-screen manual in Block 2, and you may lose it in Block 3.</p>
+  <div class="example" style="border-color:#c0392b;background:#fdf1ef"><b>Before you start:</b> print the two reference sheets, or open them on a second device such as a phone or tablet. You need both next to you for the whole session.<br><a href="manual_A.pdf" target="_blank"><b>Reference sheet A</b></a> · <a href="manual_B.pdf" target="_blank"><b>Reference sheet B</b></a></div>
   <div class="co" style="display:block"><span class="cotag">Experimenter notes</span>
   <p>Everything in a purple dashed box like this one is for the experimenter only. Participants would not see it. Untick the last option below to see the session exactly as a participant would.</p>
-  <p><b>Differences from the lab:</b> the AR overlay is drawn on screen instead of in the HoloLens; the manual is a panel instead of a printed sheet; rest periods are shortened.</p>
-  <p>Printable manual for the paper condition: <a href="manual_A.pdf">board type A</a> · <a href="manual_B.pdf">board type B</a> · <a href="design.html">design notes</a></p>
+  <p><b>Differences from the lab:</b> the AR overlay is drawn on screen instead of in the HoloLens; the reference sheets are already printed and on the desk; rest periods are shortened.</p>
+
   <h3>Treatment condition</h3>
   ${['R','A','B','C','D'].map(k=>`<label class="opt"><input type="radio" name="arm" value="${k}" ${k==='R'?'checked':''}> <span>${k==='R'?'<b>Random</b> (as a participant would be assigned)':ARMS[k].name}</span></label>`).join('')}
   <h3>Length of each block</h3>
   <p style="margin:0 0 4px"><input type="number" id="len" min="1" max="20" step="0.5" value="5" style="font:inherit;width:80px;padding:6px"> minutes per block (1 to 20). The same length applies to all three blocks. The protocol has 15.</p>
   <h3>Options</h3>
   <label class="opt"><input type="checkbox" id="snd" checked> <span>Sound and spoken reminders (use headphones, as in the lab)</span></label>
-  <label class="opt"><input type="checkbox" id="study"> <span>Show a correct reference board to memorise before Block 1 (off: Block 1 is fully unaided)</span></label>
+
   <label class="opt"><input type="checkbox" id="tst" checked> <span>Show experimenter notes and skip buttons during the session</span></label>
   <p style="margin:8px 0 0">At the end you can download your data (JSON and CSV).</p></div>
   <div class="row" style="margin-top:14px"><button class="primary big" id="go">Start session</button></div></div>`);
@@ -287,8 +288,8 @@ async function setup(){
   let k=document.querySelector('input[name=arm]:checked').value;if(k==='R')k=pick(['A','B','C','D']);
   S.armKey=k;S.arm=ARMS[k];{let m=parseFloat($('#len').value);if(!(m>=1))m=1;if(m>20)m=20;S.blockMs=(+P.get('sec')||m*60)*1000}
   S.outageMs=Math.round(Math.min(45000,Math.max(S.blockMs>=60000?10000:1500,S.blockMs*0.11)));
-  S.restMs=S.blockMs>=900000?300000:Math.min(30000,S.blockMs/6);{const d0=(+P.get('dl')||30)*1000;S.pace='cal';S.dl=d0;S.dlMin=Math.min(14000,d0)}
-  S.study=$('#study').checked;S.sound=$('#snd').checked;S.tester=$('#tst').checked;document.body.classList.toggle('part',!S.tester);
+  S.restMs=S.blockMs>=900000?300000:Math.min(30000,S.blockMs/6);{const d0=(+P.get('dl')||60)*1000;S.pace='cal';S.dl=d0;S.dlMin=Math.min(14000,d0)}
+  S.sound=$('#snd').checked;S.tester=$('#tst').checked;document.body.classList.toggle('part',!S.tester);
   logEvent('setup',{draw_odds:S.draw,arm:k,blockMs:S.blockMs,pace:S.pace,dl:S.dl,layout:S.layout});
   if(S.sound){beep(440,.05,.02)}
 }
@@ -296,6 +297,8 @@ async function intro(){
   show(`<div class="card"><h1>Welcome</h1>
   <p>You will work as a quality inspector for printed circuit boards. No technical knowledge is needed. Each board carries 18 small parts in six numbered areas. Some boards are correct; others have one or more defects.</p>
   <p><b>Your job:</b> click every part that has a defect and choose the kind of defect. If you find nothing wrong, submit the board without marks.</p>
+  <h3>Your printed reference sheets</h3>
+  <p>On your desk are two printed reference sheets, <b>A</b> and <b>B</b>. They show how a correct board of each type looks. Every board has its type printed at the bottom edge. <b>The sheets stay with you for the whole session.</b></p>
   <h3>Pay rule (identical in every block)</h3>
   <ul><li>+ €0.10 for each correct board verdict (correct / flawed)</li><li>+ €0.10 for each defect found and correctly named (+ €0.05 if the type is wrong)</li><li>− €0.05 for each missed defect and for each mark on a part that is fine</li><li>− €0.10 for each board that leaves your station unchecked</li></ul>
   <h3>The line does not wait</h3>
@@ -312,7 +315,7 @@ const stripeChips=v=>RV[v].c.map(k=>`<span class="chip" style="background:${COL[
 async function training(famT){
   show(`<div class="card" style="max-width:900px"><h1>Training: the five kinds of defect</h1>
   <p>Three kinds of defect you can simply see: a <b>missing part</b>, a <b>blob of solder</b>, a <b>burn mark</b>.</p>
-  <p>The other two you can only find by <b>comparing the board with a reference</b> that shows how a correct board looks:</p>
+  <p>The other two you can only find by <b>comparing the board with a reference</b> that shows how a correct board looks, such as your printed sheet:</p>
   <ul><li><b>Facing the wrong way.</b> Blue parts have a light stripe at one end, black parts a white band, and chips a white notch. This is the part's <i>marked end</i>. The reference says where the marked end should point.</li>
   <li><b>Wrong colour stripes.</b> Beige parts carry three colour stripes. The reference says which three colours belong at each position.</li></ul>
   <p><b>There is no general rule.</b> Which direction and which colours are correct is different for every position on the board, and for every type of board. In the examples below, "correct" only means correct for that one position.</p>
@@ -324,7 +327,7 @@ async function training(famT){
   ${galleryItem('Blob of solder','A silver blob sticking out next to a part.',{t:'C',a:0},{t:'C',a:0,bridge:true})}
   ${galleryItem('Burn mark','A dark scorch on or around a part.',{t:'R',a:0,v:0},{t:'R',a:0,v:0,burn:true})}
   </div>
-  <p>Next you inspect two practice boards. You have <b>three minutes in total</b> for both. After each board you see the solution, including what the reference would have shown.</p>
+  <p>Next you inspect two practice boards. You have <b>three minutes in total</b> for both. The practice boards are of a type that has no reference sheet, so after each board the solution shows what the reference would have said.</p>
   <div class="row"><button class="primary big" id="n">Start practice</button>${skipBtn()}</div></div>`);
   const skip=await new Promise(r=>{$('#n').onclick=()=>r(false);if($('#skip'))$('#skip').onclick=()=>r(true)});
   if(skip)return;
@@ -379,12 +382,12 @@ async function vasScreen(tag,block){
 async function reminder(block){
   const base='Reminder. At the end of the session, one board from each block will be drawn for batch sign-off review. One in '+(S.draw===4?'four':'eight')+' participants will be selected to present and defend their decisions on those boards.';
   let extra='',gd='';
-  if(block===1){extra='In this block, no guidance is available.';gd='none'}
-  if(block===2){extra=`In this block, you will work with ${S.arm.res==='ar'?'the AR guidance':'the inspection manual'}. Please note: guidance is not guaranteed. It may become unavailable at any time.`;gd='threat'}
-  if(block===3){if(S.arm.withdrawn){extra='Guidance is not available for this block.';gd='removed'}else{extra=`In this block, you continue with ${S.arm.res==='ar'?'the AR guidance':'the inspection manual'}. It may become unavailable at any time.`;gd='threat'}}
+  if(block===1){extra='';gd='none'}
+  if(block===2){extra=`In this block, you will also have ${S.arm.res==='ar'?'AR guidance':'an on-screen manual'}. Please note: this is not guaranteed. It may become unavailable at any time.`;gd='threat'}
+  if(block===3){if(S.arm.withdrawn){extra=(S.arm.res==='ar'?'The AR guidance':'The on-screen manual')+' is not available for this block.';gd='removed'}else{extra=`In this block, you continue with ${S.arm.res==='ar'?'the AR guidance':'the on-screen manual'}. It may become unavailable at any time.`;gd='threat'}}
   if(useBox(block))extra+=' Boards now arrive in a box. You choose which board to check next. Urgent boards have a short deadline and cost double if they ship unchecked.';
   const txt=base+' '+extra;
-  show(`<div class="card"><span class="speaker">🔊 Recorded announcement</span><h2>Before Block ${block}</h2><p>${base}</p><p style="font-weight:700;${gd==='removed'?'color:#c0392b':''}">${extra}</p><div class="row"><button class="primary big" id="n" disabled>Start Block ${block}</button></div></div>`);
+  show(`<div class="card"><span class="speaker">🔊 Recorded announcement</span><h2>Before Block ${block}</h2><p>${base}</p><p style="font-weight:700;${gd==='removed'?'color:#c0392b':''}">${extra}</p>${block>1?'<div class="labnote"><b>Experimenter note:</b> the printed sheet stays on the desk as the fallback whenever the on-screen guidance is gone. Participants are not reminded of it here.</div>':''}<div class="row"><button class="primary big" id="n" disabled>Start Block ${block}</button></div></div>`);
   logEvent('reminder',{block,removed:gd==='removed'});
   if(gd==='removed'){beep(240,.35,.06,'square');await sleep(400)}
   await Promise.race([speak(txt),sleep(S.sound?25000:2500)]);await sleep(600);
@@ -393,13 +396,13 @@ async function reminder(block){
 async function familiarise(famB){
   const ar=S.arm.res==='ar';
   show(`<div class="card"><h1>Your guidance for the next block</h1>
-  <p>${ar?'In the next block you will see <b>AR guidance</b> on top of each board. In the lab this appears in the HoloLens over the board; here it is drawn on the screen. Cyan outlines show where each part belongs, and the arrow shows where its marked end should point. Next to each striped part it shows the colour stripes that belong there.':'In the next block you will have an <b>inspection manual</b> for this type of board. It lists, for each numbered area of the board, where the marked end of each part should point and which colour stripes belong at each position. Use the numbers and the labels printed on the board (such as C3) to find the part you need. A printed copy of the manual is also on your desk for you to use.'}</p>
-  <p><b>The guidance never tells you whether a board is correct.</b> You still decide. The next block also uses a <b>new type of board</b>, where the correct directions and colours are different from before.</p>
+  <p>${ar?'In the next block you will also see <b>AR guidance</b> on top of each board. In the lab this appears in the HoloLens over the board; here it is drawn on the screen. Cyan outlines show where each part belongs, and the arrow shows where its marked end should point. Next to each striped part it shows the colour stripes that belong there.':'In the next block you will also have an <b>on-screen manual</b> beside each board. It shows, for one pair of numbered areas at a time, where each marked end should point and which colour stripes belong at each position. Click a number on its small map to change the area.'}</p>
+  <p><b>The guidance never tells you whether a board is correct.</b> You still decide. The next block also uses the <b>other type of board</b>.</p>
   <p>Try it on two practice boards now. There is no time limit and no feedback.</p>
   <div class="row"><button class="primary big" id="n">Start</button>${skipBtn()}</div></div>`);
   const skip=await new Promise(r=>{$('#n').onclick=()=>r(false);if($('#skip'))$('#skip').onclick=()=>r(true)});if(skip)return;
   for(let i=0;i<2;i++){const b=makeBoard(famB),marks={};let page=0;
-    await new Promise(res=>{const draw=()=>{show(`<div class="hud"><span class="pill">Familiarisation ${i+1} of 2</span><span class="pill ${ar?'gd-on':'gd-paper'}">${ar?'AR guidance on':'Manual on desk'}</span></div>
+    await new Promise(res=>{const draw=()=>{show(`<div class="hud"><span class="pill">Familiarisation ${i+1} of 2</span><span class="pill ${ar?'gd-on':'gd-paper'}">${ar?'AR guidance on':'On-screen manual on'}</span></div>
       <div class="work"><div class="boardwrap">${boardSVG(famB,b,{interactive:true,marks,overlay:ar})}</div>${ar?'':`<div class="manual" id="man">${manualHTML(famB,page)}</div>`}</div>
       <div class="actions"><button class="primary big" id="sb">${i===1?'Done':'Next board'}</button><span class="hint">Click a part to mark a defect.</span></div>`);
       bindHits(()=>marks,draw);$('#sb').onclick=res;
@@ -427,13 +430,13 @@ async function runBlock(n,fam,guidance,outages){
     <div class="work"><div class="boardwrap" id="bw"></div><div id="mw"></div></div>
     <div class="actions"><button class="primary big" id="sb">Submit board</button><button id="cl">Clear marks</button><span class="hint">Click a part to mark a defect. Submit without marks if the board is correct.</span></div>`);
   const drawGuidanceLabel=()=>{const g=$('#gd');if(!g)return;
-    if(guidance==='none'){g.className='pill gd-none';g.textContent=n===3?'Guidance: not available':'Guidance: none'}
-    else if(!available){g.className='pill gd-off';g.textContent='⚠ Guidance unavailable'}
-    else{g.className='pill '+(guidance==='ar'?'gd-on':'gd-paper');g.textContent=guidance==='ar'?'AR guidance on':'Manual on desk'}};
+    if(guidance==='none'){g.className='pill gd-none';g.textContent=n===3?'On-screen guidance removed':'No on-screen guidance'}
+    else if(!available){g.className='pill gd-off';g.textContent='⚠ On-screen guidance unavailable'}
+    else{g.className='pill '+(guidance==='ar'?'gd-on':'gd-paper');g.textContent=guidance==='ar'?'AR guidance on':'On-screen manual on'}};
   const drawBoard=()=>{const showOv=guidance==='ar'&&available;
     $('#bw').innerHTML=boardSVG(fam,b,{interactive:true,marks,overlay:showOv,boardNo})+(guidance==='ar'&&!available?`<div class="ar-banner">GUIDANCE UNAVAILABLE</div>`:'');
     bindHits(()=>marks,drawBoard);
-    const mw=$('#mw');if(guidance==='paper'){mw.className='manual';mw.innerHTML=manualHTML(fam,page)+(available?'':`<div class="shutter">Manual not available</div>`);
+    const mw=$('#mw');if(guidance==='paper'){mw.className='manual';mw.innerHTML=manualHTML(fam,page)+(available?'':`<div class="shutter">On-screen manual not available</div>`);
       mw.querySelectorAll('[data-p]').forEach(t=>t.onclick=()=>{page=+t.dataset.p;drawBoard()})}else{mw.className='';mw.innerHTML=''}
     drawGuidanceLabel()};
   drawBoard();
@@ -444,7 +447,7 @@ async function runBlock(n,fam,guidance,outages){
     if(timedOut){unchecked++;const u=$('#un');if(u){u.textContent='Shipped unchecked: '+unchecked;u.classList.add('un')}
       beep(150,.35,.09,'sawtooth');toast('Board '+boardNo+' shipped unchecked',1400,'bad');logEvent('timeout',{block:n,board:boardNo})}
     else{submitted++;$('#cnt').textContent='Checked: '+submitted;beep(880,.04,.02)}
-    if(calib){dl=Math.min(S.dlMax,Math.max(S.dlMin,dl*(timedOut?1.10:.95)));dlHist.push(dl)}
+    if(calib){dl=Math.min(S.dlMax,Math.max(S.dlMin,dl*(timedOut?1.2:.9)));dlHist.push(dl)}
     closePop();newBoard();drawBoard()};
   $('#cl').onclick=()=>{marks={};drawBoard()};
   $('#sb').onclick=()=>{if(ended||paused)return;finish(false)};
@@ -487,14 +490,14 @@ async function runBox(n,fam,guidance,outages){
     <div class="work"><div class="boardwrap" id="bw"></div><div id="mw"></div></div>
     <div class="actions"><button class="primary big" id="sb">Send board</button><button id="pb">Put back in box</button><button id="cl">Clear marks</button><span class="hint">Pick a board, mark its defects, then send it. Send without marks if it is correct.</span></div>`);
   const drawGuidanceLabel=()=>{const g=$('#gd');if(!g)return;
-    if(guidance==='none'){g.className='pill gd-none';g.textContent=n===3?'Guidance: not available':'Guidance: none'}
-    else if(!available){g.className='pill gd-off';g.textContent='⚠ Guidance unavailable'}
-    else{g.className='pill '+(guidance==='ar'?'gd-on':'gd-paper');g.textContent=guidance==='ar'?'AR guidance on':'Manual on desk'}};
+    if(guidance==='none'){g.className='pill gd-none';g.textContent=n===3?'On-screen guidance removed':'No on-screen guidance'}
+    else if(!available){g.className='pill gd-off';g.textContent='⚠ On-screen guidance unavailable'}
+    else{g.className='pill '+(guidance==='ar'?'gd-on':'gd-paper');g.textContent=guidance==='ar'?'AR guidance on':'On-screen manual on'}};
   const drawBoard=()=>{const showOv=guidance==='ar'&&available;
     $('#bw').innerHTML=cur?boardSVG(fam,cur.b,{interactive:true,marks:cur.marks,overlay:showOv,boardNo:cur.no})+(guidance==='ar'&&!available?`<div class="ar-banner">GUIDANCE UNAVAILABLE</div>`:''):`<div class="empty">Pick a board from the box</div>`;
     if(cur)bindHits(()=>cur.marks,()=>{drawBoard();drawBox()});
     $('#sb').disabled=!cur;$('#pb').disabled=!cur;$('#cl').disabled=!cur;
-    const mw=$('#mw');if(guidance==='paper'){mw.className='manual';mw.innerHTML=manualHTML(fam,page)+(available?'':`<div class="shutter">Manual not available</div>`);
+    const mw=$('#mw');if(guidance==='paper'){mw.className='manual';mw.innerHTML=manualHTML(fam,page)+(available?'':`<div class="shutter">On-screen manual not available</div>`);
       mw.querySelectorAll('[data-p]').forEach(t=>t.onclick=()=>{page=+t.dataset.p;drawBoard()})}else{mw.className='';mw.innerHTML=''}
     drawGuidanceLabel()};
   const drawBox=()=>{const el=$('#box');if(!el)return;
@@ -517,7 +520,7 @@ async function runBox(n,fam,guidance,outages){
     if(timedOut){unchecked++;const u=$('#un');u.textContent='Shipped unchecked: '+unchecked;u.classList.add('un');
       beep(150,.35,.09,'sawtooth');toast((it.urgent?'URGENT board ':'Board ')+it.no+' shipped unchecked',1500,'bad');logEvent('timeout',{block:n,board:it.no,urgent:it.urgent})}
     else{submitted++;lastSent=it.no;$('#cnt').textContent='Sent: '+submitted;beep(880,.04,.02)}
-    if(calib){dl=Math.min(S.dlMax,Math.max(S.dlMin,dl*(timedOut?1.10:.95)));dlHist.push(dl)}
+    if(calib){dl=Math.min(S.dlMax,Math.max(S.dlMin,dl*(timedOut?1.2:.9)));dlHist.push(dl)}
     drawBox();drawBoard()};
   add();add();add();drawBoard();
   $('#cl').onclick=()=>{if(cur){cur.marks={};drawBoard();drawBox()}};
@@ -557,7 +560,7 @@ async function questionnaire(n,guidance){
   ${likertQ('q_conf','How confident are you in your decisions?')}
   ${likertQ('q_chal','The block felt like a challenge I could meet.','Disagree','Agree')}
   ${likertQ('q_threat','The block felt threatening.','Disagree','Agree')}
-  ${n===1?'':used?likertQ('q_rely','How much did you rely on the guidance?'):likertQ('q_miss','How much did you miss having guidance?')}
+  ${n===1?'':used?likertQ('q_rely','How much did you rely on the on-screen guidance?'):likertQ('q_miss','How much did you miss the on-screen guidance?')}
   ${dep?`<h3>About the guidance in general</h3>
   ${likertQ('d1','When guidance was unavailable, I felt lost.','Disagree','Agree')}
   ${likertQ('d2','I could not do the task well without the guidance.','Disagree','Agree')}
@@ -603,7 +606,7 @@ function summarise(){
 function download(name,text,type){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([text],{type}));a.download=name;a.click()}
 async function results(){
   const R=summarise(),total=R.reduce((a,r)=>a+r.earn,0);
-  const gname=g=>({none:'none',ar:'AR',paper:'paper'}[g]||g);
+  const gname=g=>({none:'printed sheet only',ar:'AR',paper:'on-screen manual'}[g]||g);
   show(`<div class="card" style="max-width:900px"><h1>Thank you – session complete</h1>
   <p>Treatment condition: <b>${S.arm.name}</b>. Bonus earned: <b>€${total.toFixed(2)}</b>${S.drawn!=null?` · Sign-off draw: ${S.drawn?'selected':'not selected'}`:''}.</p>
   <h3>Performance and stress by block</h3>
@@ -634,7 +637,6 @@ async function run(){
   await training(famT);
   await announcement();
   await rest('Quiet rest',S.restMs,'resting period before the first baseline sample; heart-rate strap already on.');
-  if(S.study)await studyRef(famX);
   await vasScreen('pre',1);await reminder(1);
   await block(1,famX,'none',[]);
   await questionnaire(1,'none');
@@ -652,7 +654,7 @@ async function run(){
 }
 const SEEDS={A:1101,B:2202,T:3303};
 function printManual(name){
-  const fam=makeFamily(name,SEEDS[name]);document.title='Inspection manual – board type '+name;
+  const fam=makeFamily(name,SEEDS[name]);document.title='Reference sheet – board type '+name;
   const st=document.createElement('style');st.textContent=`@page{size:A4;margin:12mm}html,body{background:#fff}body{font:12pt/1.35 Georgia,serif;color:#111}#app{max-width:none;padding:0}
   .pm h1{font:700 20pt Georgia,serif;margin:0 0 2mm}.pm .lead{margin:0 0 3mm}.pm .top{display:flex;gap:6mm;align-items:flex-start;margin-bottom:3mm}
   .pm .how{flex:1;min-width:0;border:1px solid #999;border-radius:2mm;padding:2.5mm 3.5mm}.pm .how b{font-family:system-ui,sans-serif}.pm ol{margin:1mm 0 0;padding-left:5mm}.pm li{margin:.6mm 0}
@@ -664,7 +666,7 @@ function printManual(name){
   let map=`<svg viewBox="0 0 150 70" width="170" height="80">`;for(let z=0;z<6;z++){const x=4+(z%3)*48,y=4+Math.floor(z/3)*32;map+=`<rect x="${x}" y="${y}" width="44" height="28" fill="#f4ecd2" stroke="#8a7a4a"/><text x="${x+22}" y="${y+19}" font-size="13" text-anchor="middle" fill="#4a3f1f">${z+1}</text>`}map+='</svg>';
   const ex=(t,a)=>`<svg viewBox="-48 -40 96 80" width="40" height="33" style="background:#1f6b3a;border-radius:1mm">${compSVG({t,a,v:0,x:0,y:0,label:''})}</svg>`;
   const zone=z=>`<h2>${z+1}</h2><table>`+fam.comps.filter(c=>c.zone===z).map(c=>`<tr><td>${c.label}</td><td>${partIcon(c)}</td><td>${ruleHTML(c)}</td></tr>`).join('')+`</table>`;
-  document.body.innerHTML=`<div id="app"><div class="pm"><h1>Inspection Manual · Board type ${name}</h1>
+  document.body.innerHTML=`<div id="app"><div class="pm"><h1>Reference sheet · Board type ${name}</h1>
   <p class="lead">This sheet shows how a <b>correct</b> board of type ${name} looks. It does not tell you whether the board in front of you is correct. You decide.</p>
   <div class="top"><div>${map}<div style="font-size:8.5pt;color:#444;text-align:center">The six numbered areas of the board</div></div>
   <div class="how"><b>How to use this sheet</b><ol><li>Every part on the board has a printed label, such as <b>C3</b> or <b>R5</b>.</li><li>Find that label below, under the number of the area where the part sits.</li><li>Compare the part on the board with the picture and the text here.</li><li>If the marked end points another way, or the colour stripes are different, mark the part as a defect.</li></ol>
