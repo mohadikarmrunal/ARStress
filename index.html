@@ -273,14 +273,17 @@ async function setup(){
   <p>Everything in a purple dashed box like this one is for the author team only. Participants would not see it. Untick the last option below to see the session exactly as a participant would.</p>
   <p><b>Differences from the lab:</b> the AR overlay is drawn on screen instead of in the HoloLens; the manual is a panel instead of a printed sheet; rest periods are shortened.</p>
   <p>Printable manual for the paper condition: <a href="manual_A.pdf">board type A</a> · <a href="manual_B.pdf">board type B</a> · <a href="design.html">design notes</a></p>
+  <h3>Questions for co-authors</h3>
+  <ol style="padding-left:20px;margin:6px 0">
+  <li><b>Two board types, A and B.</b> Each participant sees both: one type in Block 1, without guidance, and the other in Blocks 2 and 3. Which is which is randomised, so about half of the participants work with manual A and half with manual B. The idea is that Block 1 should not teach the layout that matters later, and that an easier or harder board type should not look like a block effect. Is this necessary, or would one fixed order (and one manual) be enough? Do you find the boards hard enough to memorise that it matters?</li>
+  <li><b>Abrupt removal.</b> At present, guidance drops out without warning for short periods in Blocks 2 and 3, while the full removal in Block 3 is announced just before the block starts. Should the full removal also happen abruptly, in the middle of the work, to induce more stress?</li>
+  <li><b>Block length.</b> A block of about five minutes feels stressful. If the same task runs for 15 minutes, as in the protocol, the stress may well fade. Should the blocks be shorter?</li>
+  </ol>
+  <p><b>Design rule in this version:</b> after every abrupt removal the participant rates their stress, not at once but a few seconds later, so that the loss has been felt first.</p>
   <h3>Treatment condition</h3>
   ${['R','A','B','C','D'].map(k=>`<label class="opt"><input type="radio" name="arm" value="${k}" ${k==='R'?'checked':''}> <span>${k==='R'?'<b>Random</b> (as a participant would be assigned)':ARMS[k].name}</span></label>`).join('')}
   <h3>Length</h3>
   <select id="len"><option value="90">Quick check: 1.5-minute blocks</option><option value="180" selected>Demo: 3-minute blocks</option><option value="900">Full: 15-minute blocks (as in the protocol)</option></select>
-  <h3>Layout</h3>
-  <select id="lay"><option value="b23" selected>Box of boards in Blocks 2 and 3 (Block 1 one board at a time)</option><option value="all">Box of boards in all three blocks</option><option value="one">One board at a time in all blocks</option></select>
-  <h3>Pace</h3>
-  <select id="pace"><option value="cal" selected>Deadline per board, calibrated to you in Block 1</option><option value="f30">Fixed 30 seconds per board</option><option value="f20">Fixed 20 seconds per board</option><option value="off">No deadline per board (first version)</option></select>
   <h3>Sign-off draw</h3>
   <select id="odds"><option value="8" selected>One in eight (as in the protocol draft)</option><option value="4">One in four (as suggested in the review memo)</option></select>
   <h3>Options</h3>
@@ -292,8 +295,8 @@ async function setup(){
   await waitClick('#go');
   let k=document.querySelector('input[name=arm]:checked').value;if(k==='R')k=pick(['A','B','C','D']);
   S.armKey=k;S.arm=ARMS[k];S.blockMs=+$('#len').value*1000;S.outageMs=S.blockMs>=900000?45000:Math.round(S.blockMs*0.11);
-  S.restMs=S.blockMs>=900000?300000:Math.min(30000,S.blockMs/6);{const pv=$('#pace').value,d0=(+P.get('dl')||30)*1000;S.pace=pv==='off'?'off':pv==='cal'?'cal':'fix';S.dl=pv==='f30'?30000:pv==='f20'?20000:d0;S.dlMin=Math.min(14000,d0)}
-  S.layout=$('#lay').value;S.draw=+$('#odds').value;S.study=$('#study').checked;S.sound=$('#snd').checked;S.tester=$('#tst').checked;document.body.classList.toggle('part',!S.tester);
+  S.restMs=S.blockMs>=900000?300000:Math.min(30000,S.blockMs/6);{const d0=(+P.get('dl')||30)*1000;S.pace='cal';S.dl=d0;S.dlMin=Math.min(14000,d0)}
+  S.draw=+$('#odds').value;S.study=$('#study').checked;S.sound=$('#snd').checked;S.tester=$('#tst').checked;document.body.classList.toggle('part',!S.tester);
   logEvent('setup',{draw_odds:S.draw,arm:k,blockMs:S.blockMs,pace:S.pace,dl:S.dl,layout:S.layout});
   if(S.sound){beep(440,.05,.02)}
 }
@@ -418,10 +421,11 @@ async function midVAS(){return new Promise(res=>{const m=document.createElement(
 function toast(txt,ms,cls){const t=document.createElement('div');t.className='toast '+(cls||'');t.textContent=txt;document.body.appendChild(t);setTimeout(()=>t.remove(),ms)}
 async function runBlock(n,fam,guidance,outages){
   closePop();
-  const dur=S.blockMs;let elapsed=0,last=performance.now(),paused=false,ended=false,midDone=false,lastSec=-1;
+  const dur=S.blockMs;let elapsed=0,last=performance.now(),paused=false,ended=false,midDone=outages.length>0,lastSec=-1;
   let available=guidance!=='none',page=0,boardNo=0,submitted=0,unchecked=0;
   const paced=S.pace!=='off',calib=S.pace==='cal'&&n===1;let dl=S.dl;const dlHist=[];
   const audits=[.2+Math.random()*.25,.6+Math.random()*.3].map(f=>f*dur);
+  let vasAt=(n===3&&guidance==='none'&&S.arm.withdrawn)?Math.min(20000,dur*.12):null;
   let b,marks,bStart,bOut;
   const newBoard=()=>{b=makeBoard(fam);marks={};bStart=elapsed;bOut=!available&&guidance!=='none';boardNo++;lastSec=-1};
   newBoard();
@@ -457,7 +461,7 @@ async function runBlock(n,fam,guidance,outages){
     if(ended||paused)return;
     let active=-1;outages.forEach((f,i)=>{const s=f*dur;if(elapsed>=s&&elapsed<s+S.outageMs)active=i});
     if(guidance!=='none'){const nowAvail=active<0;if(nowAvail!==available){available=nowAvail;
-        if(!available){bOut=true;logEvent('outage_start',{block:n,idx:active});beep(220,.25,.08,'square');setTimeout(()=>beep(180,.3,.08,'square'),280)}
+        if(!available){bOut=true;logEvent('outage_start',{block:n,idx:active});vasAt=elapsed+Math.min(15000,S.outageMs*.5);beep(220,.25,.08,'square');setTimeout(()=>beep(180,.3,.08,'square'),280)}
         else{logEvent('outage_end',{block:n});beep(660,.12,.04)}
         drawBoard()}}
     const left=dur-elapsed;const tm=$('#tm');if(tm){tm.textContent=fmt(left);tm.classList.toggle('low',left<60000)}
@@ -466,6 +470,7 @@ async function runBlock(n,fam,guidance,outages){
       const sec=Math.ceil(bl/1000);if(bl<5000&&bl>0&&sec!==lastSec){lastSec=sec;beep(1200,.03,.035,'square')}
       if(bl<=0&&elapsed<dur)finish(true)}
     if(audits.length&&elapsed>=audits[0]){audits.shift();if(boardNo>1){beep(500,.12,.05);toast('⚑ Board '+(boardNo-1)+' has been pulled for sign-off review',3500,'audit');logEvent('audit_notice',{block:n,board:boardNo-1})}}
+    if(vasAt!=null&&elapsed>=vasAt){vasAt=null;paused=true;closePop();const v=await midVAS();S.vas.push({block:n,tag:'after_removal',v,t:Date.now()-S.start});logEvent('vas_after_removal',{block:n,v});last=performance.now();paused=false;return}
     if(!midDone&&elapsed>=dur*.5&&available===(guidance!=='none')){midDone=true;paused=true;closePop();const v=await midVAS();S.vas.push({block:n,tag:'mid',v,t:Date.now()-S.start});last=performance.now();paused=false}
     if(elapsed>=dur){ended=true;clearInterval(iv);closePop();logEvent('block_end',{block:n,submitted,unchecked});res()}
   },200)});
@@ -477,10 +482,11 @@ const useBox=n=>S.layout==='all'||(S.layout==='b23'&&n>=2);
 function block(n,...a){return(useBox(n)?runBox:runBlock)(n,...a)}
 async function runBox(n,fam,guidance,outages){
   closePop();
-  const dur=S.blockMs;let elapsed=0,last=performance.now(),paused=false,ended=false,midDone=false,lastSec=-1;
+  const dur=S.blockMs;let elapsed=0,last=performance.now(),paused=false,ended=false,midDone=outages.length>0,lastSec=-1;
   let available=guidance!=='none',page=0,boardNo=0,submitted=0,unchecked=0,lastSent=0;
   const paced=S.pace!=='off',calib=S.pace==='cal'&&n===1;let dl=S.dl;const dlHist=[];let nextArr=dl*.9;
   const audits=[.2+Math.random()*.25,.6+Math.random()*.3].map(f=>f*dur);
+  let vasAt=(n===3&&guidance==='none'&&S.arm.withdrawn)?Math.min(20000,dur*.12):null;
   const box=[];let cur=null;
   logEvent('block_start',{block:n,guidance,family:fam.name,layout:'box',pace_ms:Math.round(dl)});
   show(`<div class="hud"><span class="pill">Block ${n} of 3</span><span class="pill timer" id="tm">${fmt(dur)}</span><span class="pill" id="cnt">Sent: 0</span><span class="pill" id="un">Shipped unchecked: 0</span><span class="pill" id="bxc">In the box: 0</span><span class="pill" id="gd"></span></div>
@@ -530,7 +536,7 @@ async function runBox(n,fam,guidance,outages){
     if(ended||paused)return;
     let active=-1;outages.forEach((f,i)=>{const s=f*dur;if(elapsed>=s&&elapsed<s+S.outageMs)active=i});
     if(guidance!=='none'){const nowAvail=active<0;if(nowAvail!==available){available=nowAvail;
-        if(!available){if(cur)cur.out=true;logEvent('outage_start',{block:n,idx:active});beep(220,.25,.08,'square');setTimeout(()=>beep(180,.3,.08,'square'),280)}
+        if(!available){if(cur)cur.out=true;logEvent('outage_start',{block:n,idx:active});vasAt=elapsed+Math.min(15000,S.outageMs*.5);beep(220,.25,.08,'square');setTimeout(()=>beep(180,.3,.08,'square'),280)}
         else{logEvent('outage_end',{block:n});beep(660,.12,.04)}
         drawBoard()}}
     const left=dur-elapsed;const tm=$('#tm');if(tm){tm.textContent=fmt(left);tm.classList.toggle('low',left<60000)}
@@ -539,6 +545,7 @@ async function runBox(n,fam,guidance,outages){
       bars();
       if(cur){const bl=cur.ttl-(elapsed-cur.arr),sec=Math.ceil(bl/1000);if(bl<5000&&bl>0&&sec!==lastSec){lastSec=sec;beep(1200,.03,.035,'square')}}}
     if(audits.length&&elapsed>=audits[0]){audits.shift();if(lastSent){beep(500,.12,.05);toast('⚑ Board '+lastSent+' has been pulled for sign-off review',3500,'audit');logEvent('audit_notice',{block:n,board:lastSent})}}
+    if(vasAt!=null&&elapsed>=vasAt){vasAt=null;paused=true;closePop();const v=await midVAS();S.vas.push({block:n,tag:'after_removal',v,t:Date.now()-S.start});logEvent('vas_after_removal',{block:n,v});last=performance.now();paused=false;return}
     if(!midDone&&elapsed>=dur*.5&&available===(guidance!=='none')){midDone=true;paused=true;closePop();const v=await midVAS();S.vas.push({block:n,tag:'mid',v,t:Date.now()-S.start});last=performance.now();paused=false}
     if(elapsed>=dur){ended=true;clearInterval(iv);closePop();logEvent('block_end',{block:n,submitted,unchecked,left_in_box:box.length});res()}
   },200)});
@@ -598,7 +605,7 @@ function summarise(){
     const ub=bs.filter(b=>b.urgent);
     return{n,urg:ub.length?ub.filter(b=>!b.timed_out).length+' of '+ub.length:'–',g:bs[0]?bs[0].guidance:'–',unchecked:bs.filter(b=>b.timed_out).length,dl:bs.length&&bs[bs.length-1].deadline_s?bs[bs.length-1].deadline_s+' s':'–',boards:bs.length,det:present?Math.round(100*found/present)+'%':'–',fa:bs.length?(sum(b=>b.fa)/bs.length).toFixed(2):'–',
       acc:bs.length?Math.round(100*sum(b=>b.verdictCorrect?1:0)/bs.length)+'%':'–',tpb:tpb(bs),earn:Math.max(0,sum(b=>b.earn)),
-      vpre:v('pre'),vmid:v('mid'),vpost:v('post'),outN:out.length,detOut:det(out),detIn:det(inn),tOut:tpb(out),tIn:tpb(inn)}});
+      vrem:S.vas.filter(z=>z.block===n&&z.tag==='after_removal').map(z=>z.v).join(', ')||'–',vpre:v('pre'),vmid:v('mid'),vpost:v('post'),outN:out.length,detOut:det(out),detIn:det(inn),tOut:tpb(out),tIn:tpb(inn)}});
   return rows;
 }
 function download(name,text,type){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([text],{type}));a.download=name;a.click()}
@@ -608,8 +615,8 @@ async function results(){
   show(`<div class="card" style="max-width:900px"><h1>Thank you – session complete</h1>
   <p>Treatment condition: <b>${S.arm.name}</b>. Bonus earned: <b>€${total.toFixed(2)}</b>${S.drawn!=null?` · Sign-off draw: ${S.drawn?'selected':'not selected'}`:''}.</p>
   <h3>Performance and stress by block</h3>
-  <table class="res"><tr><th>Block</th><th>Guidance</th><th>Boards</th><th>Unchecked</th><th>Urgent sent</th><th>Deadline</th><th>Detection</th><th>False marks / board</th><th>Verdict accuracy</th><th>Time / board</th><th>Stress before · mid · after</th></tr>
-  ${R.map(r=>`<tr><td>${r.n}</td><td>${gname(r.g)}</td><td>${r.boards}</td><td>${r.unchecked}</td><td>${r.urg}</td><td>${r.dl}</td><td>${r.det}</td><td>${r.fa}</td><td>${r.acc}</td><td>${r.tpb}</td><td>${r.vpre} · ${r.vmid} · ${r.vpost}</td></tr>`).join('')}</table>
+  <table class="res"><tr><th>Block</th><th>Guidance</th><th>Boards</th><th>Unchecked</th><th>Urgent sent</th><th>Deadline</th><th>Detection</th><th>False marks / board</th><th>Verdict accuracy</th><th>Time / board</th><th>Stress before · mid · after</th><th>Stress after removal</th></tr>
+  ${R.map(r=>`<tr><td>${r.n}</td><td>${gname(r.g)}</td><td>${r.boards}</td><td>${r.unchecked}</td><td>${r.urg}</td><td>${r.dl}</td><td>${r.det}</td><td>${r.fa}</td><td>${r.acc}</td><td>${r.tpb}</td><td>${r.vpre} · ${r.vmid} · ${r.vpost}</td><td>${r.vrem}</td></tr>`).join('')}</table>
   <h3>Boards worked during an outage</h3>
   <table class="res"><tr><th>Block</th><th>Boards hit by outage</th><th>Detection: outage vs normal</th><th>Time / board: outage vs normal</th></tr>
   ${R.filter(r=>r.g!=='none').map(r=>`<tr><td>${r.n}</td><td>${r.outN}</td><td>${r.detOut} vs ${r.detIn}</td><td>${r.tOut} vs ${r.tIn}</td></tr>`).join('')||'<tr><td colspan="4">No outages in this treatment condition.</td></tr>'}</table>
