@@ -17,8 +17,14 @@ button.primary{background:var(--accent);border-color:var(--accent);color:#fff;fo
 button.big{padding:12px 26px;font-size:1.05rem}
 button:disabled{opacity:.45;cursor:default}
 .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
-.labnote{background:#f3f0e6;border-left:4px solid #b89b4a;padding:8px 12px;border-radius:0 8px 8px 0;font-size:.85rem;color:#5a4d24;margin:10px 0}
-.skip{font-size:.8rem;padding:5px 10px;color:var(--muted)}
+.labnote,.co{background:#f4effb;border:2px dashed #7a4fc0;padding:8px 12px;border-radius:8px;font-size:.85rem;color:#44207f;margin:10px 0}
+.co h3{margin-top:10px}.co>*:first-child{margin-top:0}
+.cotag{display:inline-block;font-size:.68rem;font-weight:800;letter-spacing:.07em;text-transform:uppercase;background:#7a4fc0;color:#fff;border-radius:4px;padding:1px 6px;margin-bottom:6px}
+body.part .labnote,body.part .co{display:none}
+.example{background:#eef3f7;border-left:4px solid #1f5f8b;padding:8px 12px;border-radius:0 8px 8px 0;font-size:.9rem;margin:10px 0}
+.reflab{font-size:.8rem;font-weight:700;color:#5f6970;margin-bottom:4px;text-transform:uppercase;letter-spacing:.05em}
+.refchips{font-size:.8rem;margin:4px 0}
+.skip{font-size:.8rem;padding:5px 10px;color:#44207f;border:2px dashed #7a4fc0;background:#f4effb}
 label.opt{display:flex;gap:8px;align-items:flex-start;padding:6px 0}
 select{font:inherit;padding:6px}
 /* HUD */
@@ -41,7 +47,7 @@ select{font:inherit;padding:6px}
 .manual .mbody{padding:10px 12px;font-size:.84rem}
 .manual table{width:100%;border-collapse:collapse}
 .manual td{padding:4px 3px;border-bottom:1px dotted #d8c99f;vertical-align:top}
-.manual td:first-child{font-family:ui-monospace,monospace;font-weight:700;width:42px}
+.manual td:first-child{font-family:ui-monospace,monospace;font-weight:700;width:36px}.manual td:nth-child(2){width:52px}.manual td svg{display:block;background:#1f6b3a;border-radius:4px}
 .chip{display:inline-block;width:10px;height:10px;border:1px solid #555;border-radius:2px;vertical-align:-1px;margin-right:1px}
 .shutter{position:absolute;inset:0;background:repeating-linear-gradient(45deg,#3b3f42,#3b3f42 10px,#45494c 10px,#45494c 20px);color:#ffd2cc;display:flex;align-items:center;justify-content:center;text-align:center;font:700 1rem system-ui;border-radius:6px;padding:20px}
 .actions{display:flex;gap:10px;margin-top:10px;align-items:center;flex-wrap:wrap}
@@ -136,7 +142,10 @@ const W=780,H=482;
 const RV=[{c:['brown','black','red'],l:'1 kΩ',s:'1k'},{c:['red','red','red'],l:'2.2 kΩ',s:'2.2k'},{c:['yellow','violet','red'],l:'4.7 kΩ',s:'4.7k'},
   {c:['brown','black','orange'],l:'10 kΩ',s:'10k'},{c:['orange','orange','brown'],l:'330 Ω',s:'330'},{c:['green','blue','brown'],l:'560 Ω',s:'560'}];
 const COL={black:'#111',brown:'#7a4a1e',red:'#d12b2b',orange:'#f08a1c',yellow:'#f2d21b',green:'#2f9e44',blue:'#2a62d6',violet:'#8a3fd1',gold:'#c9a227'};
-const DEF={REV:'Reversed polarity',ROT:'IC rotated',VAL:'Wrong resistor value',MIS:'Missing part',BRG:'Solder bridge',BRN:'Burn mark'};
+const DEF={WAY:'Facing the wrong way',VAL:'Wrong colour stripes',MIS:'Missing part',BRG:'Blob of solder',BRN:'Burn mark'};
+const SHORT={WAY:'WAY',VAL:'STRIPES',MIS:'MISSING',BRG:'BLOB',BRN:'BURN'};
+const DIRW={0:'right',90:'down',180:'left',270:'up'};
+const BURNDEF='<defs><radialGradient id="burn"><stop offset="0" stop-color="#0b0704" stop-opacity=".95"/><stop offset=".55" stop-color="#3b2410" stop-opacity=".8"/><stop offset="1" stop-color="#3b2410" stop-opacity="0"/></radialGradient></defs>';
 const POS=[[62,64],[178,70],[116,160]];
 const DIR={0:'right',90:'bottom',180:'left',270:'top'};
 const zoneXY=z=>[22+(z%3)*248,22+Math.floor(z/3)*224];
@@ -154,9 +163,9 @@ function makeBoard(fam,n){
   if(n==null){const u=Math.random();n=u<.2?0:u<.55?1:u<.85?2:3}
   const comps=fam.comps.map(c=>({...c})),truth={};
   const ids=fam.comps.map(c=>c.id).sort(()=>Math.random()-.5).slice(0,n);
-  for(const id of ids){const c=comps[id];const spec={C:'REV',D:'REV',U:'ROT',R:'VAL'}[c.t];
+  for(const id of ids){const c=comps[id];const spec=c.t==='R'?'VAL':'WAY';
     const d=Math.random()<.8?spec:pick(['MIS','BRG','BRN']);truth[id]=d;
-    if(d==='REV')c.a=(c.a+180)%360;else if(d==='ROT')c.a=(c.a+pick([90,180,270]))%360;
+    if(d==='WAY')c.a=(c.a+(c.t==='U'?pick([90,180,270]):180))%360;
     else if(d==='VAL')c.v=(c.v+1+Math.floor(Math.random()*(RV.length-1)))%RV.length;
     else if(d==='MIS')c.missing=true;else if(d==='BRG')c.bridge=true;else c.burn=true}
   return{fam:fam.name,comps,truth,n};
@@ -166,10 +175,10 @@ function padsSVG(t){if(t==='U'){let s='';for(let i=0;i<4;i++){const x=-21+i*14;s
 function bodySVG(c){
   if(c.t==='R'){const b=RV[c.v].c;return`<line x1="-31" y1="0" x2="31" y2="0" stroke="#c8ccd0" stroke-width="2.5"/><rect x="-22" y="-8" width="44" height="16" rx="6" fill="#dcc79f" stroke="#a8916a"/>`+
     b.map((k,i)=>`<rect x="${-15+i*8}" y="-8" width="4.5" height="16" fill="${COL[k]}"/>`).join('')+`<rect x="12" y="-8" width="3.5" height="16" fill="${COL.gold}"/>`}
-  if(c.t==='C')return`<line x1="-31" y1="0" x2="31" y2="0" stroke="#c8ccd0" stroke-width="2.5"/><rect x="-20" y="-11" width="40" height="22" rx="5" fill="#2c4f9e" stroke="#1b346e"/><rect x="9" y="-11" width="11" height="22" rx="3" fill="#cfd8ea"/><text x="14.5" y="4" font-size="12" text-anchor="middle" fill="#1b346e" font-weight="700">−</text>`;
+  if(c.t==='C')return`<line x1="-31" y1="0" x2="31" y2="0" stroke="#c8ccd0" stroke-width="2.5"/><rect x="-20" y="-11" width="40" height="22" rx="5" fill="#2c4f9e" stroke="#1b346e"/><rect x="9" y="-11" width="11" height="22" rx="3" fill="#e4eaf6"/>`;
   if(c.t==='D')return`<line x1="-31" y1="0" x2="31" y2="0" stroke="#c8ccd0" stroke-width="2.5"/><rect x="-18" y="-7" width="36" height="14" rx="3" fill="#1b1b1b"/><rect x="9" y="-7" width="5" height="14" fill="#cfcfcf"/>`;
   let pins='';for(let i=0;i<4;i++){const x=-21+i*14;pins+=`<rect x="${x-2.5}" y="-25" width="5" height="7" fill="#b9bec3"/><rect x="${x-2.5}" y="18" width="5" height="7" fill="#b9bec3"/>`}
-  return pins+`<rect x="-32" y="-20" width="64" height="40" rx="3" fill="#232526"/><circle cx="32" cy="0" r="6" fill="#1f6b3a"/><circle cx="23" cy="11" r="2.5" fill="#777"/>`;
+  return pins+`<rect x="-32" y="-20" width="64" height="40" rx="3" fill="#232526"/><path d="M32,-10 A10,10 0 0 0 32,10 Z" fill="#f2f4f5"/>`;
 }
 function compSVG(c){
   const vert=c.a%180===90,ly=vert?(c.t==='U'?46:50):(c.t==='U'?40:26);
@@ -188,13 +197,10 @@ function overlaySVG(fam){
     if(c.t!=='R')s+=`<path d="M${dim[0]/2+4},-6 L${dim[0]/2+13},0 L${dim[0]/2+4},6 Z" fill="${cy}"/>`;
     s+='</g>';
     const rad=c.a*Math.PI/180,off=(c.t==='U'?52:40),tx=c.x+Math.cos(rad)*off,ty=c.y+Math.sin(rad)*off+4;
-    if(c.t==='C')s+=`<text x="${tx}" y="${ty}" font-size="13" font-weight="700" text-anchor="middle" fill="${cy}">−</text>`;
-    if(c.t==='D')s+=`<text x="${tx}" y="${ty}" font-size="11" font-weight="700" text-anchor="middle" fill="${cy}">K</text>`;
-    if(c.t==='U')s+=`<text x="${tx}" y="${ty}" font-size="11" font-weight="700" text-anchor="middle" fill="${cy}">1</text>`;
     if(c.t==='R'){const hx=c.a===0?c.x-30:c.x+16,hy=c.a===0?c.y-15:c.y-24;
-      s+=`<rect x="${hx-2}" y="${hy-10}" width="62" height="14" rx="4" fill="#05313b" opacity=".75"/><text x="${hx+2}" y="${hy+1}" font-size="10.5" font-weight="700" fill="${cy}">${RV[c.v].s}</text>`+
-      RV[c.v].c.map((k,i)=>`<rect x="${hx+34+i*8}" y="${hy-7}" width="6" height="9" fill="${COL[k]}" stroke="${cy}" stroke-width=".6"/>`).join('')}}
-  s+=`<text x="${W-14}" y="${H-10}" font-size="10" text-anchor="end" fill="${cy}" opacity=".8">GUIDANCE · FAMILY ${fam.name}</text></g>`;
+      s+=`<rect x="${hx-2}" y="${hy-10}" width="32" height="14" rx="4" fill="#05313b" opacity=".75"/>`+
+      RV[c.v].c.map((k,i)=>`<rect x="${hx+2+i*8}" y="${hy-7}" width="6" height="9" fill="${COL[k]}" stroke="${cy}" stroke-width=".6"/>`).join('')}}
+  s+=`<text x="${W-14}" y="${H-10}" font-size="10" text-anchor="end" fill="${cy}" opacity=".8">GUIDANCE · TYPE ${fam.name}</text></g>`;
   return s;
 }
 function boardSVG(fam,b,opt={}){
@@ -203,13 +209,18 @@ function boardSVG(fam,b,opt={}){
   s+=`<clipPath id="bd"><rect width="${W}" height="${H}" rx="14"/></clipPath><g clip-path="url(#bd)">`+fam.traces.map(d=>`<path d="${d}" stroke="#2c8a4c" stroke-width="3" fill="none" opacity=".7"/>`).join('')+'</g>';
   [[14,14],[W-14,14],[14,H-14],[W-14,H-14]].forEach(([x,y])=>s+=`<circle cx="${x}" cy="${y}" r="6" fill="#0f3a1f" stroke="#c9a24a" stroke-width="2"/>`);
   for(let z=0;z<6;z++){const[zx,zy]=zoneXY(z);s+=`<text x="${zx+228}" y="${zy+206}" font-size="10" text-anchor="end" fill="#cfe3cf" opacity=".55" font-family="ui-monospace,monospace">Z${z+1}</text>`}
-  s+=`<text x="${W/2}" y="${H-6}" font-size="10" text-anchor="middle" fill="#cfe3cf" opacity=".6" font-family="ui-monospace,monospace">FAMILY ${fam.name}${opt.boardNo?' · BOARD '+String(opt.boardNo).padStart(2,'0'):''}</text>`;
+  s+=`<text x="${W/2}" y="${H-6}" font-size="10" text-anchor="middle" fill="#cfe3cf" opacity=".6" font-family="ui-monospace,monospace">TYPE ${fam.name}${opt.boardNo?' · BOARD '+String(opt.boardNo).padStart(2,'0'):''}</text>`;
   s+=b.comps.map(compSVG).join('');
   if(opt.overlay)s+=overlaySVG(fam);
-  if(opt.feedback){for(const c of b.comps){const tr=b.truth[c.id],mk=opt.marks[c.id];
-      if(tr){s+=`<circle cx="${c.x}" cy="${c.y}" r="37" fill="none" stroke="${mk?'#3ddc84':'#ffd166'}" stroke-width="3.5" ${mk?'':'stroke-dasharray="7 5"'}/><rect x="${c.x-62}" y="${c.y-58}" width="124" height="17" rx="8" fill="${mk?'#3ddc84':'#ffd166'}"/><text x="${c.x}" y="${c.y-45.5}" font-size="10.5" font-weight="700" text-anchor="middle" fill="#123">${DEF[tr]}${mk?(mk===tr?' ✓':' (type?)'):' – missed'}</text>`}
-      else if(mk){s+=`<path d="M${c.x-22},${c.y-22} L${c.x+22},${c.y+22} M${c.x+22},${c.y-22} L${c.x-22},${c.y+22}" stroke="#ff5c5c" stroke-width="5"/><text x="${c.x}" y="${c.y-34}" font-size="10.5" font-weight="700" text-anchor="middle" fill="#ff8f8f">no defect here</text>`}}}
-  else if(opt.marks){for(const id in opt.marks){const c=b.comps[id];s+=`<circle cx="${c.x}" cy="${c.y}" r="36" fill="none" stroke="#ff3b3b" stroke-width="3.5"/><rect x="${c.x+14}" y="${c.y-46}" width="36" height="16" rx="7" fill="#ff3b3b"/><text x="${c.x+32}" y="${c.y-34.5}" font-size="10" font-weight="700" text-anchor="middle" fill="#fff">${opt.marks[id]}</text>`}}
+  if(opt.feedback){const placed=[];for(const c of b.comps){const tr=b.truth[c.id],mk=opt.marks[c.id];
+      if(tr){const col=mk?'#3ddc84':'#ffd166',fc=fam.comps[c.id];
+        const l1=DEF[tr]+(mk?(mk===tr?' ✓':' (you chose another type)'):' – missed');
+        const l2=tr==='WAY'?'marked end should point '+DIRW[fc.a]:tr==='VAL'?'stripes should be '+RV[fc.v].c.join('–'):'';
+        const w=Math.max(l1.length,l2.length)*6.3+18,h=l2?32:18,lx=Math.min(W-w/2-6,Math.max(w/2+6,c.x)),up=c.y>95;let ly=up?c.y-40-h:c.y+44;
+        while(placed.some(p=>Math.abs(p.x-lx)<(p.w+w)/2+4&&Math.abs(p.y-ly)<(p.h+h)/2+2))ly+=up?-(h+4):(h+4);placed.push({x:lx,y:ly,w,h});
+        s+=`<circle cx="${c.x}" cy="${c.y}" r="37" fill="none" stroke="${col}" stroke-width="3.5" ${mk?'':'stroke-dasharray="7 5"'}/><rect x="${lx-w/2}" y="${ly}" width="${w}" height="${h}" rx="8" fill="${col}"/><text x="${lx}" y="${ly+13}" font-size="10.5" font-weight="700" text-anchor="middle" fill="#123">${l1}</text>`+(l2?`<text x="${lx}" y="${ly+26}" font-size="10" text-anchor="middle" fill="#123">${l2}</text>`:'')}
+      else if(mk){s+=`<path d="M${c.x-22},${c.y-22} L${c.x+22},${c.y+22} M${c.x+22},${c.y-22} L${c.x-22},${c.y+22}" stroke="#ff5c5c" stroke-width="5"/><rect x="${c.x-52}" y="${c.y-50}" width="104" height="17" rx="8" fill="#ff5c5c"/><text x="${c.x}" y="${c.y-37.5}" font-size="10.5" font-weight="700" text-anchor="middle" fill="#fff">nothing wrong here</text>`}}}
+  else if(opt.marks){for(const id in opt.marks){const c=b.comps[id];s+=`<circle cx="${c.x}" cy="${c.y}" r="36" fill="none" stroke="#ff3b3b" stroke-width="3.5"/><rect x="${c.x+10}" y="${c.y-48}" width="54" height="16" rx="7" fill="#ff3b3b"/><text x="${c.x+37}" y="${c.y-36.5}" font-size="9.5" font-weight="700" text-anchor="middle" fill="#fff">${SHORT[opt.marks[id]]}</text>`}}
   if(opt.interactive)s+=b.comps.map(c=>`<rect class="hit" data-id="${c.id}" x="${c.x-42}" y="${c.y-42}" width="84" height="84" fill="transparent" style="cursor:pointer"/>`).join('');
   return s+'</svg>';
 }
@@ -222,17 +233,18 @@ function scoreBoard(b,marks){
   return{found,typed,miss,fa,verdictCorrect,earn};
 }
 /* paper manual */
-function ruleHTML(c){const d=DIR[c.a];
-  if(c.t==='R')return`${c.a===0?'Horizontal':'Vertical'}, ${RV[c.v].l}<br>`+RV[c.v].c.map(k=>`<span class="chip" style="background:${COL[k]}"></span>`).join('')+` ${RV[c.v].c.join('–')}`;
-  if(c.t==='C')return`Negative stripe toward the <b>${d}</b> edge`;
-  if(c.t==='D')return`Cathode band toward the <b>${d}</b> edge`;
-  return`Pin-1 notch toward the <b>${d}</b> edge`}
+const partIcon=c=>`<svg viewBox="-48 -40 96 80" width="46" height="38">${compSVG({...c,x:0,y:0,label:''})}</svg>`;
+function ruleHTML(c){const d=DIRW[c.a];
+  if(c.t==='R')return`Stripes: `+RV[c.v].c.map(k=>`<span class="chip" style="background:${COL[k]}"></span>`).join('')+` ${RV[c.v].c.join('–')}`;
+  if(c.t==='C')return`Light stripe points <b>${d}</b>`;
+  if(c.t==='D')return`White band points <b>${d}</b>`;
+  return`Notch points <b>${d}</b>`}
 function manualHTML(fam,page){
   const zs=[page*2,page*2+1];
   let map=`<svg viewBox="0 0 150 70" width="150" height="70">`;for(let z=0;z<6;z++){const x=4+(z%3)*48,y=4+Math.floor(z/3)*32,on=zs.includes(z);map+=`<rect x="${x}" y="${y}" width="44" height="28" fill="${on?'#e6d39c':'#fff'}" stroke="#8a7a4a"/><text x="${x+22}" y="${y+18}" font-size="11" text-anchor="middle" fill="#4a3f1f">${z+1}</text>`}map+='</svg>';
   let body=`<div class="row" style="gap:8px;margin-bottom:6px">${map}<div style="font-size:.78rem;color:#6b5b2e">Board seen from the front.<br>Zones 1–3 top row, 4–6 bottom row.</div></div>`;
-  for(const z of zs){body+=`<div style="font-weight:700;margin:8px 0 2px">Zone ${z+1}</div><table>`+fam.comps.filter(c=>c.zone===z).map(c=>`<tr><td>${c.label}</td><td>${ruleHTML(c)}</td></tr>`).join('')+`</table>`}
-  return`<div class="mhead">Inspection Manual – Board Family ${fam.name}</div><div class="tabs">${[0,1,2].map(p=>`<button data-p="${p}" class="${p===page?'on':''}">p.${p+1} · Zones ${p*2+1}–${p*2+2}</button>`).join('')}</div><div class="mbody">${body}</div>`;
+  for(const z of zs){body+=`<div style="font-weight:700;margin:8px 0 2px">Zone ${z+1}</div><table>`+fam.comps.filter(c=>c.zone===z).map(c=>`<tr><td>${c.label}</td><td>${partIcon(c)}</td><td>${ruleHTML(c)}</td></tr>`).join('')+`</table>`}
+  return`<div class="mhead">Inspection Manual – Board type ${fam.name}</div><div class="tabs">${[0,1,2].map(p=>`<button data-p="${p}" class="${p===page?'on':''}">p.${p+1} · Zones ${p*2+1}–${p*2+2}</button>`).join('')}</div><div class="mbody">${body}</div>`;
 }
 
 /* ============================== UI building blocks ============================== */
@@ -255,9 +267,12 @@ function closePop(){const p=$('#pop');if(p)p.remove()}
 /* ============================== screens ============================== */
 async function setup(){
   show(`<div class="card"><h1>Board Inspection Study – test version</h1>
-  <p>This is a playable version of the planned lab session, for the author team to try. You work through three blocks of a circuit-board inspection task under time pressure, with an evaluation rule hanging over every block. Depending on the arm, you get AR guidance or a paper manual in Block 2, and you may lose it in Block 3.</p>
-  <div class="labnote"><b>Differences from the lab:</b> the AR overlay is drawn on screen instead of in the HoloLens; the manual is a panel instead of a printed booklet; no saliva or heart rate is recorded; rest periods are shortened. Grey "Lab note" boxes mark what would happen in the lab at that point.</div>
-  <h3>Arm</h3>
+  <p>This is a playable version of the planned lab session. You work through three blocks of a circuit-board inspection task under time pressure, with an evaluation rule hanging over every block. Depending on the treatment condition, you get AR guidance or a paper manual in Block 2, and you may lose it in Block 3.</p>
+  <div class="co" style="display:block"><span class="cotag">For co-authors</span>
+  <p>Everything in a purple dashed box like this one is for the author team only. Participants would not see it. The boxes mark where the lab session differs from this page or does something a web page cannot. Untick the last option below to see the session exactly as a participant would.</p>
+  <p><b>Differences from the lab:</b> the AR overlay is drawn on screen instead of in the HoloLens; the manual is a panel instead of a printed sheet; rest periods are shortened.</p>
+  <p>Printable manual for the paper condition: <a href="manual_A.pdf">board type A</a> · <a href="manual_B.pdf">board type B</a> · <a href="design.html">design notes</a></p>
+  <h3>Treatment condition</h3>
   ${['R','A','B','C','D'].map(k=>`<label class="opt"><input type="radio" name="arm" value="${k}" ${k==='R'?'checked':''}> <span>${k==='R'?'<b>Random</b> (as a participant would be assigned)':ARMS[k].name}</span></label>`).join('')}
   <h3>Length</h3>
   <select id="len"><option value="90">Quick check: 1.5-minute blocks</option><option value="180" selected>Demo: 3-minute blocks</option><option value="900">Full: 15-minute blocks (as in the protocol)</option></select>
@@ -267,58 +282,71 @@ async function setup(){
   <select id="pace"><option value="cal" selected>Deadline per board, calibrated to you in Block 1</option><option value="f30">Fixed 30 seconds per board</option><option value="f20">Fixed 20 seconds per board</option><option value="off">No deadline per board (first version)</option></select>
   <h3>Options</h3>
   <label class="opt"><input type="checkbox" id="snd" checked> <span>Sound and spoken reminders (use headphones, as in the lab)</span></label>
-  <label class="opt"><input type="checkbox" id="tst" checked> <span>Tester controls (skip buttons for rests and training)</span></label>
-  <div class="row" style="margin-top:14px"><button class="primary big" id="go">Start session</button></div>
-  <p class="muted" style="margin-top:14px;font-size:.85rem">At the end you can download your data (JSON and CSV) and send it to the team. <a href="design.html">Design notes</a></p></div>`);
+  <label class="opt"><input type="checkbox" id="study"> <span>Show a correct reference board to memorise before Block 1 (off: Block 1 is fully unaided)</span></label>
+  <label class="opt"><input type="checkbox" id="tst" checked> <span>Show co-author notes and skip buttons during the session</span></label>
+  <p style="margin:8px 0 0">At the end you can download your data (JSON and CSV) and send it to the team.</p></div>
+  <div class="row" style="margin-top:14px"><button class="primary big" id="go">Start session</button></div></div>`);
   await waitClick('#go');
   let k=document.querySelector('input[name=arm]:checked').value;if(k==='R')k=pick(['A','B','C','D']);
   S.armKey=k;S.arm=ARMS[k];S.blockMs=+$('#len').value*1000;S.outageMs=S.blockMs>=900000?45000:Math.round(S.blockMs*0.11);
   S.restMs=S.blockMs>=900000?300000:Math.min(30000,S.blockMs/6);{const pv=$('#pace').value,d0=(+P.get('dl')||30)*1000;S.pace=pv==='off'?'off':pv==='cal'?'cal':'fix';S.dl=pv==='f30'?30000:pv==='f20'?20000:d0;S.dlMin=Math.min(14000,d0)}
-  S.layout=$('#lay').value;S.sound=$('#snd').checked;S.tester=$('#tst').checked;
+  S.layout=$('#lay').value;S.study=$('#study').checked;S.sound=$('#snd').checked;S.tester=$('#tst').checked;document.body.classList.toggle('part',!S.tester);
   logEvent('setup',{arm:k,blockMs:S.blockMs,pace:S.pace,dl:S.dl,layout:S.layout});
   if(S.sound){beep(440,.05,.02)}
 }
 async function intro(){
   show(`<div class="card"><h1>Welcome</h1>
-  <p>You will work as a quality inspector for printed circuit boards. Each board shows 18 components in six zones. Some boards are correct; others have one or more defects.</p>
-  <p><b>Your job:</b> click every defective component and choose the defect type. If you find nothing wrong, submit the board without marks.</p>
+  <p>You will work as a quality inspector for printed circuit boards. No technical knowledge is needed. Each board carries 18 small parts in six zones. Some boards are correct; others have one or more defects.</p>
+  <p><b>Your job:</b> click every part that has a defect and choose the kind of defect. If you find nothing wrong, submit the board without marks.</p>
   <h3>Pay rule (identical in every block)</h3>
-  <ul><li>+ €0.10 for each correct board verdict (correct / flawed)</li><li>+ €0.10 for each defect found and correctly named (+ €0.05 if the type is wrong)</li><li>− €0.05 for each missed defect and for each mark on a component that is fine</li><li>− €0.10 for each board that leaves your station unchecked</li></ul>
+  <ul><li>+ €0.10 for each correct board verdict (correct / flawed)</li><li>+ €0.10 for each defect found and correctly named (+ €0.05 if the type is wrong)</li><li>− €0.05 for each missed defect and for each mark on a part that is fine</li><li>− €0.10 for each board that leaves your station unchecked</li></ul>
   <h3>The line does not wait</h3>
   <p>Boards arrive on a production clock. <b>Each board has its own deadline</b>, shown as a bar above the board. When the bar runs out, the board is taken away and <b>ships unchecked</b> under your name. Boards can be pulled for sign-off review at any time.</p>
-  <p class="muted">Your earnings are shown only at the end of the session. The pace is the same in every block.</p>
+  <p class="muted">Your earnings are shown only at the end of the session.</p>
   <div class="row"><button class="primary big" id="n">Continue to training</button></div></div>`);
   await waitClick('#n');
 }
-function galleryItem(title,desc,a,b){
-  const one=(c)=>`<svg viewBox="-60 -45 120 90"><g>${compSVG({...c,x:0,y:0,label:''})}</g></svg>`;
-  return`<div class="gal"><b>${title}</b><div class="row" style="flex-wrap:nowrap;gap:6px;margin:6px 0"><div style="flex:1">${one(a)}<div class="muted" style="font-size:.75rem;text-align:center">as specified</div></div><div style="flex:1">${one(b)}<div class="muted" style="font-size:.75rem;text-align:center">defect</div></div></div>${desc}</div>`;
+function galleryItem(title,desc,a,b,top=''){
+  const one=(c)=>`<svg viewBox="-60 -45 120 90">${BURNDEF}<g>${compSVG({...c,x:0,y:0,label:''})}</g></svg>`;
+  return`<div class="gal"><b>${title}</b>${top}<div class="row" style="flex-wrap:nowrap;gap:6px;margin:6px 0"><div style="flex:1">${one(a)}<div class="muted" style="font-size:.75rem;text-align:center">correct</div></div><div style="flex:1">${one(b)}<div class="muted" style="font-size:.75rem;text-align:center">defect</div></div></div>${desc}</div>`;
 }
+const stripeChips=v=>RV[v].c.map(k=>`<span class="chip" style="background:${COL[k]}"></span>`).join('')+' '+RV[v].c.join('–');
 async function training(famT){
-  show(`<div class="card" style="max-width:900px"><h1>Training: the six defect types</h1>
-  <p>Some defects you can see directly. Others only show up when you compare a component with the board's specification: which way it should face, or which value it should have. <b>Each board family has its own specification.</b></p>
+  show(`<div class="card" style="max-width:900px"><h1>Training: the five kinds of defect</h1>
+  <p>Three kinds of defect you can simply see: a <b>missing part</b>, a <b>blob of solder</b>, a <b>burn mark</b>.</p>
+  <p>The other two you can only find by <b>comparing the board with a reference</b> that shows how a correct board looks:</p>
+  <ul><li><b>Facing the wrong way.</b> Blue parts have a light stripe at one end, black parts a white band, and chips a white notch. This is the part's <i>marked end</i>. The reference says where the marked end should point.</li>
+  <li><b>Wrong colour stripes.</b> Beige parts carry three colour stripes. The reference says which three colours belong at each position.</li></ul>
+  <p><b>There is no general rule.</b> Which direction and which colours are correct is different for every position on the board, and for every type of board. In the examples below, "correct" only means correct for that one position.</p>
   <div class="gallery">
-  ${galleryItem('Reversed polarity','Capacitor stripe (−) or diode band on the wrong side.',{t:'C',a:0},{t:'C',a:180})}
-  ${galleryItem('IC rotated','The chip\'s pin-1 notch faces the wrong way.',{t:'U',a:0},{t:'U',a:90})}
-  ${galleryItem('Wrong resistor value','The colour bands do not match the specified value.',{t:'R',a:0,v:2},{t:'R',a:0,v:3})}
-  ${galleryItem('Missing part','Empty pads where a component belongs.',{t:'D',a:0},{t:'D',a:0,missing:true})}
-  ${galleryItem('Solder bridge','A blob of solder joining a pad to its neighbour.',{t:'C',a:0},{t:'C',a:0,bridge:true})}
-  ${galleryItem('Burn mark','Scorching on or around a component.',{t:'R',a:0,v:0},{t:'R',a:0,v:0,burn:true})}
+  ${galleryItem('Facing the wrong way','The light stripe points left, but the reference says right.',{t:'C',a:0},{t:'C',a:180},'<div class="refchips">Reference: light stripe points <b>right</b></div>')}
+  ${galleryItem('Facing the wrong way (chip)','The notch points down, but the reference says right.',{t:'U',a:0},{t:'U',a:90},'<div class="refchips">Reference: notch points <b>right</b></div>')}
+  ${galleryItem('Wrong colour stripes','The stripes on the part are not the ones in the reference.',{t:'R',a:0,v:2},{t:'R',a:0,v:3},'<div class="refchips">Reference: '+stripeChips(2)+'</div>')}
+  ${galleryItem('Missing part','Empty pads where a part belongs.',{t:'D',a:0},{t:'D',a:0,missing:true})}
+  ${galleryItem('Blob of solder','A silver blob sticking out next to a part.',{t:'C',a:0},{t:'C',a:0,bridge:true})}
+  ${galleryItem('Burn mark','A dark scorch on or around a part.',{t:'R',a:0,v:0},{t:'R',a:0,v:0,burn:true})}
   </div>
-  <p>Next you inspect two practice boards and see the solution after each. The practice boards have their own specification, so the correct orientations are shown in the feedback only.</p>
+  <p>Next you inspect two practice boards. A picture of a correct board is shown beside each one as the reference. After each board you see the solution.</p>
   <div class="row"><button class="primary big" id="n">Start practice</button>${skipBtn()}</div></div>`);
   const skip=await new Promise(r=>{$('#n').onclick=()=>r(false);if($('#skip'))$('#skip').onclick=()=>r(true)});
   if(skip)return;
+  const ref=makeBoard(famT,0);
   for(let i=0;i<2;i++){
-    const b=makeBoard(famT,i===0?2:1),marks={};
+    const b=makeBoard(famT,i===0?2:3),marks={};
     await new Promise(res=>{
       const draw=(fb)=>{show(`<div class="hud"><span class="pill">Practice board ${i+1} of 2</span><span class="pill gd-none">No time limit</span></div>
-        <div class="work"><div class="boardwrap" id="bw">${boardSVG(famT,b,{interactive:!fb,marks,feedback:fb})}</div></div>
-        <div class="actions">${fb?`<button class="primary big" id="nx">${i===1?'Finish training':'Next practice board'}</button><span class="hint">Green: found. Yellow dashed: missed. Red cross: marked but fine.</span>`:`<button class="primary big" id="sb">Submit board</button><button id="cl">Clear marks</button><span class="hint">Click a component to mark a defect.</span>`}</div>`);
+        <div class="work"><div class="boardwrap" style="flex:.75"><div class="reflab">Reference: a correct board</div>${boardSVG(famT,ref,{})}</div><div class="boardwrap"><div class="reflab">Board to inspect</div>${boardSVG(famT,b,{interactive:!fb,marks,feedback:fb})}</div></div>
+        <div class="actions">${fb?`<button class="primary big" id="nx">${i===1?'Finish training':'Next practice board'}</button><span class="hint">Green: found. Yellow dashed: missed. Red cross: marked, but nothing was wrong.</span>`:`<button class="primary big" id="sb">Submit board</button><button id="cl">Clear marks</button><span class="hint">Compare each part with the reference. Click a part to mark a defect.</span>`}</div>`);
         if(fb){$('#nx').onclick=res;return}
         bindHits(()=>marks,()=>draw(false));$('#sb').onclick=()=>draw(true);$('#cl').onclick=()=>{for(const k in marks)delete marks[k];draw(false)}};
       draw(false)});
   }
+}
+async function studyRef(fam){
+  const ms=S.blockMs>=900000?60000:20000;
+  show(`<div class="card" style="max-width:900px"><h2>Reference for the next block</h2><p>This is a correct board of the type you will inspect next. You have a short time to study it. It will not be available during the block.</p><div class="rest" id="rt" style="font-size:1.4rem;margin:6px 0">${fmt(ms)}</div><div class="boardwrap">${boardSVG(fam,makeBoard(fam,0),{})}</div><div class="row" style="margin-top:8px">${skipBtn()}</div></div>`);
+  const end=Date.now()+ms;await new Promise(res=>{const iv=setInterval(()=>{const left=end-Date.now();const el=$('#rt');if(el)el.textContent=fmt(left);if(left<=0){clearInterval(iv);res()}},250);if($('#skip'))$('#skip').onclick=()=>{clearInterval(iv);res()}});
+  logEvent('study_reference',{family:fam.name});
 }
 function bindHits(getMarks,redraw){
   document.querySelectorAll('.hit').forEach(h=>h.addEventListener('click',e=>{const id=h.dataset.id;
@@ -332,18 +360,18 @@ async function announcement(){
   <p><b>One in four participants</b> will be selected by lottery to present those boards and defend each decision they made: why a component was marked, and why others were not.</p>
   <div class="drumbox">${drumHTML()}<div><b>The lottery drum</b><br><span class="muted">It is spun now to show how the draw works, and again at the end of the session.</span></div></div>
   <h3>What a review looks like</h3>
-  <div class="labnote" style="background:#eef3f7;border-color:#1f5f8b;color:#1c2226">Board 14, Family B. <i>"You rejected this board for a reversed capacitor C3. What did you compare it with? Why did you not mark U2? How sure were you?"</i></div>
-  <div class="labnote"><b>Lab note:</b> here the experimenter demonstrates a short report on a practice board and spins the drum in front of the group.</div>
+  <div class="example">Board 14. <i>"You marked part C3 as facing the wrong way. What did you compare it with? Why did you not mark U2? How sure were you?"</i></div>
+  <div class="labnote"><b>Note for co-authors:</b> here the experimenter demonstrates a short report on a practice board and spins the drum in front of the group.</div>
   <div class="row"><button class="primary big" id="n" disabled>Continue</button></div></div>`);
   const d=$('#drum');d.classList.add('spin');beep(300,.3,.03);await sleep(3000);d.classList.remove('spin');$('#n').disabled=false;
   logEvent('announcement');await waitClick('#n');
 }
 async function rest(title,ms,labnote){
-  show(`<div class="card"><h2>${title}</h2><p class="muted">Please sit quietly and relax. Do not think about the task.</p><div class="rest" id="rt">${fmt(ms)}</div>${labnote?`<div class="labnote"><b>Lab note:</b> ${labnote}</div>`:''}<div class="row">${skipBtn()}</div></div>`);
+  show(`<div class="card"><h2>${title}</h2><p class="muted">Please sit quietly and relax. Do not think about the task.</p><div class="rest" id="rt">${fmt(ms)}</div>${labnote?`<div class="labnote"><b>Note for co-authors:</b> ${labnote}</div>`:''}<div class="row">${skipBtn()}</div></div>`);
   const end=Date.now()+ms;await new Promise(res=>{const iv=setInterval(()=>{const left=end-Date.now();const el=$('#rt');if(el)el.textContent=fmt(left);if(left<=0){clearInterval(iv);res()}},250);if($('#skip'))$('#skip').onclick=()=>{clearInterval(iv);res()}});
 }
 async function vasScreen(tag,block){
-  show(`<div class="card"><h2>Quick rating</h2>${sliderQ('vas','How stressed do you feel right now?','Not at all','Extremely')}<div class="labnote"><b>Lab note:</b> saliva sample (baseline before the reminder).</div><button class="primary" id="n">Continue</button></div>`);
+  show(`<div class="card"><h2>Quick rating</h2>${sliderQ('vas','How stressed do you feel right now?','Not at all','Extremely')}<div class="labnote"><b>Note for co-authors:</b> saliva sample (baseline before the reminder).</div><button class="primary" id="n">Continue</button></div>`);
   await waitClick('#n');S.vas.push({block,tag,v:+$('#vas').value,t:Date.now()-S.start});
 }
 async function reminder(block){
@@ -363,15 +391,15 @@ async function reminder(block){
 async function familiarise(famB){
   const ar=S.arm.res==='ar';
   show(`<div class="card"><h1>Your guidance for the next block</h1>
-  <p>${ar?'In the next block you will see <b>AR guidance</b> on top of each board. In the lab this appears in the HoloLens over the board; here it is drawn on the screen. Cyan outlines show each zone, where each component belongs and which way it should face (the arrow marks the − stripe, the cathode band K, or pin 1). For resistors it shows the specified value and colour bands.':'In the next block you will have an <b>inspection manual</b> for this board family. It lists, zone by zone, how each component should face and which value each resistor should have. Use the zone map and the component labels printed on the board to find what you need.'}</p>
-  <p><b>The guidance never tells you whether a board is correct.</b> You still decide. The next block also uses a <b>new board family</b> with its own specification.</p>
+  <p>${ar?'In the next block you will see <b>AR guidance</b> on top of each board. In the lab this appears in the HoloLens over the board; here it is drawn on the screen. Cyan outlines show where each part belongs, and the arrow shows where its marked end should point. Next to each striped part it shows the colour stripes that belong there.':'In the next block you will have an <b>inspection manual</b> for this type of board. It lists, zone by zone, where the marked end of each part should point and which colour stripes belong at each position. Use the zone map and the labels printed on the board (such as C3) to find the part you need.'}</p>
+  <p><b>The guidance never tells you whether a board is correct.</b> You still decide. The next block also uses a <b>new type of board</b>, where the correct directions and colours are different from before.</p>
   <p>Try it on two practice boards now. There is no time limit and no feedback.</p>
   <div class="row"><button class="primary big" id="n">Start</button>${skipBtn()}</div></div>`);
   const skip=await new Promise(r=>{$('#n').onclick=()=>r(false);if($('#skip'))$('#skip').onclick=()=>r(true)});if(skip)return;
   for(let i=0;i<2;i++){const b=makeBoard(famB),marks={};let page=0;
     await new Promise(res=>{const draw=()=>{show(`<div class="hud"><span class="pill">Familiarisation ${i+1} of 2</span><span class="pill ${ar?'gd-on':'gd-paper'}">${ar?'AR guidance on':'Manual on desk'}</span></div>
       <div class="work"><div class="boardwrap">${boardSVG(famB,b,{interactive:true,marks,overlay:ar})}</div>${ar?'':`<div class="manual" id="man">${manualHTML(famB,page)}</div>`}</div>
-      <div class="actions"><button class="primary big" id="sb">${i===1?'Done':'Next board'}</button><span class="hint">Click a component to mark a defect.</span></div>`);
+      <div class="actions"><button class="primary big" id="sb">${i===1?'Done':'Next board'}</button><span class="hint">Click a part to mark a defect.</span></div>`);
       bindHits(()=>marks,draw);$('#sb').onclick=res;
       if(!ar)document.querySelectorAll('#man .tabs button').forEach(t=>t.onclick=()=>{page=+t.dataset.p;draw()})};draw()})}
   logEvent('familiarised');
@@ -394,7 +422,7 @@ async function runBlock(n,fam,guidance,outages){
   show(`<div class="hud"><span class="pill">Block ${n} of 3</span><span class="pill timer" id="tm">${fmt(dur)}</span><span class="pill" id="cnt">Checked: 0</span>${paced?'<span class="pill" id="un">Shipped unchecked: 0</span>':''}<span class="pill" id="gd"></span></div>
     ${paced?'<div class="bbar"><div id="bb"></div></div>':''}
     <div class="work"><div class="boardwrap" id="bw"></div><div id="mw"></div></div>
-    <div class="actions"><button class="primary big" id="sb">Submit board</button><button id="cl">Clear marks</button><span class="hint">Click a component to mark a defect. Submit without marks if the board is correct.</span></div>`);
+    <div class="actions"><button class="primary big" id="sb">Submit board</button><button id="cl">Clear marks</button><span class="hint">Click a part to mark a defect. Submit without marks if the board is correct.</span></div>`);
   const drawGuidanceLabel=()=>{const g=$('#gd');if(!g)return;
     if(guidance==='none'){g.className='pill gd-none';g.textContent=n===3?'Guidance: not available':'Guidance: none'}
     else if(!available){g.className='pill gd-off';g.textContent='⚠ Guidance unavailable'}
@@ -435,7 +463,7 @@ async function runBlock(n,fam,guidance,outages){
     if(elapsed>=dur){ended=true;clearInterval(iv);closePop();logEvent('block_end',{block:n,submitted,unchecked});res()}
   },200)});
   if(calib&&dlHist.length){const h=dlHist.slice(-5);S.dl=h.reduce((a,x)=>a+x,0)/h.length;logEvent('pace_set',{deadline_ms:Math.round(S.dl)})}
-  show(`<div class="card"><h2>Block ${n} is over</h2><p>Please stop working.</p><div class="labnote"><b>Lab note:</b> saliva sample at the end of the block, and again five minutes later.</div><button class="primary big" id="n">Continue</button></div>`);
+  show(`<div class="card"><h2>Block ${n} is over</h2><p>Please stop working.</p><div class="labnote"><b>Note for co-authors:</b> saliva sample at the end of the block, and again five minutes later.</div><button class="primary big" id="n">Continue</button></div>`);
   beep(520,.4,.05);await waitClick('#n');
 }
 const useBox=n=>S.layout==='all'||(S.layout==='b23'&&n>=2);
@@ -508,7 +536,7 @@ async function runBox(n,fam,guidance,outages){
     if(elapsed>=dur){ended=true;clearInterval(iv);closePop();logEvent('block_end',{block:n,submitted,unchecked,left_in_box:box.length});res()}
   },200)});
   if(calib&&dlHist.length){const h=dlHist.slice(-5);S.dl=h.reduce((a,x)=>a+x,0)/h.length;logEvent('pace_set',{deadline_ms:Math.round(S.dl)})}
-  show(`<div class="card"><h2>Block ${n} is over</h2><p>Please stop working.</p><div class="labnote"><b>Lab note:</b> saliva sample at the end of the block, and again five minutes later.</div><button class="primary big" id="n">Continue</button></div>`);
+  show(`<div class="card"><h2>Block ${n} is over</h2><p>Please stop working.</p><div class="labnote"><b>Note for co-authors:</b> saliva sample at the end of the block, and again five minutes later.</div><button class="primary big" id="n">Continue</button></div>`);
   beep(520,.4,.05);await waitClick('#n');
 }
 async function questionnaire(n,guidance){
@@ -548,7 +576,7 @@ async function drawAndReview(){
     show(`<div class="card" style="max-width:900px"><span class="speaker">Sign-off review</span><h2>Block ${p.block}, board ${p.board}</h2>
     <p>Here is the board as you submitted it. In the lab you would present this to the group and answer the experimenter's questions.</p>
     <div class="boardwrap">${boardSVG(fam,p._b,{marks:p._m,boardNo:p.board})}</div>
-    <div class="q"><div class="ql">${Object.keys(p._m).length?'Walk us through your marks. What did you compare each marked component with?':'You signed this board off as correct. What did you check before deciding that?'}</div><textarea id="ans" rows="3" style="width:100%;font:inherit;padding:8px"></textarea></div>
+    <div class="q"><div class="ql">${Object.keys(p._m).length?'Walk us through your marks. What did you compare each marked part with?':'You signed this board off as correct. What did you check before deciding that?'}</div><textarea id="ans" rows="3" style="width:100%;font:inherit;padding:8px"></textarea></div>
     ${likertQ('rsure','How sure were you about this board?')}
     <button class="primary" id="n">${p===picks[picks.length-1]?'Finish review':'Next board'}</button></div>`);
     await waitClick('#n');S.review.push({block:p.block,board:p.board,answer:$('#ans').value,sure:readQs(['rsure']).rsure})}
@@ -571,18 +599,18 @@ async function results(){
   const R=summarise(),total=R.reduce((a,r)=>a+r.earn,0);
   const gname=g=>({none:'none',ar:'AR',paper:'paper'}[g]||g);
   show(`<div class="card" style="max-width:900px"><h1>Thank you – session complete</h1>
-  <p>Arm: <b>${S.arm.name}</b>. Bonus earned: <b>€${total.toFixed(2)}</b>${S.drawn!=null?` · Sign-off draw: ${S.drawn?'selected':'not selected'}`:''}.</p>
+  <p>Treatment condition: <b>${S.arm.name}</b>. Bonus earned: <b>€${total.toFixed(2)}</b>${S.drawn!=null?` · Sign-off draw: ${S.drawn?'selected':'not selected'}`:''}.</p>
   <h3>Performance and stress by block</h3>
   <table class="res"><tr><th>Block</th><th>Guidance</th><th>Boards</th><th>Unchecked</th><th>Urgent sent</th><th>Deadline</th><th>Detection</th><th>False marks / board</th><th>Verdict accuracy</th><th>Time / board</th><th>Stress before · mid · after</th></tr>
   ${R.map(r=>`<tr><td>${r.n}</td><td>${gname(r.g)}</td><td>${r.boards}</td><td>${r.unchecked}</td><td>${r.urg}</td><td>${r.dl}</td><td>${r.det}</td><td>${r.fa}</td><td>${r.acc}</td><td>${r.tpb}</td><td>${r.vpre} · ${r.vmid} · ${r.vpost}</td></tr>`).join('')}</table>
   <h3>Boards worked during an outage</h3>
   <table class="res"><tr><th>Block</th><th>Boards hit by outage</th><th>Detection: outage vs normal</th><th>Time / board: outage vs normal</th></tr>
-  ${R.filter(r=>r.g!=='none').map(r=>`<tr><td>${r.n}</td><td>${r.outN}</td><td>${r.detOut} vs ${r.detIn}</td><td>${r.tOut} vs ${r.tIn}</td></tr>`).join('')||'<tr><td colspan="4">No outages in this arm.</td></tr>'}</table>
-  <p class="muted" style="font-size:.85rem">Stress ratings are 0–100. In the lab, heart rate and alpha-amylase would sit beside these.</p>
+  ${R.filter(r=>r.g!=='none').map(r=>`<tr><td>${r.n}</td><td>${r.outN}</td><td>${r.detOut} vs ${r.detIn}</td><td>${r.tOut} vs ${r.tIn}</td></tr>`).join('')||'<tr><td colspan="4">No outages in this treatment condition.</td></tr>'}</table>
+  <p class="muted" style="font-size:.85rem">Stress ratings are 0–100. </p>
   <div class="row" style="margin-top:12px"><button class="primary" id="dj">Download data (JSON)</button><button id="dc">Download boards (CSV)</button><button id="re">Start again</button></div></div>`);
   const clean=S.boards.map(({_b,_m,...r})=>r);
   const stamp=new Date().toISOString().slice(0,16).replace(/[:T]/g,'-');
-  $('#dj').onclick=()=>download(`inspection_${S.armKey}_${stamp}.json`,JSON.stringify({arm:S.armKey,blockSeconds:S.blockMs/1000,boards:clean,questionnaires:S.qs,vas:S.vas,events:S.events,review:S.review,drawn:S.drawn,summary:R},null,2),'application/json');
+  $('#dj').onclick=()=>download(`inspection_${S.armKey}_${stamp}.json`,JSON.stringify({condition:S.armKey,blockSeconds:S.blockMs/1000,boards:clean,questionnaires:S.qs,vas:S.vas,events:S.events,review:S.review,drawn:S.drawn,summary:R},null,2),'application/json');
   $('#dc').onclick=()=>{const keys=[...new Set(clean.flatMap(r=>Object.keys(r)))];download(`inspection_${S.armKey}_${stamp}.csv`,[keys.join(',')].concat(clean.map(r=>keys.map(k=>JSON.stringify(r[k]??'')).join(','))).join('\n'),'text/csv')};
   $('#re').onclick=()=>location.reload();
 }
@@ -591,8 +619,8 @@ async function results(){
 let FAMS={};
 async function run(){
   await setup();
-  const seed=Math.floor(Math.random()*1e9),swap=Math.random()<.5;
-  const famT=makeFamily('T',seed+7),famX=makeFamily(swap?'B':'A',seed+101),famY=makeFamily(swap?'A':'B',seed+202);
+  const swap=Math.random()<.5,fA=makeFamily('A',SEEDS.A),fB=makeFamily('B',SEEDS.B);
+  const famT=makeFamily('T',SEEDS.T),famX=swap?fB:fA,famY=swap?fA:fB;
   FAMS={T:famT,[famX.name]:famX,[famY.name]:famY};
   logEvent('families',{baseline:famX.name,test:famY.name});
   const res=S.arm.res;
@@ -600,6 +628,7 @@ async function run(){
   await training(famT);
   await announcement();
   await rest('Quiet rest',S.restMs,'resting period before the first baseline sample; heart-rate strap already on.');
+  if(S.study)await studyRef(famX);
   await vasScreen('pre',1);await reminder(1);
   await block(1,famX,'none',[]);
   await questionnaire(1,'none');
@@ -615,7 +644,29 @@ async function run(){
   await drawAndReview();
   await results();
 }
-run();
+const SEEDS={A:1101,B:2202,T:3303};
+function printManual(name){
+  const fam=makeFamily(name,SEEDS[name]);document.title='Inspection manual – board type '+name;
+  const st=document.createElement('style');st.textContent=`@page{size:A4;margin:12mm}html,body{background:#fff}body{font:12pt/1.35 Georgia,serif;color:#111}#app{max-width:none;padding:0}
+  .pm h1{font:700 20pt Georgia,serif;margin:0 0 2mm}.pm .lead{margin:0 0 3mm}.pm .top{display:flex;gap:6mm;align-items:flex-start;margin-bottom:3mm}
+  .pm .how{flex:1;min-width:0;border:1px solid #999;border-radius:2mm;padding:2.5mm 3.5mm}.pm .how b{font-family:system-ui,sans-serif}.pm ol{margin:1mm 0 0;padding-left:5mm}.pm li{margin:.6mm 0}
+  .pm .cols{display:grid;grid-template-columns:1fr 1fr 1fr;gap:4mm}.pm h2{font:700 13pt system-ui,sans-serif;margin:0 0 1mm;background:#e6d39c;padding:1mm 2mm;border-radius:1mm}
+  .pm table{width:100%;border-collapse:collapse;margin-bottom:6mm}.pm td{padding:2.6mm 1mm;border-bottom:.3mm dotted #999;vertical-align:middle;font-size:11pt}
+  .pm td:first-child{font:700 12.5pt ui-monospace,monospace;width:10mm}.pm td:nth-child(2){width:21mm}.pm td svg{width:19mm;height:15.5mm;display:block;background:#1f6b3a;border-radius:1mm}
+  .pm .key{display:flex;flex-wrap:wrap;gap:2mm 5mm;font-size:10pt;margin-top:1mm}.pm .key span{display:flex;align-items:center;gap:1.5mm}.pm .foot{font-size:10.5pt;color:#444;border-top:.3mm solid #999;padding-top:2mm;margin-top:1mm}
+  *{-webkit-print-color-adjust:exact;print-color-adjust:exact}`;document.head.appendChild(st);
+  let map=`<svg viewBox="0 0 150 70" width="170" height="80">`;for(let z=0;z<6;z++){const x=4+(z%3)*48,y=4+Math.floor(z/3)*32;map+=`<rect x="${x}" y="${y}" width="44" height="28" fill="#f4ecd2" stroke="#8a7a4a"/><text x="${x+22}" y="${y+19}" font-size="13" text-anchor="middle" fill="#4a3f1f">${z+1}</text>`}map+='</svg>';
+  const ex=(t,a)=>`<svg viewBox="-48 -40 96 80" width="40" height="33" style="background:#1f6b3a;border-radius:1mm">${compSVG({t,a,v:0,x:0,y:0,label:''})}</svg>`;
+  const zone=z=>`<h2>Zone ${z+1}</h2><table>`+fam.comps.filter(c=>c.zone===z).map(c=>`<tr><td>${c.label}</td><td>${partIcon(c)}</td><td>${ruleHTML(c)}</td></tr>`).join('')+`</table>`;
+  document.body.innerHTML=`<div id="app"><div class="pm"><h1>Inspection Manual · Board type ${name}</h1>
+  <p class="lead">This sheet shows how a <b>correct</b> board of type ${name} looks. It does not tell you whether the board in front of you is correct. You decide.</p>
+  <div class="top"><div>${map}<div style="font-size:8.5pt;color:#444;text-align:center">The six zones of the board</div></div>
+  <div class="how"><b>How to use this sheet</b><ol><li>Every part on the board has a printed label, such as <b>C3</b> or <b>R5</b>.</li><li>Find that label below, in the zone where the part sits.</li><li>Compare the part on the board with the picture and the text here.</li><li>If the marked end points another way, or the colour stripes are different, mark the part as a defect.</li></ol>
+  <div class="key"><span>${ex('C',0)} light stripe = marked end</span><span>${ex('D',0)} white band = marked end</span><span>${ex('U',0)} white notch = marked end</span></div></div></div>
+  <div class="cols"><div>${zone(0)}${zone(3)}</div><div>${zone(1)}${zone(4)}</div><div>${zone(2)}${zone(5)}</div></div>
+  <div class="foot">Missing parts, blobs of solder and burn marks are also defects. You can see those without this sheet.</div></div></div>`;
+}
+if(P.get('manual'))printManual(P.get('manual')==='B'?'B':'A');else run();
 </script>
 </body>
 </html>
