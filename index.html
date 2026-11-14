@@ -282,8 +282,8 @@ async function setup(){
   <p><b>Design rule in this version:</b> after every abrupt removal the participant rates their stress, not at once but a few seconds later, so that the loss has been felt first.</p>
   <h3>Treatment condition</h3>
   ${['R','A','B','C','D'].map(k=>`<label class="opt"><input type="radio" name="arm" value="${k}" ${k==='R'?'checked':''}> <span>${k==='R'?'<b>Random</b> (as a participant would be assigned)':ARMS[k].name}</span></label>`).join('')}
-  <h3>Length</h3>
-  <select id="len"><option value="90">Quick check: 1.5-minute blocks</option><option value="180" selected>Demo: 3-minute blocks</option><option value="900">Full: 15-minute blocks (as in the protocol)</option></select>
+  <h3>Length of each block</h3>
+  <p style="margin:0 0 4px"><input type="number" id="len" min="1" max="20" step="0.5" value="5" style="font:inherit;width:80px;padding:6px"> minutes per block (1 to 20). The same length applies to all three blocks. The protocol has 15.</p>
   <h3>Sign-off draw</h3>
   <select id="odds"><option value="8" selected>One in eight (as in the protocol draft)</option><option value="4">One in four (as suggested in the review memo)</option></select>
   <h3>Options</h3>
@@ -294,7 +294,8 @@ async function setup(){
   <div class="row" style="margin-top:14px"><button class="primary big" id="go">Start session</button></div></div>`);
   await waitClick('#go');
   let k=document.querySelector('input[name=arm]:checked').value;if(k==='R')k=pick(['A','B','C','D']);
-  S.armKey=k;S.arm=ARMS[k];S.blockMs=+$('#len').value*1000;S.outageMs=S.blockMs>=900000?45000:Math.round(S.blockMs*0.11);
+  S.armKey=k;S.arm=ARMS[k];{let m=parseFloat($('#len').value);if(!(m>=1))m=1;if(m>20)m=20;S.blockMs=(+P.get('sec')||m*60)*1000}
+  S.outageMs=Math.round(Math.min(45000,Math.max(S.blockMs>=60000?10000:1500,S.blockMs*0.11)));
   S.restMs=S.blockMs>=900000?300000:Math.min(30000,S.blockMs/6);{const d0=(+P.get('dl')||30)*1000;S.pace='cal';S.dl=d0;S.dlMin=Math.min(14000,d0)}
   S.draw=+$('#odds').value;S.study=$('#study').checked;S.sound=$('#snd').checked;S.tester=$('#tst').checked;document.body.classList.toggle('part',!S.tester);
   logEvent('setup',{draw_odds:S.draw,arm:k,blockMs:S.blockMs,pace:S.pace,dl:S.dl,layout:S.layout});
