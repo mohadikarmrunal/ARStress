@@ -251,7 +251,7 @@ function manualHTML(fam,page){
 /* ============================== UI building blocks ============================== */
 function show(html){app().innerHTML=html;window.scrollTo(0,0)}
 function waitClick(sel){return new Promise(r=>{const el=$(sel);el.onclick=()=>r()})}
-function skipBtn(){return S.tester?`<button class="skip" id="skip">Skip (tester)</button>`:''}
+function skipBtn(){return S.tester?`<button class="skip" id="skip">Skip (experimenter)</button>`:''}
 function sliderQ(id,label,l,r){return`<div class="q"><div class="ql">${label}</div><input type="range" min="0" max="100" value="50" id="${id}"><div class="ends"><span>${l}</span><span>${r}</span></div></div>`}
 function likertQ(id,label,l='Not at all',r='Completely'){return`<div class="q"><div class="ql">${label}</div><div class="likert">${[1,2,3,4,5,6,7].map(v=>`<label><input type="radio" name="${id}" value="${v}"><span>${v}</span></label>`).join('')}</div><div class="ends"><span>${l}</span><span>${r}</span></div></div>`}
 function readQs(ids){const o={};for(const id of ids){const el=$('#'+id);if(el)o[id]=+el.value;else{const r=document.querySelector(`input[name="${id}"]:checked`);o[id]=r?+r.value:null}}return o}
@@ -269,27 +269,18 @@ function closePop(){const p=$('#pop');if(p)p.remove()}
 async function setup(){
   show(`<div class="card"><h1>Board Inspection Study – test version</h1>
   <p>This is a playable version of the planned lab session. You work through three blocks of a circuit-board inspection task under time pressure, with an evaluation rule hanging over every block. Depending on the treatment condition, you get AR guidance or a paper manual in Block 2, and you may lose it in Block 3.</p>
-  <div class="co" style="display:block"><span class="cotag">For co-authors</span>
-  <p>Everything in a purple dashed box like this one is for the author team only. Participants would not see it. Untick the last option below to see the session exactly as a participant would.</p>
+  <div class="co" style="display:block"><span class="cotag">Experimenter notes</span>
+  <p>Everything in a purple dashed box like this one is for the experimenter only. Participants would not see it. Untick the last option below to see the session exactly as a participant would.</p>
   <p><b>Differences from the lab:</b> the AR overlay is drawn on screen instead of in the HoloLens; the manual is a panel instead of a printed sheet; rest periods are shortened.</p>
   <p>Printable manual for the paper condition: <a href="manual_A.pdf">board type A</a> · <a href="manual_B.pdf">board type B</a> · <a href="design.html">design notes</a></p>
-  <h3>Questions for co-authors</h3>
-  <ol style="padding-left:20px;margin:6px 0">
-  <li><b>Two board types, A and B.</b> Each participant sees both: one type in Block 1, without guidance, and the other in Blocks 2 and 3. Which is which is randomised, so about half of the participants work with manual A and half with manual B. The idea is that Block 1 should not teach the layout that matters later, and that an easier or harder board type should not look like a block effect. Is this necessary, or would one fixed order (and one manual) be enough? Do you find the boards hard enough to memorise that it matters?</li>
-  <li><b>Abrupt removal.</b> At present, guidance drops out without warning for short periods in Blocks 2 and 3, while the full removal in Block 3 is announced just before the block starts. Should the full removal also happen abruptly, in the middle of the work, to induce more stress?</li>
-  <li><b>Block length.</b> A block of about five minutes feels stressful. If the same task runs for 15 minutes, as in the protocol, the stress may well fade. Should the blocks be shorter?</li>
-  </ol>
-  <p><b>Design rule in this version:</b> after every abrupt removal the participant rates their stress, not at once but a few seconds later, so that the loss has been felt first.</p>
   <h3>Treatment condition</h3>
   ${['R','A','B','C','D'].map(k=>`<label class="opt"><input type="radio" name="arm" value="${k}" ${k==='R'?'checked':''}> <span>${k==='R'?'<b>Random</b> (as a participant would be assigned)':ARMS[k].name}</span></label>`).join('')}
   <h3>Length of each block</h3>
   <p style="margin:0 0 4px"><input type="number" id="len" min="1" max="20" step="0.5" value="5" style="font:inherit;width:80px;padding:6px"> minutes per block (1 to 20). The same length applies to all three blocks. The protocol has 15.</p>
-  <h3>Sign-off draw</h3>
-  <select id="odds"><option value="8" selected>One in eight (as in the protocol draft)</option><option value="4">One in four (as suggested in the review memo)</option></select>
   <h3>Options</h3>
   <label class="opt"><input type="checkbox" id="snd" checked> <span>Sound and spoken reminders (use headphones, as in the lab)</span></label>
   <label class="opt"><input type="checkbox" id="study"> <span>Show a correct reference board to memorise before Block 1 (off: Block 1 is fully unaided)</span></label>
-  <label class="opt"><input type="checkbox" id="tst" checked> <span>Show co-author notes and skip buttons during the session</span></label>
+  <label class="opt"><input type="checkbox" id="tst" checked> <span>Show experimenter notes and skip buttons during the session</span></label>
   <p style="margin:8px 0 0">At the end you can download your data (JSON and CSV) and send it to the team.</p></div>
   <div class="row" style="margin-top:14px"><button class="primary big" id="go">Start session</button></div></div>`);
   await waitClick('#go');
@@ -297,7 +288,7 @@ async function setup(){
   S.armKey=k;S.arm=ARMS[k];{let m=parseFloat($('#len').value);if(!(m>=1))m=1;if(m>20)m=20;S.blockMs=(+P.get('sec')||m*60)*1000}
   S.outageMs=Math.round(Math.min(45000,Math.max(S.blockMs>=60000?10000:1500,S.blockMs*0.11)));
   S.restMs=S.blockMs>=900000?300000:Math.min(30000,S.blockMs/6);{const d0=(+P.get('dl')||30)*1000;S.pace='cal';S.dl=d0;S.dlMin=Math.min(14000,d0)}
-  S.draw=+$('#odds').value;S.study=$('#study').checked;S.sound=$('#snd').checked;S.tester=$('#tst').checked;document.body.classList.toggle('part',!S.tester);
+  S.study=$('#study').checked;S.sound=$('#snd').checked;S.tester=$('#tst').checked;document.body.classList.toggle('part',!S.tester);
   logEvent('setup',{draw_odds:S.draw,arm:k,blockMs:S.blockMs,pace:S.pace,dl:S.dl,layout:S.layout});
   if(S.sound){beep(440,.05,.02)}
 }
@@ -372,17 +363,17 @@ async function announcement(){
   <div class="drumbox">${drumHTML()}<div><b>The lottery drum</b><br><span class="muted">It is spun now to show how the draw works, and again at the end of the session.</span></div></div>
   <h3>What a review looks like</h3>
   <div class="example">Board 14. <i>"You marked part C3 as facing the wrong way. What did you compare it with? Why did you not mark U2? How sure were you?"</i></div>
-  <div class="labnote"><b>Note for co-authors:</b> here the experimenter demonstrates a short report on a practice board and spins the drum in front of the group.</div>
+  <div class="labnote"><b>Experimenter note:</b> here the experimenter demonstrates a short report on a practice board and spins the drum in front of the group.</div>
   <div class="row"><button class="primary big" id="n" disabled>Continue</button></div></div>`);
   const d=$('#drum');d.classList.add('spin');beep(300,.3,.03);await sleep(3000);d.classList.remove('spin');$('#n').disabled=false;
   logEvent('announcement');await waitClick('#n');
 }
 async function rest(title,ms,labnote){
-  show(`<div class="card"><h2>${title}</h2><p class="muted">Please sit quietly and relax. Do not think about the task.</p><div class="rest" id="rt">${fmt(ms)}</div>${labnote?`<div class="labnote"><b>Note for co-authors:</b> ${labnote}</div>`:''}<div class="row">${skipBtn()}</div></div>`);
+  show(`<div class="card"><h2>${title}</h2><p class="muted">Please sit quietly and relax. Do not think about the task.</p><div class="rest" id="rt">${fmt(ms)}</div>${labnote?`<div class="labnote"><b>Experimenter note:</b> ${labnote}</div>`:''}<div class="row">${skipBtn()}</div></div>`);
   const end=Date.now()+ms;await new Promise(res=>{const iv=setInterval(()=>{const left=end-Date.now();const el=$('#rt');if(el)el.textContent=fmt(left);if(left<=0){clearInterval(iv);res()}},250);if($('#skip'))$('#skip').onclick=()=>{clearInterval(iv);res()}});
 }
 async function vasScreen(tag,block){
-  show(`<div class="card"><h2>Quick rating</h2>${sliderQ('vas','How stressed do you feel right now?','Not at all','Extremely')}<div class="labnote"><b>Note for co-authors:</b> saliva sample (baseline before the reminder).</div><button class="primary" id="n">Continue</button></div>`);
+  show(`<div class="card"><h2>Quick rating</h2>${sliderQ('vas','How stressed do you feel right now?','Not at all','Extremely')}<div class="labnote"><b>Experimenter note:</b> saliva sample (baseline before the reminder).</div><button class="primary" id="n">Continue</button></div>`);
   await waitClick('#n');S.vas.push({block,tag,v:+$('#vas').value,t:Date.now()-S.start});
 }
 async function reminder(block){
@@ -476,7 +467,7 @@ async function runBlock(n,fam,guidance,outages){
     if(elapsed>=dur){ended=true;clearInterval(iv);closePop();logEvent('block_end',{block:n,submitted,unchecked});res()}
   },200)});
   if(calib&&dlHist.length){const h=dlHist.slice(-5);S.dl=h.reduce((a,x)=>a+x,0)/h.length;logEvent('pace_set',{deadline_ms:Math.round(S.dl)})}
-  show(`<div class="card"><h2>Block ${n} is over</h2><p>Please stop working.</p><div class="labnote"><b>Note for co-authors:</b> saliva sample at the end of the block, and again five minutes later.</div><button class="primary big" id="n">Continue</button></div>`);
+  show(`<div class="card"><h2>Block ${n} is over</h2><p>Please stop working.</p><div class="labnote"><b>Experimenter note:</b> saliva sample at the end of the block, and again five minutes later.</div><button class="primary big" id="n">Continue</button></div>`);
   beep(520,.4,.05);await waitClick('#n');
 }
 const useBox=n=>S.layout==='all'||(S.layout==='b23'&&n>=2);
@@ -551,7 +542,7 @@ async function runBox(n,fam,guidance,outages){
     if(elapsed>=dur){ended=true;clearInterval(iv);closePop();logEvent('block_end',{block:n,submitted,unchecked,left_in_box:box.length});res()}
   },200)});
   if(calib&&dlHist.length){const h=dlHist.slice(-5);S.dl=h.reduce((a,x)=>a+x,0)/h.length;logEvent('pace_set',{deadline_ms:Math.round(S.dl)})}
-  show(`<div class="card"><h2>Block ${n} is over</h2><p>Please stop working.</p><div class="labnote"><b>Note for co-authors:</b> saliva sample at the end of the block, and again five minutes later.</div><button class="primary big" id="n">Continue</button></div>`);
+  show(`<div class="card"><h2>Block ${n} is over</h2><p>Please stop working.</p><div class="labnote"><b>Experimenter note:</b> saliva sample at the end of the block, and again five minutes later.</div><button class="primary big" id="n">Continue</button></div>`);
   beep(520,.4,.05);await waitClick('#n');
 }
 async function questionnaire(n,guidance){
@@ -582,7 +573,7 @@ async function drawAndReview(){
   const d=$('#drum');d.classList.add('spin');await sleep(3500);d.classList.remove('spin');
   S.drawn=Math.random()<1/S.draw;logEvent('draw',{drawn:S.drawn});
   $('#dr').innerHTML=S.drawn?'<b style="color:#c0392b">You have been selected for the sign-off review.</b>':'<b>You have not been selected.</b> No review for you today.';
-  $('#after').innerHTML=`<button class="primary big" id="n">Continue</button>${!S.drawn&&S.tester?'<button class="skip" id="force">Try the review anyway (tester)</button>':''}`;
+  $('#after').innerHTML=`<button class="primary big" id="n">Continue</button>${!S.drawn&&S.tester?'<button class="skip" id="force">Try the review anyway (experimenter)</button>':''}`;
   const doReview=await new Promise(r=>{$('#n').onclick=()=>r(S.drawn);if($('#force'))$('#force').onclick=()=>r(true)});
   if(!doReview)return;
   const picks=[1,2,3].map(n=>{const bs=S.boards.filter(x=>x.block===n&&!x.timed_out);return bs.length?pick(bs):null}).filter(Boolean);
