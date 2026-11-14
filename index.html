@@ -270,7 +270,7 @@ function closePop(){const p=$('#pop');if(p)p.remove()}
 async function setup(){
   show(`<div class="card"><h1>Board Inspection Study – test version</h1>
   <p>This is a playable version of the planned lab session. You work through three blocks of a circuit-board inspection task under time pressure, with an evaluation rule hanging over every block. Everyone has a printed reference sheet for the whole session. Depending on the treatment condition, you also get AR guidance or an on-screen manual in Block 2, and you may lose it in Block 3.</p>
-  <div class="example" style="border-color:#c0392b;background:#fdf1ef"><b>Before you start:</b> print the two reference sheets, or open them on a second device such as a phone or tablet. You need both next to you for the whole session.<br><a href="manual_A.pdf" target="_blank"><b>Reference sheet A</b></a> · <a href="manual_B.pdf" target="_blank"><b>Reference sheet B</b></a></div>
+  <div class="example" style="border-color:#c0392b;background:#fdf1ef"><b>Before you start:</b> print the three reference sheets, or open them on a second device such as a phone or tablet. You need them next to you for the whole session: sheet P for the practice boards, sheets A and B for the three blocks.<br><a href="manual_P.pdf" target="_blank"><b>Reference sheet P (practice)</b></a> · <a href="manual_A.pdf" target="_blank"><b>Reference sheet A</b></a> · <a href="manual_B.pdf" target="_blank"><b>Reference sheet B</b></a></div>
   <div class="co" style="display:block"><span class="cotag">Experimenter notes</span>
   <p>Everything in a purple dashed box like this one is for the experimenter only. Participants would not see it. Untick the last option below to see the session exactly as a participant would.</p>
   <p><b>Differences from the lab:</b> the AR overlay is drawn on screen instead of in the HoloLens; the reference sheets are already printed and on the desk; rest periods are shortened.</p>
@@ -299,7 +299,7 @@ async function intro(){
   <p>You will work as a quality inspector for printed circuit boards. No technical knowledge is needed. Each board carries 18 small parts in six numbered areas. Some boards are correct; others have one or more defects.</p>
   <p><b>Your job:</b> click every part that has a defect and choose the kind of defect. If you find nothing wrong, submit the board without marks.</p>
   <h3>Your printed reference sheets</h3>
-  <p>On your desk are two printed reference sheets, <b>A</b> and <b>B</b>. They show how a correct board of each type looks. Every board has its type printed at the bottom edge. <b>The sheets stay with you for the whole session.</b></p>
+  <p>On your desk are three printed reference sheets: <b>P</b> for the practice boards, and <b>A</b> and <b>B</b> for the main task. They show how a correct board of each type looks. Every board has its type printed at the bottom edge. <b>The sheets stay with you for the whole session.</b></p>
   <h3>Pay rule (identical in every block)</h3>
   <ul><li>+ €0.10 for each correct board verdict (correct / flawed)</li><li>+ €0.10 for each defect found and correctly named (+ €0.05 if the type is wrong)</li><li>− €0.05 for each missed defect and for each mark on a part that is fine</li><li>− €0.10 for each board that leaves your station unchecked</li></ul>
   <h3>The line does not wait</h3>
@@ -328,16 +328,16 @@ async function training(famT){
   ${galleryItem('Blob of solder','A silver blob sticking out next to a part.',{t:'C',a:0},{t:'C',a:0,bridge:true})}
   ${galleryItem('Burn mark','A dark scorch on or around a part.',{t:'R',a:0,v:0},{t:'R',a:0,v:0,burn:true})}
   </div>
-  <p>Next you inspect two practice boards. You have <b>three minutes in total</b> for both. The practice boards are of a type that has no reference sheet, so after each board the solution shows what the reference would have said.</p>
+  <p>Next you inspect two practice boards. The practice boards are <b>type P</b>, so use <b>reference sheet P</b>. You have <b>four minutes in total</b> for both boards. After each board you see the solution.</p>
   <div class="row"><button class="primary big" id="n">Start practice</button>${skipBtn()}</div></div>`);
   const skip=await new Promise(r=>{$('#n').onclick=()=>r(false);if($('#skip'))$('#skip').onclick=()=>r(true)});
   if(skip)return;
-  let left=180000;
+  let left=240000;
   for(let i=0;i<2;i++){
     const b=makeBoard(famT,i===0?2:3),marks={};
     await new Promise(res=>{let iv=null,done=false;
       const draw=(fb)=>{const lastOne=i===1||left<=0;
-        show(`<div class="hud"><span class="pill">Practice board ${i+1} of 2</span><span class="pill timer ${left<30000?'low':''}" id="pt">${fmt(left)}</span><span class="pill gd-none">Practice time left</span></div>
+        show(`<div class="hud"><span class="pill">Practice board ${i+1} of 2</span><span class="pill btype">Board type P</span><span class="pill timer ${left<30000?'low':''}" id="pt">${fmt(left)}</span><span class="pill gd-none">Practice time left</span></div>
         <div class="work"><div class="boardwrap">${boardSVG(famT,b,{interactive:!fb,marks,feedback:fb})}</div></div>
         <div class="actions">${fb?`<button class="primary big" id="nx">${lastOne?'Finish training':'Next practice board'}</button><span class="hint">Green: found. Yellow dashed: missed. Red cross: marked, but nothing was wrong.</span>`:`<button class="primary big" id="sb">Submit board</button><button id="cl">Clear marks</button><span class="hint">Click a part to mark a defect.</span>`}</div>`);
         if(fb){done=true;clearInterval(iv);closePop();$('#nx').onclick=res;return}
@@ -631,7 +631,7 @@ let FAMS={};
 async function run(){
   await setup();
   const swap=Math.random()<.5,fA=makeFamily('A',SEEDS.A),fB=makeFamily('B',SEEDS.B);
-  const famT=makeFamily('T',SEEDS.T),famX=swap?fB:fA,famY=swap?fA:fB;
+  const famT=makeFamily('P',SEEDS.P),famX=swap?fB:fA,famY=swap?fA:fB;
   FAMS={T:famT,[famX.name]:famX,[famY.name]:famY};
   S.famOf={1:famX.name,2:famY.name,3:famY.name};
   logEvent('families',{baseline:famX.name,test:famY.name});
@@ -655,7 +655,7 @@ async function run(){
   await drawAndReview();
   await results();
 }
-const SEEDS={A:1101,B:2202,T:3303};
+const SEEDS={A:1101,B:2202,P:3303};
 function printManual(name){
   const fam=makeFamily(name,SEEDS[name]);document.title='Reference sheet – board type '+name;
   const st=document.createElement('style');st.textContent=`@page{size:A4;margin:12mm}html,body{background:#fff}body{font:12pt/1.35 Georgia,serif;color:#111}#app{max-width:none;padding:0}
@@ -669,7 +669,7 @@ function printManual(name){
   let map=`<svg viewBox="0 0 150 70" width="170" height="80">`;for(let z=0;z<6;z++){const x=4+(z%3)*48,y=4+Math.floor(z/3)*32;map+=`<rect x="${x}" y="${y}" width="44" height="28" fill="#f4ecd2" stroke="#8a7a4a"/><text x="${x+22}" y="${y+19}" font-size="13" text-anchor="middle" fill="#4a3f1f">${z+1}</text>`}map+='</svg>';
   const ex=(t,a)=>`<svg viewBox="-48 -40 96 80" width="40" height="33" style="background:#1f6b3a;border-radius:1mm">${compSVG({t,a,v:0,x:0,y:0,label:''})}</svg>`;
   const zone=z=>`<h2>${z+1}</h2><table>`+fam.comps.filter(c=>c.zone===z).map(c=>`<tr><td>${c.label}</td><td>${partIcon(c)}</td><td>${ruleHTML(c)}</td></tr>`).join('')+`</table>`;
-  document.body.innerHTML=`<div id="app"><div class="pm"><h1>Reference sheet · Board type ${name}</h1>
+  document.body.innerHTML=`<div id="app"><div class="pm"><h1>Reference sheet · Board type ${name}${name==='P'?' (practice)':''}</h1>
   <p class="lead">This sheet shows how a <b>correct</b> board of type ${name} looks. It does not tell you whether the board in front of you is correct. You decide.</p>
   <div class="top"><div>${map}<div style="font-size:8.5pt;color:#444;text-align:center">The six numbered areas of the board</div></div>
   <div class="how"><b>How to use this sheet</b><ol><li>Every part on the board has a printed label, such as <b>C3</b> or <b>R5</b>.</li><li>Find that label below, under the number of the area where the part sits.</li><li>Compare the part on the board with the picture and the text here.</li><li>If the marked end points another way, or the colour stripes are different, mark the part as a defect.</li></ol>
@@ -677,7 +677,7 @@ function printManual(name){
   <div class="cols"><div>${zone(0)}${zone(3)}</div><div>${zone(1)}${zone(4)}</div><div>${zone(2)}${zone(5)}</div></div>
   <div class="foot">Missing parts, blobs of solder and burn marks are also defects. You can see those without this sheet.</div></div></div>`;
 }
-if(P.get('manual'))printManual(P.get('manual')==='B'?'B':'A');else run();
+if(P.get('manual'))printManual(['A','B','P'].includes(P.get('manual'))?P.get('manual'):'A');else run();
 </script>
 </body>
 </html>
