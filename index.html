@@ -59,6 +59,7 @@ select{font:inherit;padding:6px}
 .bbar{height:14px;background:#d9dedb;border-radius:7px;overflow:hidden;margin-bottom:10px}
 .bbar div{height:100%;width:100%;background:#2e7d4f;transition:width .2s linear}
 .bbar div.mid{background:#b7791f}.bbar div.low{background:#c0392b}
+.hud .btype{background:#f2d27a;color:#3d3216;font-weight:800}
 .hud .un{color:#ff8a7a;font-weight:700}
 .toast{position:fixed;top:70px;left:50%;transform:translateX(-50%);z-index:70;background:#1c2226;color:#fff;padding:10px 18px;border-radius:8px;font-weight:700;box-shadow:0 4px 18px rgba(0,0,0,.35);max-width:90vw;text-align:center}
 .toast.bad{background:#c0392b}.toast.audit{background:#7a4a00}
@@ -175,7 +176,7 @@ function padsSVG(t){if(t==='U'){let s='';for(let i=0;i<4;i++){const x=-21+i*14;s
   return`<rect x="-40" y="-6" width="11" height="12" rx="2" fill="#c9a24a"/><rect x="29" y="-6" width="11" height="12" rx="2" fill="#c9a24a"/>`}
 function bodySVG(c){
   if(c.t==='R'){const b=RV[c.v].c;return`<line x1="-31" y1="0" x2="31" y2="0" stroke="#c8ccd0" stroke-width="2.5"/><rect x="-22" y="-8" width="44" height="16" rx="6" fill="#dcc79f" stroke="#a8916a"/>`+
-    b.map((k,i)=>`<rect x="${-15+i*8}" y="-8" width="4.5" height="16" fill="${COL[k]}"/>`).join('')+`<rect x="12" y="-8" width="3.5" height="16" fill="${COL.gold}"/>`}
+    b.map((k,i)=>`<rect x="${-11.5+i*9}" y="-8" width="5" height="16" fill="${COL[k]}"/>`).join('')}
   if(c.t==='C')return`<line x1="-31" y1="0" x2="31" y2="0" stroke="#c8ccd0" stroke-width="2.5"/><rect x="-20" y="-11" width="40" height="22" rx="5" fill="#2c4f9e" stroke="#1b346e"/><rect x="9" y="-11" width="11" height="22" rx="3" fill="#e4eaf6"/>`;
   if(c.t==='D')return`<line x1="-31" y1="0" x2="31" y2="0" stroke="#c8ccd0" stroke-width="2.5"/><rect x="-18" y="-7" width="36" height="14" rx="3" fill="#1b1b1b"/><rect x="9" y="-7" width="5" height="14" fill="#cfcfcf"/>`;
   let pins='';for(let i=0;i<4;i++){const x=-21+i*14;pins+=`<rect x="${x-2.5}" y="-25" width="5" height="7" fill="#b9bec3"/><rect x="${x-2.5}" y="18" width="5" height="7" fill="#b9bec3"/>`}
@@ -210,7 +211,7 @@ function boardSVG(fam,b,opt={}){
   s+=`<clipPath id="bd"><rect width="${W}" height="${H}" rx="14"/></clipPath><g clip-path="url(#bd)">`+fam.traces.map(d=>`<path d="${d}" stroke="#2c8a4c" stroke-width="3" fill="none" opacity=".7"/>`).join('')+'</g>';
   [[14,14],[W-14,14],[14,H-14],[W-14,H-14]].forEach(([x,y])=>s+=`<circle cx="${x}" cy="${y}" r="6" fill="#0f3a1f" stroke="#c9a24a" stroke-width="2"/>`);
   for(let z=0;z<6;z++){const[zx,zy]=zoneXY(z);s+=`<text x="${zx+228}" y="${zy+206}" font-size="17" font-weight="700" text-anchor="end" fill="#cfe3cf" opacity=".6" font-family="ui-monospace,monospace">${z+1}</text>`}
-  s+=`<text x="${W/2}" y="${H-6}" font-size="10" text-anchor="middle" fill="#cfe3cf" opacity=".6" font-family="ui-monospace,monospace">TYPE ${fam.name}${opt.boardNo?' · BOARD '+String(opt.boardNo).padStart(2,'0'):''}</text>`;
+  s+=`<text x="${W/2}" y="${H-6}" font-size="13" font-weight="700" text-anchor="middle" fill="#f2d27a" opacity=".95" font-family="ui-monospace,monospace">TYPE ${fam.name}${opt.boardNo?' · BOARD '+String(opt.boardNo).padStart(2,'0'):''}</text>`;
   s+=b.comps.map(compSVG).join('');
   if(opt.overlay)s+=overlaySVG(fam);
   if(opt.feedback){const placed=[];for(const c of b.comps){const tr=b.truth[c.id],mk=opt.marks[c.id];
@@ -236,7 +237,7 @@ function scoreBoard(b,marks){
 /* paper manual */
 const partIcon=c=>`<svg viewBox="-48 -40 96 80" width="46" height="38">${compSVG({...c,x:0,y:0,label:''})}</svg>`;
 function ruleHTML(c){const d=DIRW[c.a];
-  if(c.t==='R')return`Stripes: `+RV[c.v].c.map(k=>`<span class="chip" style="background:${COL[k]}"></span>`).join('')+` ${RV[c.v].c.join('–')}`;
+  if(c.t==='R')return`Stripes: `+RV[c.v].c.map(k=>`<span class="chip" style="background:${COL[k]}"></span>`).join('')+`<br><span class="snames" style="white-space:nowrap">${RV[c.v].c.join('–')}</span>`;
   if(c.t==='C')return`Light stripe points <b>${d}</b>`;
   if(c.t==='D')return`White band points <b>${d}</b>`;
   return`Notch points <b>${d}</b>`}
@@ -386,6 +387,7 @@ async function reminder(block){
   if(block===2){extra=`In this block, you will also have ${S.arm.res==='ar'?'AR guidance':'an on-screen manual'}. Please note: this is not guaranteed. It may become unavailable at any time.`;gd='threat'}
   if(block===3){if(S.arm.withdrawn){extra=(S.arm.res==='ar'?'The AR guidance':'The on-screen manual')+' is not available for this block.';gd='removed'}else{extra=`In this block, you continue with ${S.arm.res==='ar'?'the AR guidance':'the on-screen manual'}. It may become unavailable at any time.`;gd='threat'}}
   if(useBox(block))extra+=' Boards now arrive in a box. You choose which board to check next. Urgent boards have a short deadline and cost double if they ship unchecked.';
+  extra=('The boards in this block are type '+S.famOf[block]+'. '+extra).trim();
   const txt=base+' '+extra;
   show(`<div class="card"><span class="speaker">🔊 Recorded announcement</span><h2>Before Block ${block}</h2><p>${base}</p><p style="font-weight:700;${gd==='removed'?'color:#c0392b':''}">${extra}</p>${block>1?'<div class="labnote"><b>Experimenter note:</b> the printed sheet stays on the desk as the fallback whenever the on-screen guidance is gone. Participants are not reminded of it here.</div>':''}<div class="row"><button class="primary big" id="n" disabled>Start Block ${block}</button></div></div>`);
   logEvent('reminder',{block,removed:gd==='removed'});
@@ -402,7 +404,7 @@ async function familiarise(famB){
   <div class="row"><button class="primary big" id="n">Start</button>${skipBtn()}</div></div>`);
   const skip=await new Promise(r=>{$('#n').onclick=()=>r(false);if($('#skip'))$('#skip').onclick=()=>r(true)});if(skip)return;
   for(let i=0;i<2;i++){const b=makeBoard(famB),marks={};let page=0;
-    await new Promise(res=>{const draw=()=>{show(`<div class="hud"><span class="pill">Familiarisation ${i+1} of 2</span><span class="pill ${ar?'gd-on':'gd-paper'}">${ar?'AR guidance on':'On-screen manual on'}</span></div>
+    await new Promise(res=>{const draw=()=>{show(`<div class="hud"><span class="pill">Familiarisation ${i+1} of 2</span><span class="pill btype">Board type ${famB.name}</span><span class="pill ${ar?'gd-on':'gd-paper'}">${ar?'AR guidance on':'On-screen manual on'}</span></div>
       <div class="work"><div class="boardwrap">${boardSVG(famB,b,{interactive:true,marks,overlay:ar})}</div>${ar?'':`<div class="manual" id="man">${manualHTML(famB,page)}</div>`}</div>
       <div class="actions"><button class="primary big" id="sb">${i===1?'Done':'Next board'}</button><span class="hint">Click a part to mark a defect.</span></div>`);
       bindHits(()=>marks,draw);$('#sb').onclick=res;
@@ -425,7 +427,7 @@ async function runBlock(n,fam,guidance,outages){
   const newBoard=()=>{b=makeBoard(fam);marks={};bStart=elapsed;bOut=!available&&guidance!=='none';boardNo++;lastSec=-1};
   newBoard();
   logEvent('block_start',{block:n,guidance,family:fam.name,deadline_ms:paced?Math.round(dl):null});
-  show(`<div class="hud"><span class="pill">Block ${n} of 3</span><span class="pill timer" id="tm">${fmt(dur)}</span><span class="pill" id="cnt">Checked: 0</span>${paced?'<span class="pill" id="un">Shipped unchecked: 0</span>':''}<span class="pill" id="gd"></span></div>
+  show(`<div class="hud"><span class="pill">Block ${n} of 3</span><span class="pill btype">Board type ${fam.name}</span><span class="pill timer" id="tm">${fmt(dur)}</span><span class="pill" id="cnt">Checked: 0</span>${paced?'<span class="pill" id="un">Shipped unchecked: 0</span>':''}<span class="pill" id="gd"></span></div>
     ${paced?'<div class="bbar"><div id="bb"></div></div>':''}
     <div class="work"><div class="boardwrap" id="bw"></div><div id="mw"></div></div>
     <div class="actions"><button class="primary big" id="sb">Submit board</button><button id="cl">Clear marks</button><span class="hint">Click a part to mark a defect. Submit without marks if the board is correct.</span></div>`);
@@ -484,7 +486,7 @@ async function runBox(n,fam,guidance,outages){
   let vasAt=(n===3&&guidance==='none'&&S.arm.withdrawn)?Math.min(20000,dur*.12):null;
   const box=[];let cur=null;
   logEvent('block_start',{block:n,guidance,family:fam.name,layout:'box',pace_ms:Math.round(dl)});
-  show(`<div class="hud"><span class="pill">Block ${n} of 3</span><span class="pill timer" id="tm">${fmt(dur)}</span><span class="pill" id="cnt">Sent: 0</span><span class="pill" id="un">Shipped unchecked: 0</span><span class="pill" id="bxc">In the box: 0</span><span class="pill" id="gd"></span></div>
+  show(`<div class="hud"><span class="pill">Block ${n} of 3</span><span class="pill btype">Board type ${fam.name}</span><span class="pill timer" id="tm">${fmt(dur)}</span><span class="pill" id="cnt">Sent: 0</span><span class="pill" id="un">Shipped unchecked: 0</span><span class="pill" id="bxc">In the box: 0</span><span class="pill" id="gd"></span></div>
     <div class="boxwrap"><div class="bt">Incoming boards – pick one to inspect</div><div id="box"></div></div>
     ${paced?'<div class="bbar"><div id="bb" style="width:0"></div></div>':''}
     <div class="work"><div class="boardwrap" id="bw"></div><div id="mw"></div></div>
@@ -631,6 +633,7 @@ async function run(){
   const swap=Math.random()<.5,fA=makeFamily('A',SEEDS.A),fB=makeFamily('B',SEEDS.B);
   const famT=makeFamily('T',SEEDS.T),famX=swap?fB:fA,famY=swap?fA:fB;
   FAMS={T:famT,[famX.name]:famX,[famY.name]:famY};
+  S.famOf={1:famX.name,2:famY.name,3:famY.name};
   logEvent('families',{baseline:famX.name,test:famY.name});
   const res=S.arm.res;
   await intro();
@@ -656,11 +659,11 @@ const SEEDS={A:1101,B:2202,T:3303};
 function printManual(name){
   const fam=makeFamily(name,SEEDS[name]);document.title='Reference sheet – board type '+name;
   const st=document.createElement('style');st.textContent=`@page{size:A4;margin:12mm}html,body{background:#fff}body{font:12pt/1.35 Georgia,serif;color:#111}#app{max-width:none;padding:0}
-  .pm h1{font:700 20pt Georgia,serif;margin:0 0 2mm}.pm .lead{margin:0 0 3mm}.pm .top{display:flex;gap:6mm;align-items:flex-start;margin-bottom:3mm}
+  .pm{padding-right:1.5mm}.pm h1{font:700 20pt Georgia,serif;margin:0 0 2mm}.pm .lead{margin:0 0 3mm}.pm .top{display:flex;gap:6mm;align-items:flex-start;margin-bottom:3mm}
   .pm .how{flex:1;min-width:0;border:1px solid #999;border-radius:2mm;padding:2.5mm 3.5mm}.pm .how b{font-family:system-ui,sans-serif}.pm ol{margin:1mm 0 0;padding-left:5mm}.pm li{margin:.6mm 0}
-  .pm .cols{display:grid;grid-template-columns:1fr 1fr 1fr;gap:4mm}.pm h2{font:700 13pt system-ui,sans-serif;margin:0 0 1mm;background:#e6d39c;padding:1mm 2mm;border-radius:1mm}
-  .pm table{width:100%;border-collapse:collapse;margin-bottom:6mm}.pm td{padding:2.6mm 1mm;border-bottom:.3mm dotted #999;vertical-align:middle;font-size:11pt}
-  .pm td:first-child{font:700 12.5pt ui-monospace,monospace;width:10mm}.pm td:nth-child(2){width:21mm}.pm td svg{width:19mm;height:15.5mm;display:block;background:#1f6b3a;border-radius:1mm}
+  .pm .cols{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4mm}.pm .snames{font-size:9.5pt}.pm h2{font:700 13pt system-ui,sans-serif;margin:0 0 1mm;background:#e6d39c;padding:1mm 2mm;border-radius:1mm}
+  .pm table{width:100%;border-collapse:collapse;margin-bottom:4.5mm}.pm td{padding:1.9mm 1mm;border-bottom:.3mm dotted #999;vertical-align:middle;font-size:11pt}
+  .pm td:first-child{font:700 12.5pt ui-monospace,monospace;width:10mm}.pm td:nth-child(2){width:19mm}.pm td svg{width:17.5mm;height:14.5mm;display:block;background:#1f6b3a;border-radius:1mm}
   .pm .key{display:flex;flex-wrap:wrap;gap:2mm 5mm;font-size:10pt;margin-top:1mm}.pm .key span{display:flex;align-items:center;gap:1.5mm}.pm .foot{font-size:10.5pt;color:#444;border-top:.3mm solid #999;padding-top:2mm;margin-top:1mm}
   *{-webkit-print-color-adjust:exact;print-color-adjust:exact}`;document.head.appendChild(st);
   let map=`<svg viewBox="0 0 150 70" width="170" height="80">`;for(let z=0;z<6;z++){const x=4+(z%3)*48,y=4+Math.floor(z/3)*32;map+=`<rect x="${x}" y="${y}" width="44" height="28" fill="#f4ecd2" stroke="#8a7a4a"/><text x="${x+22}" y="${y+19}" font-size="13" text-anchor="middle" fill="#4a3f1f">${z+1}</text>`}map+='</svg>';
@@ -670,7 +673,7 @@ function printManual(name){
   <p class="lead">This sheet shows how a <b>correct</b> board of type ${name} looks. It does not tell you whether the board in front of you is correct. You decide.</p>
   <div class="top"><div>${map}<div style="font-size:8.5pt;color:#444;text-align:center">The six numbered areas of the board</div></div>
   <div class="how"><b>How to use this sheet</b><ol><li>Every part on the board has a printed label, such as <b>C3</b> or <b>R5</b>.</li><li>Find that label below, under the number of the area where the part sits.</li><li>Compare the part on the board with the picture and the text here.</li><li>If the marked end points another way, or the colour stripes are different, mark the part as a defect.</li></ol>
-  <div class="key"><span>${ex('C',0)} light stripe = marked end</span><span>${ex('D',0)} white band = marked end</span><span>${ex('U',0)} white notch = marked end</span></div></div></div>
+  <div class="key"><span>${ex('C',0)} light stripe = marked end</span><span>${ex('D',0)} white band = marked end</span><span>${ex('U',0)} white notch = marked end</span><span>${ex('R',0)} three colour stripes, read left to right or top to bottom</span></div></div></div>
   <div class="cols"><div>${zone(0)}${zone(3)}</div><div>${zone(1)}${zone(4)}</div><div>${zone(2)}${zone(5)}</div></div>
   <div class="foot">Missing parts, blobs of solder and burn marks are also defects. You can see those without this sheet.</div></div></div>`;
 }
