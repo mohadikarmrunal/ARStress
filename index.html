@@ -29,7 +29,10 @@ select{font:inherit;padding:6px}
 .hud .gd-on{color:#7fe3ff}.hud .gd-paper{color:#f3d08a}.hud .gd-off{color:#ff8a7a;font-weight:700}.hud .gd-none{color:#aab3b8}
 .work{display:flex;gap:12px;align-items:flex-start}
 .boardwrap{flex:1;min-width:0;position:relative}
-.boardwrap svg{width:100%;height:auto;max-height:64vh;display:block;border-radius:10px;user-select:none}
+.boardwrap svg{width:100%;height:auto;max-height:max(260px,calc(100vh - 185px));display:block;border-radius:10px;user-select:none}
+#app:has(.hud){max-width:none;padding:10px 14px}
+.boxwrap~.work .boardwrap svg{max-height:max(260px,calc(100vh - 335px))}
+.boxwrap~.work .empty{aspect-ratio:auto;height:max(260px,calc(100vh - 335px))}
 .manual{width:330px;flex:none;background:#fbf6e9;border:1px solid #dccfaa;border-radius:6px;box-shadow:2px 3px 10px rgba(0,0,0,.12);font-family:Georgia,serif;position:relative;min-height:300px}
 .manual .mhead{padding:10px 12px;border-bottom:1px solid #e3d7b5;font-weight:700;font-size:.95rem}
 .manual .tabs{display:flex;border-bottom:1px solid #e3d7b5}
@@ -54,8 +57,8 @@ select{font:inherit;padding:6px}
 .toast.bad{background:#c0392b}.toast.audit{background:#7a4a00}
 .boxwrap{background:#b9a47a;border:3px solid #8a7648;border-radius:10px;padding:8px 8px 4px;margin-bottom:10px;box-shadow:inset 0 3px 10px rgba(0,0,0,.25)}
 .boxwrap .bt{font-size:.75rem;font-weight:700;color:#3d3216;letter-spacing:.06em;text-transform:uppercase;margin-bottom:6px}
-#box{display:flex;gap:8px;overflow-x:auto;min-height:128px;padding-bottom:6px}
-.bcard{flex:none;width:132px;background:#fff;border:3px solid #fff;border-radius:8px;padding:4px;cursor:pointer;position:relative}
+#box{display:flex;gap:8px;overflow-x:auto;min-height:104px;padding-bottom:6px}
+.bcard{flex:none;width:108px;background:#fff;border:3px solid #fff;border-radius:8px;padding:4px;cursor:pointer;position:relative}
 .bcard .th svg{width:100%;height:auto;display:block;border-radius:4px;pointer-events:none}
 .bcard .bl{font-size:.72rem;margin:3px 0;white-space:nowrap}
 .bcard.cur{border-color:#1f5f8b;box-shadow:0 0 0 3px rgba(31,95,139,.35)}
@@ -197,7 +200,7 @@ function overlaySVG(fam){
 function boardSVG(fam,b,opt={}){
   let s=`<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg"><defs><radialGradient id="burn"><stop offset="0" stop-color="#0b0704" stop-opacity=".95"/><stop offset=".55" stop-color="#3b2410" stop-opacity=".8"/><stop offset="1" stop-color="#3b2410" stop-opacity="0"/></radialGradient></defs>`;
   s+=`<rect width="${W}" height="${H}" rx="14" fill="#1f6b3a"/>`;
-  s+=fam.traces.map(d=>`<path d="${d}" stroke="#2c8a4c" stroke-width="3" fill="none" opacity=".7"/>`).join('');
+  s+=`<clipPath id="bd"><rect width="${W}" height="${H}" rx="14"/></clipPath><g clip-path="url(#bd)">`+fam.traces.map(d=>`<path d="${d}" stroke="#2c8a4c" stroke-width="3" fill="none" opacity=".7"/>`).join('')+'</g>';
   [[14,14],[W-14,14],[14,H-14],[W-14,H-14]].forEach(([x,y])=>s+=`<circle cx="${x}" cy="${y}" r="6" fill="#0f3a1f" stroke="#c9a24a" stroke-width="2"/>`);
   for(let z=0;z<6;z++){const[zx,zy]=zoneXY(z);s+=`<text x="${zx+228}" y="${zy+206}" font-size="10" text-anchor="end" fill="#cfe3cf" opacity=".55" font-family="ui-monospace,monospace">Z${z+1}</text>`}
   s+=`<text x="${W/2}" y="${H-6}" font-size="10" text-anchor="middle" fill="#cfe3cf" opacity=".6" font-family="ui-monospace,monospace">FAMILY ${fam.name}${opt.boardNo?' · BOARD '+String(opt.boardNo).padStart(2,'0'):''}</text>`;
@@ -462,7 +465,7 @@ async function runBox(n,fam,guidance,outages){
       mw.querySelectorAll('.tabs button').forEach(t=>t.onclick=()=>{page=+t.dataset.p;drawBoard()})}else{mw.className='';mw.innerHTML=''}
     drawGuidanceLabel()};
   const drawBox=()=>{const el=$('#box');if(!el)return;
-    el.innerHTML=box.map(it=>`<div class="bcard ${it.urgent?'urg':''} ${it===cur?'cur':''}" data-no="${it.no}">${it.urgent?'<span class="utag">URGENT</span>':''}<div class="th">${it.thumb}</div><div class="bl">Board ${String(it.no).padStart(2,'0')}${Object.keys(it.marks).length?' · started':''}</div>${paced?`<div class="cbar"><div id="cb${it.no}"></div></div>`:''}</div>`).join('')||'<div style="padding:44px 16px;color:#3d3216">The box is empty. New boards are on their way.</div>';
+    el.innerHTML=box.map(it=>`<div class="bcard ${it.urgent?'urg':''} ${it===cur?'cur':''}" data-no="${it.no}">${it.urgent?'<span class="utag">URGENT</span>':''}<div class="th">${it.thumb}</div><div class="bl">Board ${String(it.no).padStart(2,'0')}${Object.keys(it.marks).length?' · started':''}</div>${paced?`<div class="cbar"><div id="cb${it.no}"></div></div>`:''}</div>`).join('')||'<div style="padding:32px 16px;color:#3d3216">The box is empty. New boards are on their way.</div>';
     el.querySelectorAll('.bcard').forEach(c=>c.onclick=()=>{if(paused||ended)return;const it=box.find(x=>x.no==c.dataset.no);if(!it||it===cur)return;
       cur=it;lastSec=-1;if(it.picked==null)it.picked=elapsed;if(!available&&guidance!=='none')it.out=true;closePop();logEvent('pick',{block:n,board:it.no,urgent:it.urgent});drawBox();drawBoard()});
     $('#bxc').textContent='In the box: '+box.length;bars()};
