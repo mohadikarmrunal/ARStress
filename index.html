@@ -281,7 +281,7 @@ async function setup(){
   <label class="opt"><input type="checkbox" id="snd" checked> <span>Sound and spoken reminders (use headphones, as in the lab)</span></label>
   <label class="opt"><input type="checkbox" id="study"> <span>Show a correct reference board to memorise before Block 1 (off: Block 1 is fully unaided)</span></label>
   <label class="opt"><input type="checkbox" id="tst" checked> <span>Show experimenter notes and skip buttons during the session</span></label>
-  <p style="margin:8px 0 0">At the end you can download your data (JSON and CSV) and send it to the team.</p></div>
+  <p style="margin:8px 0 0">At the end you can download your data (JSON and CSV).</p></div>
   <div class="row" style="margin-top:14px"><button class="primary big" id="go">Start session</button></div></div>`);
   await waitClick('#go');
   let k=document.querySelector('input[name=arm]:checked').value;if(k==='R')k=pick(['A','B','C','D']);
@@ -393,7 +393,7 @@ async function reminder(block){
 async function familiarise(famB){
   const ar=S.arm.res==='ar';
   show(`<div class="card"><h1>Your guidance for the next block</h1>
-  <p>${ar?'In the next block you will see <b>AR guidance</b> on top of each board. In the lab this appears in the HoloLens over the board; here it is drawn on the screen. Cyan outlines show where each part belongs, and the arrow shows where its marked end should point. Next to each striped part it shows the colour stripes that belong there.':'In the next block you will have an <b>inspection manual</b> for this type of board. It lists, for each numbered area of the board, where the marked end of each part should point and which colour stripes belong at each position. Use the numbers and the labels printed on the board (such as C3) to find the part you need.'}</p>
+  <p>${ar?'In the next block you will see <b>AR guidance</b> on top of each board. In the lab this appears in the HoloLens over the board; here it is drawn on the screen. Cyan outlines show where each part belongs, and the arrow shows where its marked end should point. Next to each striped part it shows the colour stripes that belong there.':'In the next block you will have an <b>inspection manual</b> for this type of board. It lists, for each numbered area of the board, where the marked end of each part should point and which colour stripes belong at each position. Use the numbers and the labels printed on the board (such as C3) to find the part you need. A printed copy of the manual is also on your desk for you to use.'}</p>
   <p><b>The guidance never tells you whether a board is correct.</b> You still decide. The next block also uses a <b>new type of board</b>, where the correct directions and colours are different from before.</p>
   <p>Try it on two practice boards now. There is no time limit and no feedback.</p>
   <div class="row"><button class="primary big" id="n">Start</button>${skipBtn()}</div></div>`);
