@@ -29,7 +29,7 @@ select{font:inherit;padding:6px}
 .hud .gd-on{color:#7fe3ff}.hud .gd-paper{color:#f3d08a}.hud .gd-off{color:#ff8a7a;font-weight:700}.hud .gd-none{color:#aab3b8}
 .work{display:flex;gap:12px;align-items:flex-start}
 .boardwrap{flex:1;min-width:0;position:relative}
-.boardwrap svg{width:100%;height:auto;display:block;border-radius:10px;user-select:none}
+.boardwrap svg{width:100%;height:auto;max-height:64vh;display:block;border-radius:10px;user-select:none}
 .manual{width:330px;flex:none;background:#fbf6e9;border:1px solid #dccfaa;border-radius:6px;box-shadow:2px 3px 10px rgba(0,0,0,.12);font-family:Georgia,serif;position:relative;min-height:300px}
 .manual .mhead{padding:10px 12px;border-bottom:1px solid #e3d7b5;font-weight:700;font-size:.95rem}
 .manual .tabs{display:flex;border-bottom:1px solid #e3d7b5}
@@ -52,6 +52,19 @@ select{font:inherit;padding:6px}
 .hud .un{color:#ff8a7a;font-weight:700}
 .toast{position:fixed;top:70px;left:50%;transform:translateX(-50%);z-index:70;background:#1c2226;color:#fff;padding:10px 18px;border-radius:8px;font-weight:700;box-shadow:0 4px 18px rgba(0,0,0,.35);max-width:90vw;text-align:center}
 .toast.bad{background:#c0392b}.toast.audit{background:#7a4a00}
+.boxwrap{background:#b9a47a;border:3px solid #8a7648;border-radius:10px;padding:8px 8px 4px;margin-bottom:10px;box-shadow:inset 0 3px 10px rgba(0,0,0,.25)}
+.boxwrap .bt{font-size:.75rem;font-weight:700;color:#3d3216;letter-spacing:.06em;text-transform:uppercase;margin-bottom:6px}
+#box{display:flex;gap:8px;overflow-x:auto;min-height:128px;padding-bottom:6px}
+.bcard{flex:none;width:132px;background:#fff;border:3px solid #fff;border-radius:8px;padding:4px;cursor:pointer;position:relative}
+.bcard .th svg{width:100%;height:auto;display:block;border-radius:4px;pointer-events:none}
+.bcard .bl{font-size:.72rem;margin:3px 0;white-space:nowrap}
+.bcard.cur{border-color:#1f5f8b;box-shadow:0 0 0 3px rgba(31,95,139,.35)}
+.bcard.urg{border-color:#c0392b;animation:pulse 1s ease-in-out infinite}
+@keyframes pulse{50%{box-shadow:0 0 0 5px rgba(192,57,43,.35)}}
+.utag{position:absolute;top:-2px;right:-2px;background:#c0392b;color:#fff;font-size:.65rem;font-weight:800;padding:2px 6px;border-radius:0 6px 0 6px;z-index:2}
+.cbar{height:6px;background:#e3e6e4;border-radius:3px;overflow:hidden}
+.cbar div{height:100%;width:100%;background:#2e7d4f}.cbar div.mid{background:#b7791f}.cbar div.low{background:#c0392b}
+.empty{aspect-ratio:780/482;border:3px dashed #9aa3a0;border-radius:10px;display:flex;align-items:center;justify-content:center;color:#5f6970;font-size:1.1rem;font-weight:600;text-align:center;padding:20px}
 /* popover */
 .pop{position:fixed;z-index:50;background:#fff;border:1px solid var(--line);border-radius:10px;box-shadow:0 6px 24px rgba(0,0,0,.2);padding:6px;width:220px}
 .pop button{display:block;width:100%;text-align:left;border:none;padding:8px 10px;border-radius:6px}
@@ -100,7 +113,7 @@ const fmt=ms=>{const s=Math.max(0,Math.ceil(ms/1000));return String(Math.floor(s
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 
 const P=new URLSearchParams(location.search);
-const S={pace:'cal',dl:30000,dlMin:14000,dlMax:45000,arm:null,armKey:null,blockMs:180000,outageMs:20000,restMs:20000,sound:true,tester:true,
+const S={layout:'b23',pace:'cal',dl:30000,dlMin:14000,dlMax:45000,arm:null,armKey:null,blockMs:180000,outageMs:20000,restMs:20000,sound:true,tester:true,
   boards:[],events:[],qs:[],vas:[],review:null,start:Date.now(),drawn:null};
 const ARMS={
   A:{name:'A · AR, removed in Block 3',res:'ar',withdrawn:true},
@@ -245,6 +258,8 @@ async function setup(){
   ${['R','A','B','C','D'].map(k=>`<label class="opt"><input type="radio" name="arm" value="${k}" ${k==='R'?'checked':''}> <span>${k==='R'?'<b>Random</b> (as a participant would be assigned)':ARMS[k].name}</span></label>`).join('')}
   <h3>Length</h3>
   <select id="len"><option value="90">Quick check: 1.5-minute blocks</option><option value="180" selected>Demo: 3-minute blocks</option><option value="900">Full: 15-minute blocks (as in the protocol)</option></select>
+  <h3>Layout</h3>
+  <select id="lay"><option value="b23" selected>Box of boards in Blocks 2 and 3 (Block 1 one board at a time)</option><option value="all">Box of boards in all three blocks</option><option value="one">One board at a time in all blocks</option></select>
   <h3>Pace</h3>
   <select id="pace"><option value="cal" selected>Deadline per board, calibrated to you in Block 1</option><option value="f30">Fixed 30 seconds per board</option><option value="f20">Fixed 20 seconds per board</option><option value="off">No deadline per board (first version)</option></select>
   <h3>Options</h3>
@@ -256,8 +271,8 @@ async function setup(){
   let k=document.querySelector('input[name=arm]:checked').value;if(k==='R')k=pick(['A','B','C','D']);
   S.armKey=k;S.arm=ARMS[k];S.blockMs=+$('#len').value*1000;S.outageMs=S.blockMs>=900000?45000:Math.round(S.blockMs*0.11);
   S.restMs=S.blockMs>=900000?300000:Math.min(30000,S.blockMs/6);{const pv=$('#pace').value,d0=(+P.get('dl')||30)*1000;S.pace=pv==='off'?'off':pv==='cal'?'cal':'fix';S.dl=pv==='f30'?30000:pv==='f20'?20000:d0;S.dlMin=Math.min(14000,d0)}
-  S.sound=$('#snd').checked;S.tester=$('#tst').checked;
-  logEvent('setup',{arm:k,blockMs:S.blockMs,pace:S.pace,dl:S.dl});
+  S.layout=$('#lay').value;S.sound=$('#snd').checked;S.tester=$('#tst').checked;
+  logEvent('setup',{arm:k,blockMs:S.blockMs,pace:S.pace,dl:S.dl,layout:S.layout});
   if(S.sound){beep(440,.05,.02)}
 }
 async function intro(){
@@ -334,6 +349,7 @@ async function reminder(block){
   if(block===1){extra='In this block, no guidance is available.';gd='none'}
   if(block===2){extra=`In this block, you will work with ${S.arm.res==='ar'?'the AR guidance':'the inspection manual'}. Please note: guidance is not guaranteed. It may become unavailable at any time.`;gd='threat'}
   if(block===3){if(S.arm.withdrawn){extra='Guidance is not available for this block.';gd='removed'}else{extra=`In this block, you continue with ${S.arm.res==='ar'?'the AR guidance':'the inspection manual'}. It may become unavailable at any time.`;gd='threat'}}
+  if(useBox(block))extra+=' Boards now arrive in a box. You choose which board to check next. Urgent boards have a short deadline and cost double if they ship unchecked.';
   const txt=base+' '+extra;
   show(`<div class="card"><span class="speaker">🔊 Recorded announcement</span><h2>Before Block ${block}</h2><p>${base}</p><p style="font-weight:700;${gd==='removed'?'color:#c0392b':''}">${extra}</p><div class="row"><button class="primary big" id="n" disabled>Start Block ${block}</button></div></div>`);
   logEvent('reminder',{block,removed:gd==='removed'});
@@ -419,6 +435,79 @@ async function runBlock(n,fam,guidance,outages){
   show(`<div class="card"><h2>Block ${n} is over</h2><p>Please stop working.</p><div class="labnote"><b>Lab note:</b> saliva sample at the end of the block, and again five minutes later.</div><button class="primary big" id="n">Continue</button></div>`);
   beep(520,.4,.05);await waitClick('#n');
 }
+const useBox=n=>S.layout==='all'||(S.layout==='b23'&&n>=2);
+function block(n,...a){return(useBox(n)?runBox:runBlock)(n,...a)}
+async function runBox(n,fam,guidance,outages){
+  closePop();
+  const dur=S.blockMs;let elapsed=0,last=performance.now(),paused=false,ended=false,midDone=false,lastSec=-1;
+  let available=guidance!=='none',page=0,boardNo=0,submitted=0,unchecked=0,lastSent=0;
+  const paced=S.pace!=='off',calib=S.pace==='cal'&&n===1;let dl=S.dl;const dlHist=[];let nextArr=dl*.9;
+  const audits=[.2+Math.random()*.25,.6+Math.random()*.3].map(f=>f*dur);
+  const box=[];let cur=null;
+  logEvent('block_start',{block:n,guidance,family:fam.name,layout:'box',pace_ms:Math.round(dl)});
+  show(`<div class="hud"><span class="pill">Block ${n} of 3</span><span class="pill timer" id="tm">${fmt(dur)}</span><span class="pill" id="cnt">Sent: 0</span><span class="pill" id="un">Shipped unchecked: 0</span><span class="pill" id="bxc">In the box: 0</span><span class="pill" id="gd"></span></div>
+    <div class="boxwrap"><div class="bt">Incoming boards – pick one to inspect</div><div id="box"></div></div>
+    ${paced?'<div class="bbar"><div id="bb" style="width:0"></div></div>':''}
+    <div class="work"><div class="boardwrap" id="bw"></div><div id="mw"></div></div>
+    <div class="actions"><button class="primary big" id="sb">Send board</button><button id="pb">Put back in box</button><button id="cl">Clear marks</button><span class="hint">Pick a board, mark its defects, then send it. Send without marks if it is correct.</span></div>`);
+  const drawGuidanceLabel=()=>{const g=$('#gd');if(!g)return;
+    if(guidance==='none'){g.className='pill gd-none';g.textContent=n===3?'Guidance: not available':'Guidance: none'}
+    else if(!available){g.className='pill gd-off';g.textContent='⚠ Guidance unavailable'}
+    else{g.className='pill '+(guidance==='ar'?'gd-on':'gd-paper');g.textContent=guidance==='ar'?'AR guidance on':'Manual on desk'}};
+  const drawBoard=()=>{const showOv=guidance==='ar'&&available;
+    $('#bw').innerHTML=cur?boardSVG(fam,cur.b,{interactive:true,marks:cur.marks,overlay:showOv,boardNo:cur.no})+(guidance==='ar'&&!available?`<div class="ar-banner">GUIDANCE UNAVAILABLE</div>`:''):`<div class="empty">Pick a board from the box</div>`;
+    if(cur)bindHits(()=>cur.marks,()=>{drawBoard();drawBox()});
+    $('#sb').disabled=!cur;$('#pb').disabled=!cur;$('#cl').disabled=!cur;
+    const mw=$('#mw');if(guidance==='paper'){mw.className='manual';mw.innerHTML=manualHTML(fam,page)+(available?'':`<div class="shutter">Manual not available</div>`);
+      mw.querySelectorAll('.tabs button').forEach(t=>t.onclick=()=>{page=+t.dataset.p;drawBoard()})}else{mw.className='';mw.innerHTML=''}
+    drawGuidanceLabel()};
+  const drawBox=()=>{const el=$('#box');if(!el)return;
+    el.innerHTML=box.map(it=>`<div class="bcard ${it.urgent?'urg':''} ${it===cur?'cur':''}" data-no="${it.no}">${it.urgent?'<span class="utag">URGENT</span>':''}<div class="th">${it.thumb}</div><div class="bl">Board ${String(it.no).padStart(2,'0')}${Object.keys(it.marks).length?' · started':''}</div>${paced?`<div class="cbar"><div id="cb${it.no}"></div></div>`:''}</div>`).join('')||'<div style="padding:44px 16px;color:#3d3216">The box is empty. New boards are on their way.</div>';
+    el.querySelectorAll('.bcard').forEach(c=>c.onclick=()=>{if(paused||ended)return;const it=box.find(x=>x.no==c.dataset.no);if(!it||it===cur)return;
+      cur=it;lastSec=-1;if(it.picked==null)it.picked=elapsed;if(!available&&guidance!=='none')it.out=true;closePop();logEvent('pick',{block:n,board:it.no,urgent:it.urgent});drawBox();drawBoard()});
+    $('#bxc').textContent='In the box: '+box.length;bars()};
+  const bars=()=>{if(!paced)return;for(const it of box){const l=it.ttl-(elapsed-it.arr),e=$('#cb'+it.no);if(e){e.style.width=Math.max(0,100*l/it.ttl)+'%';e.className=l<it.ttl*.25?'low':l<it.ttl*.5?'mid':''}}
+    const bb=$('#bb');if(bb){if(cur){const l=cur.ttl-(elapsed-cur.arr);bb.style.width=Math.max(0,100*l/cur.ttl)+'%';bb.className=l<cur.ttl*.25?'low':l<cur.ttl*.5?'mid':''}else bb.style.width='0'}};
+  const add=()=>{boardNo++;const urgent=paced&&boardNo>3&&Math.random()<.25;
+    const it={no:boardNo,b:makeBoard(fam),marks:{},arr:elapsed,ttl:paced?dl*(urgent?1.5:3.5):Infinity,urgent,picked:null,out:false};
+    it.thumb=boardSVG(fam,it.b,{boardNo:it.no});box.push(it);
+    if(urgent){beep(990,.1,.07,'square');setTimeout(()=>beep(990,.1,.07,'square'),170);toast('URGENT board '+it.no+' has arrived',1600,'bad');logEvent('urgent_arrival',{block:n,board:it.no})}
+    drawBox()};
+  const finish=(it,timedOut)=>{
+    const sc=timedOut?{found:0,typed:0,miss:it.b.n,fa:0,verdictCorrect:false,earn:it.urgent?-.20:-.10}:scoreBoard(it.b,it.marks);
+    S.boards.push({block:n,board:it.no,family:fam.name,guidance,start_s:+(it.arr/1000).toFixed(2),wait_s:+(((it.picked??elapsed)-it.arr)/1000).toFixed(2),time_s:+((elapsed-(it.picked??elapsed))/1000).toFixed(2),
+      deadline_s:paced?+(it.ttl/1000).toFixed(1):null,urgent:it.urgent,timed_out:timedOut,defects:it.b.n,truth:JSON.stringify(it.b.truth),marks:JSON.stringify(timedOut?{}:it.marks),during_outage:it.out,...sc,_b:it.b,_m:timedOut?{}:{...it.marks}});
+    box.splice(box.indexOf(it),1);if(cur===it){cur=null;closePop()}
+    if(timedOut){unchecked++;const u=$('#un');u.textContent='Shipped unchecked: '+unchecked;u.classList.add('un');
+      beep(150,.35,.09,'sawtooth');toast((it.urgent?'URGENT board ':'Board ')+it.no+' shipped unchecked',1500,'bad');logEvent('timeout',{block:n,board:it.no,urgent:it.urgent})}
+    else{submitted++;lastSent=it.no;$('#cnt').textContent='Sent: '+submitted;beep(880,.04,.02)}
+    if(calib){dl=Math.min(S.dlMax,Math.max(S.dlMin,dl*(timedOut?1.10:.95)));dlHist.push(dl)}
+    drawBox();drawBoard()};
+  add();add();add();drawBoard();
+  $('#cl').onclick=()=>{if(cur){cur.marks={};drawBoard();drawBox()}};
+  $('#pb').onclick=()=>{if(cur){logEvent('put_back',{block:n,board:cur.no});cur=null;closePop();drawBox();drawBoard()}};
+  $('#sb').onclick=()=>{if(ended||paused||!cur)return;finish(cur,false)};
+  await new Promise(res=>{const iv=setInterval(async()=>{
+    const now=performance.now();if(!paused)elapsed+=now-last;last=now;
+    if(ended||paused)return;
+    let active=-1;outages.forEach((f,i)=>{const s=f*dur;if(elapsed>=s&&elapsed<s+S.outageMs)active=i});
+    if(guidance!=='none'){const nowAvail=active<0;if(nowAvail!==available){available=nowAvail;
+        if(!available){if(cur)cur.out=true;logEvent('outage_start',{block:n,idx:active});beep(220,.25,.08,'square');setTimeout(()=>beep(180,.3,.08,'square'),280)}
+        else{logEvent('outage_end',{block:n});beep(660,.12,.04)}
+        drawBoard()}}
+    const left=dur-elapsed;const tm=$('#tm');if(tm){tm.textContent=fmt(left);tm.classList.toggle('low',left<60000)}
+    while(elapsed>=nextArr){if(box.length<10)add();nextArr+=dl*(.7+Math.random()*.5)}
+    if(paced){for(const it of box.slice())if(it.ttl-(elapsed-it.arr)<=0&&elapsed<dur)finish(it,true);
+      bars();
+      if(cur){const bl=cur.ttl-(elapsed-cur.arr),sec=Math.ceil(bl/1000);if(bl<5000&&bl>0&&sec!==lastSec){lastSec=sec;beep(1200,.03,.035,'square')}}}
+    if(audits.length&&elapsed>=audits[0]){audits.shift();if(lastSent){beep(500,.12,.05);toast('⚑ Board '+lastSent+' has been pulled for sign-off review',3500,'audit');logEvent('audit_notice',{block:n,board:lastSent})}}
+    if(!midDone&&elapsed>=dur*.5&&available===(guidance!=='none')){midDone=true;paused=true;closePop();const v=await midVAS();S.vas.push({block:n,tag:'mid',v,t:Date.now()-S.start});last=performance.now();paused=false}
+    if(elapsed>=dur){ended=true;clearInterval(iv);closePop();logEvent('block_end',{block:n,submitted,unchecked,left_in_box:box.length});res()}
+  },200)});
+  if(calib&&dlHist.length){const h=dlHist.slice(-5);S.dl=h.reduce((a,x)=>a+x,0)/h.length;logEvent('pace_set',{deadline_ms:Math.round(S.dl)})}
+  show(`<div class="card"><h2>Block ${n} is over</h2><p>Please stop working.</p><div class="labnote"><b>Lab note:</b> saliva sample at the end of the block, and again five minutes later.</div><button class="primary big" id="n">Continue</button></div>`);
+  beep(520,.4,.05);await waitClick('#n');
+}
 async function questionnaire(n,guidance){
   const used=guidance!=='none';
   const dep=n===3;
@@ -468,7 +557,8 @@ function summarise(){
     const out=bs.filter(b=>b.during_outage),inn=bs.filter(b=>!b.during_outage);
     const det=a=>{const p=a.reduce((s,b)=>s+b.defects,0);return p?Math.round(100*a.reduce((s,b)=>s+b.found,0)/p)+'%':'–'};
     const tpb=a=>a.length?(a.reduce((s,b)=>s+b.time_s,0)/a.length).toFixed(1)+' s':'–';
-    return{n,g:bs[0]?bs[0].guidance:'–',unchecked:bs.filter(b=>b.timed_out).length,dl:bs.length&&bs[bs.length-1].deadline_s?bs[bs.length-1].deadline_s+' s':'–',boards:bs.length,det:present?Math.round(100*found/present)+'%':'–',fa:bs.length?(sum(b=>b.fa)/bs.length).toFixed(2):'–',
+    const ub=bs.filter(b=>b.urgent);
+    return{n,urg:ub.length?ub.filter(b=>!b.timed_out).length+' of '+ub.length:'–',g:bs[0]?bs[0].guidance:'–',unchecked:bs.filter(b=>b.timed_out).length,dl:bs.length&&bs[bs.length-1].deadline_s?bs[bs.length-1].deadline_s+' s':'–',boards:bs.length,det:present?Math.round(100*found/present)+'%':'–',fa:bs.length?(sum(b=>b.fa)/bs.length).toFixed(2):'–',
       acc:bs.length?Math.round(100*sum(b=>b.verdictCorrect?1:0)/bs.length)+'%':'–',tpb:tpb(bs),earn:Math.max(0,sum(b=>b.earn)),
       vpre:v('pre'),vmid:v('mid'),vpost:v('post'),outN:out.length,detOut:det(out),detIn:det(inn),tOut:tpb(out),tIn:tpb(inn)}});
   return rows;
@@ -480,8 +570,8 @@ async function results(){
   show(`<div class="card" style="max-width:900px"><h1>Thank you – session complete</h1>
   <p>Arm: <b>${S.arm.name}</b>. Bonus earned: <b>€${total.toFixed(2)}</b>${S.drawn!=null?` · Sign-off draw: ${S.drawn?'selected':'not selected'}`:''}.</p>
   <h3>Performance and stress by block</h3>
-  <table class="res"><tr><th>Block</th><th>Guidance</th><th>Boards</th><th>Unchecked</th><th>Deadline</th><th>Detection</th><th>False marks / board</th><th>Verdict accuracy</th><th>Time / board</th><th>Stress before · mid · after</th></tr>
-  ${R.map(r=>`<tr><td>${r.n}</td><td>${gname(r.g)}</td><td>${r.boards}</td><td>${r.unchecked}</td><td>${r.dl}</td><td>${r.det}</td><td>${r.fa}</td><td>${r.acc}</td><td>${r.tpb}</td><td>${r.vpre} · ${r.vmid} · ${r.vpost}</td></tr>`).join('')}</table>
+  <table class="res"><tr><th>Block</th><th>Guidance</th><th>Boards</th><th>Unchecked</th><th>Urgent sent</th><th>Deadline</th><th>Detection</th><th>False marks / board</th><th>Verdict accuracy</th><th>Time / board</th><th>Stress before · mid · after</th></tr>
+  ${R.map(r=>`<tr><td>${r.n}</td><td>${gname(r.g)}</td><td>${r.boards}</td><td>${r.unchecked}</td><td>${r.urg}</td><td>${r.dl}</td><td>${r.det}</td><td>${r.fa}</td><td>${r.acc}</td><td>${r.tpb}</td><td>${r.vpre} · ${r.vmid} · ${r.vpost}</td></tr>`).join('')}</table>
   <h3>Boards worked during an outage</h3>
   <table class="res"><tr><th>Block</th><th>Boards hit by outage</th><th>Detection: outage vs normal</th><th>Time / board: outage vs normal</th></tr>
   ${R.filter(r=>r.g!=='none').map(r=>`<tr><td>${r.n}</td><td>${r.outN}</td><td>${r.detOut} vs ${r.detIn}</td><td>${r.tOut} vs ${r.tIn}</td></tr>`).join('')||'<tr><td colspan="4">No outages in this arm.</td></tr>'}</table>
@@ -490,7 +580,7 @@ async function results(){
   const clean=S.boards.map(({_b,_m,...r})=>r);
   const stamp=new Date().toISOString().slice(0,16).replace(/[:T]/g,'-');
   $('#dj').onclick=()=>download(`inspection_${S.armKey}_${stamp}.json`,JSON.stringify({arm:S.armKey,blockSeconds:S.blockMs/1000,boards:clean,questionnaires:S.qs,vas:S.vas,events:S.events,review:S.review,drawn:S.drawn,summary:R},null,2),'application/json');
-  $('#dc').onclick=()=>{const keys=Object.keys(clean[0]||{block:1});download(`inspection_${S.armKey}_${stamp}.csv`,[keys.join(',')].concat(clean.map(r=>keys.map(k=>JSON.stringify(r[k]??'')).join(','))).join('\n'),'text/csv')};
+  $('#dc').onclick=()=>{const keys=[...new Set(clean.flatMap(r=>Object.keys(r)))];download(`inspection_${S.armKey}_${stamp}.csv`,[keys.join(',')].concat(clean.map(r=>keys.map(k=>JSON.stringify(r[k]??'')).join(','))).join('\n'),'text/csv')};
   $('#re').onclick=()=>location.reload();
 }
 
@@ -508,16 +598,16 @@ async function run(){
   await announcement();
   await rest('Quiet rest',S.restMs,'resting period before the first baseline sample; heart-rate strap already on.');
   await vasScreen('pre',1);await reminder(1);
-  await runBlock(1,famX,'none',[]);
+  await block(1,famX,'none',[]);
   await questionnaire(1,'none');
   await familiarise(famY);
   await rest('Recovery',S.restMs,'quiet recovery with nature sounds; baseline 2 saliva sample at the end.');
   await vasScreen('pre',2);await reminder(2);
-  await runBlock(2,famY,res,[.3,.68]);
+  await block(2,famY,res,[.3,.68]);
   await questionnaire(2,res);
   await rest('Recovery',S.restMs,'recovery; baseline 3 saliva sample at the end.');
   await vasScreen('pre',3);await reminder(3);
-  if(S.arm.withdrawn)await runBlock(3,famY,'none',[]);else await runBlock(3,famY,res,[.38,.78]);
+  if(S.arm.withdrawn)await block(3,famY,'none',[]);else await block(3,famY,res,[.38,.78]);
   await questionnaire(3,S.arm.withdrawn?'none':res);
   await drawAndReview();
   await results();
