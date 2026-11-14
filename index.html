@@ -22,6 +22,7 @@ button:disabled{opacity:.45;cursor:default}
 .cotag{display:inline-block;font-size:.68rem;font-weight:800;letter-spacing:.07em;text-transform:uppercase;background:#7a4fc0;color:#fff;border-radius:4px;padding:1px 6px;margin-bottom:6px}
 body.part .labnote,body.part .co{display:none}
 .example{background:#eef3f7;border-left:4px solid #1f5f8b;padding:8px 12px;border-radius:0 8px 8px 0;font-size:.9rem;margin:10px 0}
+.znum{display:inline-block;min-width:26px;text-align:center;font:700 .95rem system-ui,sans-serif;background:#e0c878;border:1px solid #8a7a4a;border-radius:4px;padding:1px 6px;margin:8px 0 3px}
 .reflab{font-size:.8rem;font-weight:700;color:#5f6970;margin-bottom:4px;text-transform:uppercase;letter-spacing:.05em}
 .refchips{font-size:.8rem;margin:4px 0}
 .skip{font-size:.8rem;padding:5px 10px;color:#44207f;border:2px dashed #7a4fc0;background:#f4effb}
@@ -122,7 +123,7 @@ const fmt=ms=>{const s=Math.max(0,Math.ceil(ms/1000));return String(Math.floor(s
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 
 const P=new URLSearchParams(location.search);
-const S={layout:'b23',pace:'cal',dl:30000,dlMin:14000,dlMax:45000,arm:null,armKey:null,blockMs:180000,outageMs:20000,restMs:20000,sound:true,tester:true,
+const S={draw:8,layout:'b23',pace:'cal',dl:30000,dlMin:14000,dlMax:45000,arm:null,armKey:null,blockMs:180000,outageMs:20000,restMs:20000,sound:true,tester:true,
   boards:[],events:[],qs:[],vas:[],review:null,start:Date.now(),drawn:null};
 const ARMS={
   A:{name:'A · AR, removed in Block 3',res:'ar',withdrawn:true},
@@ -191,7 +192,7 @@ function compSVG(c){
 }
 function overlaySVG(fam){
   const cy='#4fe3ff';let s=`<g class="holo" pointer-events="none">`;
-  for(let z=0;z<6;z++){const[zx,zy]=zoneXY(z);s+=`<rect x="${zx+3}" y="${zy+3}" width="234" height="208" rx="10" fill="none" stroke="${cy}" stroke-width="1.5" stroke-dasharray="6 5" opacity=".75"/><rect x="${zx+8}" y="${zy+8}" width="58" height="17" rx="8" fill="${cy}" opacity=".85"/><text x="${zx+37}" y="${zy+20.5}" font-size="10.5" font-weight="700" text-anchor="middle" fill="#05313b">ZONE ${z+1}</text>`}
+  for(let z=0;z<6;z++){const[zx,zy]=zoneXY(z);s+=`<rect x="${zx+3}" y="${zy+3}" width="234" height="208" rx="10" fill="none" stroke="${cy}" stroke-width="1.5" stroke-dasharray="6 5" opacity=".75"/><rect x="${zx+8}" y="${zy+8}" width="24" height="18" rx="8" fill="${cy}" opacity=".85"/><text x="${zx+20}" y="${zy+21.5}" font-size="12" font-weight="700" text-anchor="middle" fill="#05313b">${z+1}</text>`}
   for(const c of fam.comps){const dim={R:[48,20],C:[44,26],D:[40,18],U:[68,44]}[c.t];
     s+=`<g transform="translate(${c.x},${c.y}) rotate(${c.a})"><rect x="${-dim[0]/2}" y="${-dim[1]/2}" width="${dim[0]}" height="${dim[1]}" rx="5" fill="${cy}" fill-opacity=".08" stroke="${cy}" stroke-width="1.6"/>`;
     if(c.t!=='R')s+=`<path d="M${dim[0]/2+4},-6 L${dim[0]/2+13},0 L${dim[0]/2+4},6 Z" fill="${cy}"/>`;
@@ -208,7 +209,7 @@ function boardSVG(fam,b,opt={}){
   s+=`<rect width="${W}" height="${H}" rx="14" fill="#1f6b3a"/>`;
   s+=`<clipPath id="bd"><rect width="${W}" height="${H}" rx="14"/></clipPath><g clip-path="url(#bd)">`+fam.traces.map(d=>`<path d="${d}" stroke="#2c8a4c" stroke-width="3" fill="none" opacity=".7"/>`).join('')+'</g>';
   [[14,14],[W-14,14],[14,H-14],[W-14,H-14]].forEach(([x,y])=>s+=`<circle cx="${x}" cy="${y}" r="6" fill="#0f3a1f" stroke="#c9a24a" stroke-width="2"/>`);
-  for(let z=0;z<6;z++){const[zx,zy]=zoneXY(z);s+=`<text x="${zx+228}" y="${zy+206}" font-size="10" text-anchor="end" fill="#cfe3cf" opacity=".55" font-family="ui-monospace,monospace">Z${z+1}</text>`}
+  for(let z=0;z<6;z++){const[zx,zy]=zoneXY(z);s+=`<text x="${zx+228}" y="${zy+206}" font-size="17" font-weight="700" text-anchor="end" fill="#cfe3cf" opacity=".6" font-family="ui-monospace,monospace">${z+1}</text>`}
   s+=`<text x="${W/2}" y="${H-6}" font-size="10" text-anchor="middle" fill="#cfe3cf" opacity=".6" font-family="ui-monospace,monospace">TYPE ${fam.name}${opt.boardNo?' · BOARD '+String(opt.boardNo).padStart(2,'0'):''}</text>`;
   s+=b.comps.map(compSVG).join('');
   if(opt.overlay)s+=overlaySVG(fam);
@@ -240,11 +241,11 @@ function ruleHTML(c){const d=DIRW[c.a];
   if(c.t==='D')return`White band points <b>${d}</b>`;
   return`Notch points <b>${d}</b>`}
 function manualHTML(fam,page){
-  const zs=[page*2,page*2+1];
-  let map=`<svg viewBox="0 0 150 70" width="150" height="70">`;for(let z=0;z<6;z++){const x=4+(z%3)*48,y=4+Math.floor(z/3)*32,on=zs.includes(z);map+=`<rect x="${x}" y="${y}" width="44" height="28" fill="${on?'#e6d39c':'#fff'}" stroke="#8a7a4a"/><text x="${x+22}" y="${y+18}" font-size="11" text-anchor="middle" fill="#4a3f1f">${z+1}</text>`}map+='</svg>';
-  let body=`<div class="row" style="gap:8px;margin-bottom:6px">${map}<div style="font-size:.78rem;color:#6b5b2e">Board seen from the front.<br>Zones 1–3 top row, 4–6 bottom row.</div></div>`;
-  for(const z of zs){body+=`<div style="font-weight:700;margin:8px 0 2px">Zone ${z+1}</div><table>`+fam.comps.filter(c=>c.zone===z).map(c=>`<tr><td>${c.label}</td><td>${partIcon(c)}</td><td>${ruleHTML(c)}</td></tr>`).join('')+`</table>`}
-  return`<div class="mhead">Inspection Manual – Board type ${fam.name}</div><div class="tabs">${[0,1,2].map(p=>`<button data-p="${p}" class="${p===page?'on':''}">p.${p+1} · Zones ${p*2+1}–${p*2+2}</button>`).join('')}</div><div class="mbody">${body}</div>`;
+  const zs=[page,page+3];
+  let map=`<svg viewBox="0 0 150 70" width="180" height="84" style="flex:none">`;for(let z=0;z<6;z++){const x=4+(z%3)*48,y=4+Math.floor(z/3)*32,on=zs.includes(z);map+=`<rect data-p="${z%3}" x="${x}" y="${y}" width="44" height="28" rx="3" fill="${on?'#e0c878':'#fff'}" stroke="#8a7a4a" stroke-width="${on?2:1}" style="cursor:pointer"/><text x="${x+22}" y="${y+19}" font-size="13" font-weight="${on?700:400}" text-anchor="middle" fill="#4a3f1f" pointer-events="none">${z+1}</text>`}map+='</svg>';
+  let body=`<div class="row" style="gap:8px;margin-bottom:6px;flex-wrap:nowrap">${map}<div style="font-size:.78rem;color:#6b5b2e">Click a number to see the parts in that area of the board and the one below or above it.</div></div>`;
+  for(const z of zs){body+=`<div class="znum">${z+1}</div><table>`+fam.comps.filter(c=>c.zone===z).map(c=>`<tr><td>${c.label}</td><td>${partIcon(c)}</td><td>${ruleHTML(c)}</td></tr>`).join('')+`</table>`}
+  return`<div class="mhead">Inspection Manual – Board type ${fam.name}</div><div class="mbody">${body}</div>`;
 }
 
 /* ============================== UI building blocks ============================== */
@@ -269,7 +270,7 @@ async function setup(){
   show(`<div class="card"><h1>Board Inspection Study – test version</h1>
   <p>This is a playable version of the planned lab session. You work through three blocks of a circuit-board inspection task under time pressure, with an evaluation rule hanging over every block. Depending on the treatment condition, you get AR guidance or a paper manual in Block 2, and you may lose it in Block 3.</p>
   <div class="co" style="display:block"><span class="cotag">For co-authors</span>
-  <p>Everything in a purple dashed box like this one is for the author team only. Participants would not see it. The boxes mark where the lab session differs from this page or does something a web page cannot. Untick the last option below to see the session exactly as a participant would.</p>
+  <p>Everything in a purple dashed box like this one is for the author team only. Participants would not see it. Untick the last option below to see the session exactly as a participant would.</p>
   <p><b>Differences from the lab:</b> the AR overlay is drawn on screen instead of in the HoloLens; the manual is a panel instead of a printed sheet; rest periods are shortened.</p>
   <p>Printable manual for the paper condition: <a href="manual_A.pdf">board type A</a> · <a href="manual_B.pdf">board type B</a> · <a href="design.html">design notes</a></p>
   <h3>Treatment condition</h3>
@@ -280,6 +281,8 @@ async function setup(){
   <select id="lay"><option value="b23" selected>Box of boards in Blocks 2 and 3 (Block 1 one board at a time)</option><option value="all">Box of boards in all three blocks</option><option value="one">One board at a time in all blocks</option></select>
   <h3>Pace</h3>
   <select id="pace"><option value="cal" selected>Deadline per board, calibrated to you in Block 1</option><option value="f30">Fixed 30 seconds per board</option><option value="f20">Fixed 20 seconds per board</option><option value="off">No deadline per board (first version)</option></select>
+  <h3>Sign-off draw</h3>
+  <select id="odds"><option value="8" selected>One in eight (as in the protocol draft)</option><option value="4">One in four (as suggested in the review memo)</option></select>
   <h3>Options</h3>
   <label class="opt"><input type="checkbox" id="snd" checked> <span>Sound and spoken reminders (use headphones, as in the lab)</span></label>
   <label class="opt"><input type="checkbox" id="study"> <span>Show a correct reference board to memorise before Block 1 (off: Block 1 is fully unaided)</span></label>
@@ -290,13 +293,13 @@ async function setup(){
   let k=document.querySelector('input[name=arm]:checked').value;if(k==='R')k=pick(['A','B','C','D']);
   S.armKey=k;S.arm=ARMS[k];S.blockMs=+$('#len').value*1000;S.outageMs=S.blockMs>=900000?45000:Math.round(S.blockMs*0.11);
   S.restMs=S.blockMs>=900000?300000:Math.min(30000,S.blockMs/6);{const pv=$('#pace').value,d0=(+P.get('dl')||30)*1000;S.pace=pv==='off'?'off':pv==='cal'?'cal':'fix';S.dl=pv==='f30'?30000:pv==='f20'?20000:d0;S.dlMin=Math.min(14000,d0)}
-  S.layout=$('#lay').value;S.study=$('#study').checked;S.sound=$('#snd').checked;S.tester=$('#tst').checked;document.body.classList.toggle('part',!S.tester);
-  logEvent('setup',{arm:k,blockMs:S.blockMs,pace:S.pace,dl:S.dl,layout:S.layout});
+  S.layout=$('#lay').value;S.draw=+$('#odds').value;S.study=$('#study').checked;S.sound=$('#snd').checked;S.tester=$('#tst').checked;document.body.classList.toggle('part',!S.tester);
+  logEvent('setup',{draw_odds:S.draw,arm:k,blockMs:S.blockMs,pace:S.pace,dl:S.dl,layout:S.layout});
   if(S.sound){beep(440,.05,.02)}
 }
 async function intro(){
   show(`<div class="card"><h1>Welcome</h1>
-  <p>You will work as a quality inspector for printed circuit boards. No technical knowledge is needed. Each board carries 18 small parts in six zones. Some boards are correct; others have one or more defects.</p>
+  <p>You will work as a quality inspector for printed circuit boards. No technical knowledge is needed. Each board carries 18 small parts in six numbered areas. Some boards are correct; others have one or more defects.</p>
   <p><b>Your job:</b> click every part that has a defect and choose the kind of defect. If you find nothing wrong, submit the board without marks.</p>
   <h3>Pay rule (identical in every block)</h3>
   <ul><li>+ €0.10 for each correct board verdict (correct / flawed)</li><li>+ €0.10 for each defect found and correctly named (+ €0.05 if the type is wrong)</li><li>− €0.05 for each missed defect and for each mark on a part that is fine</li><li>− €0.10 for each board that leaves your station unchecked</li></ul>
@@ -326,20 +329,24 @@ async function training(famT){
   ${galleryItem('Blob of solder','A silver blob sticking out next to a part.',{t:'C',a:0},{t:'C',a:0,bridge:true})}
   ${galleryItem('Burn mark','A dark scorch on or around a part.',{t:'R',a:0,v:0},{t:'R',a:0,v:0,burn:true})}
   </div>
-  <p>Next you inspect two practice boards. A picture of a correct board is shown beside each one as the reference. After each board you see the solution.</p>
+  <p>Next you inspect two practice boards. You have <b>three minutes in total</b> for both. After each board you see the solution, including what the reference would have shown.</p>
   <div class="row"><button class="primary big" id="n">Start practice</button>${skipBtn()}</div></div>`);
   const skip=await new Promise(r=>{$('#n').onclick=()=>r(false);if($('#skip'))$('#skip').onclick=()=>r(true)});
   if(skip)return;
-  const ref=makeBoard(famT,0);
+  let left=180000;
   for(let i=0;i<2;i++){
     const b=makeBoard(famT,i===0?2:3),marks={};
-    await new Promise(res=>{
-      const draw=(fb)=>{show(`<div class="hud"><span class="pill">Practice board ${i+1} of 2</span><span class="pill gd-none">No time limit</span></div>
-        <div class="work"><div class="boardwrap" style="flex:.75"><div class="reflab">Reference: a correct board</div>${boardSVG(famT,ref,{})}</div><div class="boardwrap"><div class="reflab">Board to inspect</div>${boardSVG(famT,b,{interactive:!fb,marks,feedback:fb})}</div></div>
-        <div class="actions">${fb?`<button class="primary big" id="nx">${i===1?'Finish training':'Next practice board'}</button><span class="hint">Green: found. Yellow dashed: missed. Red cross: marked, but nothing was wrong.</span>`:`<button class="primary big" id="sb">Submit board</button><button id="cl">Clear marks</button><span class="hint">Compare each part with the reference. Click a part to mark a defect.</span>`}</div>`);
-        if(fb){$('#nx').onclick=res;return}
+    await new Promise(res=>{let iv=null,done=false;
+      const draw=(fb)=>{const lastOne=i===1||left<=0;
+        show(`<div class="hud"><span class="pill">Practice board ${i+1} of 2</span><span class="pill timer ${left<30000?'low':''}" id="pt">${fmt(left)}</span><span class="pill gd-none">Practice time left</span></div>
+        <div class="work"><div class="boardwrap">${boardSVG(famT,b,{interactive:!fb,marks,feedback:fb})}</div></div>
+        <div class="actions">${fb?`<button class="primary big" id="nx">${lastOne?'Finish training':'Next practice board'}</button><span class="hint">Green: found. Yellow dashed: missed. Red cross: marked, but nothing was wrong.</span>`:`<button class="primary big" id="sb">Submit board</button><button id="cl">Clear marks</button><span class="hint">Click a part to mark a defect.</span>`}</div>`);
+        if(fb){done=true;clearInterval(iv);closePop();$('#nx').onclick=res;return}
         bindHits(()=>marks,()=>draw(false));$('#sb').onclick=()=>draw(true);$('#cl').onclick=()=>{for(const k in marks)delete marks[k];draw(false)}};
-      draw(false)});
+      draw(false);let last=Date.now();
+      iv=setInterval(()=>{if(done)return;const now=Date.now();left-=now-last;last=now;const e=$('#pt');if(e){e.textContent=fmt(left);e.classList.toggle('low',left<30000)}
+        if(left<=0){left=0;beep(520,.4,.05);draw(true)}},250)});
+    if(left<=0)break;
   }
 }
 async function studyRef(fam){
@@ -357,7 +364,7 @@ function drumHTML(){const cols=['#c0392b','#1f5f8b','#2e7d4f','#b7791f','#6c3483
 async function announcement(){
   show(`<div class="card"><h1>Batch sign-off review</h1>
   <p>In inspection work, a batch is signed off by the inspector who checked it. In this session, <b>one board from each block</b> will be drawn for sign-off review at the end.</p>
-  <p><b>One in four participants</b> will be selected by lottery to present those boards and defend each decision they made: why a component was marked, and why others were not.</p>
+  <p><b>One in ${S.draw===4?'four':'eight'} participants</b> will be selected by lottery to present those boards and defend each decision they made: why a part was marked, and why others were not.</p>
   <div class="drumbox">${drumHTML()}<div><b>The lottery drum</b><br><span class="muted">It is spun now to show how the draw works, and again at the end of the session.</span></div></div>
   <h3>What a review looks like</h3>
   <div class="example">Board 14. <i>"You marked part C3 as facing the wrong way. What did you compare it with? Why did you not mark U2? How sure were you?"</i></div>
@@ -375,7 +382,7 @@ async function vasScreen(tag,block){
   await waitClick('#n');S.vas.push({block,tag,v:+$('#vas').value,t:Date.now()-S.start});
 }
 async function reminder(block){
-  const base='Reminder. At the end of the session, one board from each block will be drawn for batch sign-off review. One in four participants will be selected to present and defend their decisions on those boards.';
+  const base='Reminder. At the end of the session, one board from each block will be drawn for batch sign-off review. One in '+(S.draw===4?'four':'eight')+' participants will be selected to present and defend their decisions on those boards.';
   let extra='',gd='';
   if(block===1){extra='In this block, no guidance is available.';gd='none'}
   if(block===2){extra=`In this block, you will work with ${S.arm.res==='ar'?'the AR guidance':'the inspection manual'}. Please note: guidance is not guaranteed. It may become unavailable at any time.`;gd='threat'}
@@ -391,7 +398,7 @@ async function reminder(block){
 async function familiarise(famB){
   const ar=S.arm.res==='ar';
   show(`<div class="card"><h1>Your guidance for the next block</h1>
-  <p>${ar?'In the next block you will see <b>AR guidance</b> on top of each board. In the lab this appears in the HoloLens over the board; here it is drawn on the screen. Cyan outlines show where each part belongs, and the arrow shows where its marked end should point. Next to each striped part it shows the colour stripes that belong there.':'In the next block you will have an <b>inspection manual</b> for this type of board. It lists, zone by zone, where the marked end of each part should point and which colour stripes belong at each position. Use the zone map and the labels printed on the board (such as C3) to find the part you need.'}</p>
+  <p>${ar?'In the next block you will see <b>AR guidance</b> on top of each board. In the lab this appears in the HoloLens over the board; here it is drawn on the screen. Cyan outlines show where each part belongs, and the arrow shows where its marked end should point. Next to each striped part it shows the colour stripes that belong there.':'In the next block you will have an <b>inspection manual</b> for this type of board. It lists, for each numbered area of the board, where the marked end of each part should point and which colour stripes belong at each position. Use the numbers and the labels printed on the board (such as C3) to find the part you need.'}</p>
   <p><b>The guidance never tells you whether a board is correct.</b> You still decide. The next block also uses a <b>new type of board</b>, where the correct directions and colours are different from before.</p>
   <p>Try it on two practice boards now. There is no time limit and no feedback.</p>
   <div class="row"><button class="primary big" id="n">Start</button>${skipBtn()}</div></div>`);
@@ -401,10 +408,10 @@ async function familiarise(famB){
       <div class="work"><div class="boardwrap">${boardSVG(famB,b,{interactive:true,marks,overlay:ar})}</div>${ar?'':`<div class="manual" id="man">${manualHTML(famB,page)}</div>`}</div>
       <div class="actions"><button class="primary big" id="sb">${i===1?'Done':'Next board'}</button><span class="hint">Click a part to mark a defect.</span></div>`);
       bindHits(()=>marks,draw);$('#sb').onclick=res;
-      if(!ar)document.querySelectorAll('#man .tabs button').forEach(t=>t.onclick=()=>{page=+t.dataset.p;draw()})};draw()})}
+      if(!ar)document.querySelectorAll('#man [data-p]').forEach(t=>t.onclick=()=>{page=+t.dataset.p;draw()})};draw()})}
   logEvent('familiarised');
 }
-async function midVAS(){return new Promise(res=>{const m=document.createElement('div');m.className='modal';
+async function midVAS(){return new Promise(res=>{const m=document.createElement('div');m.className='modal';m.style.background='#eef0ee';
   m.innerHTML=`<div class="card"><h2>Quick rating</h2><p class="muted">The clock is paused.</p>${sliderQ('mvas','How stressed do you feel right now?','Not at all','Extremely')}<button class="primary" id="mv">Back to work</button></div>`;
   document.body.appendChild(m);m.querySelector('#mv').onclick=()=>{const v=+m.querySelector('#mvas').value;m.remove();res(v)}})}
 
@@ -431,7 +438,7 @@ async function runBlock(n,fam,guidance,outages){
     $('#bw').innerHTML=boardSVG(fam,b,{interactive:true,marks,overlay:showOv,boardNo})+(guidance==='ar'&&!available?`<div class="ar-banner">GUIDANCE UNAVAILABLE</div>`:'');
     bindHits(()=>marks,drawBoard);
     const mw=$('#mw');if(guidance==='paper'){mw.className='manual';mw.innerHTML=manualHTML(fam,page)+(available?'':`<div class="shutter">Manual not available</div>`);
-      mw.querySelectorAll('.tabs button').forEach(t=>t.onclick=()=>{page=+t.dataset.p;drawBoard()})}else{mw.className='';mw.innerHTML=''}
+      mw.querySelectorAll('[data-p]').forEach(t=>t.onclick=()=>{page=+t.dataset.p;drawBoard()})}else{mw.className='';mw.innerHTML=''}
     drawGuidanceLabel()};
   drawBoard();
   const finish=(timedOut)=>{
@@ -490,7 +497,7 @@ async function runBox(n,fam,guidance,outages){
     if(cur)bindHits(()=>cur.marks,()=>{drawBoard();drawBox()});
     $('#sb').disabled=!cur;$('#pb').disabled=!cur;$('#cl').disabled=!cur;
     const mw=$('#mw');if(guidance==='paper'){mw.className='manual';mw.innerHTML=manualHTML(fam,page)+(available?'':`<div class="shutter">Manual not available</div>`);
-      mw.querySelectorAll('.tabs button').forEach(t=>t.onclick=()=>{page=+t.dataset.p;drawBoard()})}else{mw.className='';mw.innerHTML=''}
+      mw.querySelectorAll('[data-p]').forEach(t=>t.onclick=()=>{page=+t.dataset.p;drawBoard()})}else{mw.className='';mw.innerHTML=''}
     drawGuidanceLabel()};
   const drawBox=()=>{const el=$('#box');if(!el)return;
     el.innerHTML=box.map(it=>`<div class="bcard ${it.urgent?'urg':''} ${it===cur?'cur':''}" data-no="${it.no}">${it.urgent?'<span class="utag">URGENT</span>':''}<div class="th">${it.thumb}</div><div class="bl">Board ${String(it.no).padStart(2,'0')}${Object.keys(it.marks).length?' · started':''}</div>${paced?`<div class="cbar"><div id="cb${it.no}"></div></div>`:''}</div>`).join('')||'<div style="padding:32px 16px;color:#3d3216">The box is empty. New boards are on their way.</div>';
@@ -551,7 +558,7 @@ async function questionnaire(n,guidance){
   ${likertQ('q_conf','How confident are you in your decisions?')}
   ${likertQ('q_chal','The block felt like a challenge I could meet.','Disagree','Agree')}
   ${likertQ('q_threat','The block felt threatening.','Disagree','Agree')}
-  ${used?likertQ('q_rely','How much did you rely on the guidance?'):likertQ('q_miss','How much did you miss having guidance?')}
+  ${n===1?'':used?likertQ('q_rely','How much did you rely on the guidance?'):likertQ('q_miss','How much did you miss having guidance?')}
   ${dep?`<h3>About the guidance in general</h3>
   ${likertQ('d1','When guidance was unavailable, I felt lost.','Disagree','Agree')}
   ${likertQ('d2','I could not do the task well without the guidance.','Disagree','Agree')}
@@ -559,13 +566,13 @@ async function questionnaire(n,guidance){
   ${likertQ('d4','I would have preferred to keep the guidance at all times.','Disagree','Agree')}`:''}
   <button class="primary big" id="n">Submit</button></div>`);
   await waitClick('#n');
-  const ids=['q_vas','q_mental','q_time','q_frus','q_perf','q_conf','q_chal','q_threat',used?'q_rely':'q_miss'].concat(dep?['d1','d2','d3','d4']:[]);
+  const ids=['q_vas','q_mental','q_time','q_frus','q_perf','q_conf','q_chal','q_threat'].concat(n===1?[]:[used?'q_rely':'q_miss']).concat(dep?['d1','d2','d3','d4']:[]);
   const a=readQs(ids);S.qs.push({block:n,guidance,...a});S.vas.push({block:n,tag:'post',v:a.q_vas,t:Date.now()-S.start});
 }
 async function drawAndReview(){
   show(`<div class="card"><h1>The draw</h1><p>The lottery decides now whether you are selected for the batch sign-off review.</p><div class="drumbox">${drumHTML()}<div id="dr" class="muted">Spinning…</div></div><div class="row" id="after"></div></div>`);
   const d=$('#drum');d.classList.add('spin');await sleep(3500);d.classList.remove('spin');
-  S.drawn=Math.random()<.25;logEvent('draw',{drawn:S.drawn});
+  S.drawn=Math.random()<1/S.draw;logEvent('draw',{drawn:S.drawn});
   $('#dr').innerHTML=S.drawn?'<b style="color:#c0392b">You have been selected for the sign-off review.</b>':'<b>You have not been selected.</b> No review for you today.';
   $('#after').innerHTML=`<button class="primary big" id="n">Continue</button>${!S.drawn&&S.tester?'<button class="skip" id="force">Try the review anyway (tester)</button>':''}`;
   const doReview=await new Promise(r=>{$('#n').onclick=()=>r(S.drawn);if($('#force'))$('#force').onclick=()=>r(true)});
@@ -657,11 +664,11 @@ function printManual(name){
   *{-webkit-print-color-adjust:exact;print-color-adjust:exact}`;document.head.appendChild(st);
   let map=`<svg viewBox="0 0 150 70" width="170" height="80">`;for(let z=0;z<6;z++){const x=4+(z%3)*48,y=4+Math.floor(z/3)*32;map+=`<rect x="${x}" y="${y}" width="44" height="28" fill="#f4ecd2" stroke="#8a7a4a"/><text x="${x+22}" y="${y+19}" font-size="13" text-anchor="middle" fill="#4a3f1f">${z+1}</text>`}map+='</svg>';
   const ex=(t,a)=>`<svg viewBox="-48 -40 96 80" width="40" height="33" style="background:#1f6b3a;border-radius:1mm">${compSVG({t,a,v:0,x:0,y:0,label:''})}</svg>`;
-  const zone=z=>`<h2>Zone ${z+1}</h2><table>`+fam.comps.filter(c=>c.zone===z).map(c=>`<tr><td>${c.label}</td><td>${partIcon(c)}</td><td>${ruleHTML(c)}</td></tr>`).join('')+`</table>`;
+  const zone=z=>`<h2>${z+1}</h2><table>`+fam.comps.filter(c=>c.zone===z).map(c=>`<tr><td>${c.label}</td><td>${partIcon(c)}</td><td>${ruleHTML(c)}</td></tr>`).join('')+`</table>`;
   document.body.innerHTML=`<div id="app"><div class="pm"><h1>Inspection Manual · Board type ${name}</h1>
   <p class="lead">This sheet shows how a <b>correct</b> board of type ${name} looks. It does not tell you whether the board in front of you is correct. You decide.</p>
-  <div class="top"><div>${map}<div style="font-size:8.5pt;color:#444;text-align:center">The six zones of the board</div></div>
-  <div class="how"><b>How to use this sheet</b><ol><li>Every part on the board has a printed label, such as <b>C3</b> or <b>R5</b>.</li><li>Find that label below, in the zone where the part sits.</li><li>Compare the part on the board with the picture and the text here.</li><li>If the marked end points another way, or the colour stripes are different, mark the part as a defect.</li></ol>
+  <div class="top"><div>${map}<div style="font-size:8.5pt;color:#444;text-align:center">The six numbered areas of the board</div></div>
+  <div class="how"><b>How to use this sheet</b><ol><li>Every part on the board has a printed label, such as <b>C3</b> or <b>R5</b>.</li><li>Find that label below, under the number of the area where the part sits.</li><li>Compare the part on the board with the picture and the text here.</li><li>If the marked end points another way, or the colour stripes are different, mark the part as a defect.</li></ol>
   <div class="key"><span>${ex('C',0)} light stripe = marked end</span><span>${ex('D',0)} white band = marked end</span><span>${ex('U',0)} white notch = marked end</span></div></div></div>
   <div class="cols"><div>${zone(0)}${zone(3)}</div><div>${zone(1)}${zone(4)}</div><div>${zone(2)}${zone(5)}</div></div>
   <div class="foot">Missing parts, blobs of solder and burn marks are also defects. You can see those without this sheet.</div></div></div>`;
