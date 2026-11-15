@@ -282,6 +282,7 @@ async function setup(){
   <h3>Options</h3>
   <label class="opt"><input type="checkbox" id="snd" checked> <span>Sound and spoken reminders (use headphones, as in the lab)</span></label>
 
+  <label class="opt"><input type="checkbox" id="guide" checked> <span>Guidance in Blocks 2 and 3 (AR overlay or on-screen manual, according to the treatment condition). Untick to run all three blocks with the printed sheets only.</span></label>
   <label class="opt"><input type="checkbox" id="tst" checked> <span>Show experimenter notes and skip buttons during the session</span></label>
   <p style="margin:8px 0 0">At the end you can download your data (JSON and CSV).</p></div>
   <div class="row" style="margin-top:14px"><button class="primary big" id="go">Start session</button></div></div>`);
@@ -290,8 +291,8 @@ async function setup(){
   S.armKey=k;S.arm=ARMS[k];{let m=parseFloat($('#len').value);if(!(m>=1))m=1;if(m>20)m=20;S.blockMs=(+P.get('sec')||m*60)*1000}
   S.outageMs=Math.round(Math.min(45000,Math.max(S.blockMs>=60000?10000:1500,S.blockMs*0.11)));
   S.restMs=S.blockMs>=900000?300000:Math.min(30000,S.blockMs/6);{const d0=(+P.get('dl')||60)*1000;S.pace='cal';S.dl=d0;S.dlMin=Math.min(14000,d0)}
-  S.sound=$('#snd').checked;S.tester=$('#tst').checked;document.body.classList.toggle('part',!S.tester);
-  logEvent('setup',{draw_odds:S.draw,arm:k,blockMs:S.blockMs,pace:S.pace,dl:S.dl,layout:S.layout});
+  S.sound=$('#snd').checked;S.guide=$('#guide').checked;S.tester=$('#tst').checked;document.body.classList.toggle('part',!S.tester);
+  logEvent('setup',{guidance_enabled:S.guide,draw_odds:S.draw,arm:k,blockMs:S.blockMs,pace:S.pace,dl:S.dl,layout:S.layout});
   if(S.sound){beep(440,.05,.02)}
 }
 async function intro(){
@@ -384,12 +385,12 @@ async function reminder(block){
   const base='Reminder. At the end of the session, one board from each block will be drawn for batch sign-off review. One in '+(S.draw===4?'four':'eight')+' participants will be selected to present and defend their decisions on those boards.';
   let extra='',gd='';
   if(block===1){extra='';gd='none'}
-  if(block===2){extra=`In this block, you will also have ${S.arm.res==='ar'?'AR guidance':'an on-screen manual'}. Please note: this is not guaranteed. It may become unavailable at any time.`;gd='threat'}
-  if(block===3){if(S.arm.withdrawn){extra=(S.arm.res==='ar'?'The AR guidance':'The on-screen manual')+' is not available for this block.';gd='removed'}else{extra=`In this block, you continue with ${S.arm.res==='ar'?'the AR guidance':'the on-screen manual'}. It may become unavailable at any time.`;gd='threat'}}
+  if(block===2&&S.guide){extra='In this block, you will also have guidance. Please note: guidance is not guaranteed. It may become unavailable at any time.';gd='threat'}
+  if(block===3&&S.guide){if(S.arm.withdrawn){extra='Guidance is not available for this block.';gd='removed'}else{extra='In this block, you continue with the guidance. It may become unavailable at any time.';gd='threat'}}
   if(useBox(block))extra+=' Boards now arrive in a box. You choose which board to check next. Urgent boards have a short deadline and cost double if they ship unchecked.';
   extra=('The boards in this block are type '+S.famOf[block]+'. '+extra).trim();
   const txt=base+' '+extra;
-  show(`<div class="card"><span class="speaker">🔊 Recorded announcement</span><h2>Before Block ${block}</h2><p>${base}</p><p style="font-weight:700;${gd==='removed'?'color:#c0392b':''}">${extra}</p>${block>1?'<div class="labnote"><b>Experimenter note:</b> the printed sheet stays on the desk as the fallback whenever the on-screen guidance is gone. Participants are not reminded of it here.</div>':''}<div class="row"><button class="primary big" id="n" disabled>Start Block ${block}</button></div></div>`);
+  show(`<div class="card"><span class="speaker">🔊 Recorded announcement</span><h2>Before Block ${block}</h2><p>${base}</p><p style="font-weight:700;${gd==='removed'?'color:#c0392b':''}">${extra}</p>${block>1&&S.guide?'<div class="labnote"><b>Experimenter note:</b> the printed sheet stays on the desk as the fallback whenever the guidance is gone. Participants are not reminded of it here.</div>':''}<div class="row"><button class="primary big" id="n" disabled>Start Block ${block}</button></div></div>`);
   logEvent('reminder',{block,removed:gd==='removed'});
   if(gd==='removed'){beep(240,.35,.06,'square');await sleep(400)}
   await Promise.race([speak(txt),sleep(S.sound?25000:2500)]);await sleep(600);
@@ -404,7 +405,7 @@ async function familiarise(famB){
   <div class="row"><button class="primary big" id="n">Start</button>${skipBtn()}</div></div>`);
   const skip=await new Promise(r=>{$('#n').onclick=()=>r(false);if($('#skip'))$('#skip').onclick=()=>r(true)});if(skip)return;
   for(let i=0;i<2;i++){const b=makeBoard(famB),marks={};let page=0;
-    await new Promise(res=>{const draw=()=>{show(`<div class="hud"><span class="pill">Familiarisation ${i+1} of 2</span><span class="pill btype">Board type ${famB.name}</span><span class="pill ${ar?'gd-on':'gd-paper'}">${ar?'AR guidance on':'On-screen manual on'}</span></div>
+    await new Promise(res=>{const draw=()=>{show(`<div class="hud"><span class="pill">Familiarisation ${i+1} of 2</span><span class="pill btype">Board type ${famB.name}</span><span class="pill ${ar?'gd-on':'gd-paper'}">Guidance on</span></div>
       <div class="work"><div class="boardwrap">${boardSVG(famB,b,{interactive:true,marks,overlay:ar})}</div>${ar?'':`<div class="manual" id="man">${manualHTML(famB,page)}</div>`}</div>
       <div class="actions"><button class="primary big" id="sb">${i===1?'Done':'Next board'}</button><span class="hint">Click a part to mark a defect.</span></div>`);
       bindHits(()=>marks,draw);$('#sb').onclick=res;
@@ -422,7 +423,7 @@ async function runBlock(n,fam,guidance,outages){
   let available=guidance!=='none',page=0,boardNo=0,submitted=0,unchecked=0;
   const paced=S.pace!=='off',calib=S.pace==='cal'&&n===1;let dl=S.dl;const dlHist=[];
   const audits=[.2+Math.random()*.25,.6+Math.random()*.3].map(f=>f*dur);
-  let vasAt=(n===3&&guidance==='none'&&S.arm.withdrawn)?Math.min(20000,dur*.12):null;
+  let vasAt=(n===3&&guidance==='none'&&S.arm.withdrawn&&S.guide)?Math.min(20000,dur*.12):null;
   let b,marks,bStart,bOut;
   const newBoard=()=>{b=makeBoard(fam);marks={};bStart=elapsed;bOut=!available&&guidance!=='none';boardNo++;lastSec=-1};
   newBoard();
@@ -432,13 +433,13 @@ async function runBlock(n,fam,guidance,outages){
     <div class="work"><div class="boardwrap" id="bw"></div><div id="mw"></div></div>
     <div class="actions"><button class="primary big" id="sb">Submit board</button><button id="cl">Clear marks</button><span class="hint">Click a part to mark a defect. Submit without marks if the board is correct.</span></div>`);
   const drawGuidanceLabel=()=>{const g=$('#gd');if(!g)return;
-    if(guidance==='none'){g.className='pill gd-none';g.textContent=n===3?'On-screen guidance removed':'No on-screen guidance'}
-    else if(!available){g.className='pill gd-off';g.textContent='⚠ On-screen guidance unavailable'}
-    else{g.className='pill '+(guidance==='ar'?'gd-on':'gd-paper');g.textContent=guidance==='ar'?'AR guidance on':'On-screen manual on'}};
+    if(guidance==='none'){g.className='pill gd-none';g.textContent=n===3&&S.guide&&S.arm.withdrawn?'Guidance removed':'No guidance'}
+    else if(!available){g.className='pill gd-off';g.textContent='⚠ Guidance unavailable'}
+    else{g.className='pill '+(guidance==='ar'?'gd-on':'gd-paper');g.textContent='Guidance on'}};
   const drawBoard=()=>{const showOv=guidance==='ar'&&available;
     $('#bw').innerHTML=boardSVG(fam,b,{interactive:true,marks,overlay:showOv,boardNo})+(guidance==='ar'&&!available?`<div class="ar-banner">GUIDANCE UNAVAILABLE</div>`:'');
     bindHits(()=>marks,drawBoard);
-    const mw=$('#mw');if(guidance==='paper'){mw.className='manual';mw.innerHTML=manualHTML(fam,page)+(available?'':`<div class="shutter">On-screen manual not available</div>`);
+    const mw=$('#mw');if(guidance==='paper'){mw.className='manual';mw.innerHTML=manualHTML(fam,page)+(available?'':`<div class="shutter">Guidance unavailable</div>`);
       mw.querySelectorAll('[data-p]').forEach(t=>t.onclick=()=>{page=+t.dataset.p;drawBoard()})}else{mw.className='';mw.innerHTML=''}
     drawGuidanceLabel()};
   drawBoard();
@@ -483,7 +484,7 @@ async function runBox(n,fam,guidance,outages){
   let available=guidance!=='none',page=0,boardNo=0,submitted=0,unchecked=0,lastSent=0;
   const paced=S.pace!=='off',calib=S.pace==='cal'&&n===1;let dl=S.dl;const dlHist=[];let nextArr=dl*.9;
   const audits=[.2+Math.random()*.25,.6+Math.random()*.3].map(f=>f*dur);
-  let vasAt=(n===3&&guidance==='none'&&S.arm.withdrawn)?Math.min(20000,dur*.12):null;
+  let vasAt=(n===3&&guidance==='none'&&S.arm.withdrawn&&S.guide)?Math.min(20000,dur*.12):null;
   const box=[];let cur=null;
   logEvent('block_start',{block:n,guidance,family:fam.name,layout:'box',pace_ms:Math.round(dl)});
   show(`<div class="hud"><span class="pill">Block ${n} of 3</span><span class="pill btype">Board type ${fam.name}</span><span class="pill timer" id="tm">${fmt(dur)}</span><span class="pill" id="cnt">Sent: 0</span><span class="pill" id="un">Shipped unchecked: 0</span><span class="pill" id="bxc">In the box: 0</span><span class="pill" id="gd"></span></div>
@@ -492,14 +493,14 @@ async function runBox(n,fam,guidance,outages){
     <div class="work"><div class="boardwrap" id="bw"></div><div id="mw"></div></div>
     <div class="actions"><button class="primary big" id="sb">Send board</button><button id="pb">Put back in box</button><button id="cl">Clear marks</button><span class="hint">Pick a board, mark its defects, then send it. Send without marks if it is correct.</span></div>`);
   const drawGuidanceLabel=()=>{const g=$('#gd');if(!g)return;
-    if(guidance==='none'){g.className='pill gd-none';g.textContent=n===3?'On-screen guidance removed':'No on-screen guidance'}
-    else if(!available){g.className='pill gd-off';g.textContent='⚠ On-screen guidance unavailable'}
-    else{g.className='pill '+(guidance==='ar'?'gd-on':'gd-paper');g.textContent=guidance==='ar'?'AR guidance on':'On-screen manual on'}};
+    if(guidance==='none'){g.className='pill gd-none';g.textContent=n===3&&S.guide&&S.arm.withdrawn?'Guidance removed':'No guidance'}
+    else if(!available){g.className='pill gd-off';g.textContent='⚠ Guidance unavailable'}
+    else{g.className='pill '+(guidance==='ar'?'gd-on':'gd-paper');g.textContent='Guidance on'}};
   const drawBoard=()=>{const showOv=guidance==='ar'&&available;
     $('#bw').innerHTML=cur?boardSVG(fam,cur.b,{interactive:true,marks:cur.marks,overlay:showOv,boardNo:cur.no})+(guidance==='ar'&&!available?`<div class="ar-banner">GUIDANCE UNAVAILABLE</div>`:''):`<div class="empty">Pick a board from the box</div>`;
     if(cur)bindHits(()=>cur.marks,()=>{drawBoard();drawBox()});
     $('#sb').disabled=!cur;$('#pb').disabled=!cur;$('#cl').disabled=!cur;
-    const mw=$('#mw');if(guidance==='paper'){mw.className='manual';mw.innerHTML=manualHTML(fam,page)+(available?'':`<div class="shutter">On-screen manual not available</div>`);
+    const mw=$('#mw');if(guidance==='paper'){mw.className='manual';mw.innerHTML=manualHTML(fam,page)+(available?'':`<div class="shutter">Guidance unavailable</div>`);
       mw.querySelectorAll('[data-p]').forEach(t=>t.onclick=()=>{page=+t.dataset.p;drawBoard()})}else{mw.className='';mw.innerHTML=''}
     drawGuidanceLabel()};
   const drawBox=()=>{const el=$('#box');if(!el)return;
@@ -552,7 +553,7 @@ async function runBox(n,fam,guidance,outages){
 }
 async function questionnaire(n,guidance){
   const used=guidance!=='none';
-  const dep=n===3;
+  const dep=n===3&&S.guide;
   show(`<div class="card"><h2>About Block ${n}</h2>
   ${sliderQ('q_vas','How stressed do you feel right now?','Not at all','Extremely')}
   ${sliderQ('q_mental','How mentally demanding was the block?','Very low','Very high')}
@@ -562,7 +563,7 @@ async function questionnaire(n,guidance){
   ${likertQ('q_conf','How confident are you in your decisions?')}
   ${likertQ('q_chal','The block felt like a challenge I could meet.','Disagree','Agree')}
   ${likertQ('q_threat','The block felt threatening.','Disagree','Agree')}
-  ${n===1?'':used?likertQ('q_rely','How much did you rely on the on-screen guidance?'):likertQ('q_miss','How much did you miss the on-screen guidance?')}
+  ${n===1||!S.guide?'':used?likertQ('q_rely','How much did you rely on the guidance?'):likertQ('q_miss','How much did you miss the guidance?')}
   ${dep?`<h3>About the guidance in general</h3>
   ${likertQ('d1','When guidance was unavailable, I felt lost.','Disagree','Agree')}
   ${likertQ('d2','I could not do the task well without the guidance.','Disagree','Agree')}
@@ -570,7 +571,7 @@ async function questionnaire(n,guidance){
   ${likertQ('d4','I would have preferred to keep the guidance at all times.','Disagree','Agree')}`:''}
   <button class="primary big" id="n">Submit</button></div>`);
   await waitClick('#n');
-  const ids=['q_vas','q_mental','q_time','q_frus','q_perf','q_conf','q_chal','q_threat'].concat(n===1?[]:[used?'q_rely':'q_miss']).concat(dep?['d1','d2','d3','d4']:[]);
+  const ids=['q_vas','q_mental','q_time','q_frus','q_perf','q_conf','q_chal','q_threat'].concat(n===1||!S.guide?[]:[used?'q_rely':'q_miss']).concat(dep?['d1','d2','d3','d4']:[]);
   const a=readQs(ids);S.qs.push({block:n,guidance,...a});S.vas.push({block:n,tag:'post',v:a.q_vas,t:Date.now()-S.start});
 }
 async function drawAndReview(){
@@ -610,7 +611,7 @@ async function results(){
   const R=summarise(),total=R.reduce((a,r)=>a+r.earn,0);
   const gname=g=>({none:'printed sheet only',ar:'AR',paper:'on-screen manual'}[g]||g);
   show(`<div class="card" style="max-width:900px"><h1>Thank you – session complete</h1>
-  <p>Treatment condition: <b>${S.arm.name}</b>. Bonus earned: <b>€${total.toFixed(2)}</b>${S.drawn!=null?` · Sign-off draw: ${S.drawn?'selected':'not selected'}`:''}.</p>
+  <p>Treatment condition: <b>${S.guide?S.arm.name:'guidance switched off, printed sheets only'}</b>. Bonus earned: <b>€${total.toFixed(2)}</b>${S.drawn!=null?` · Sign-off draw: ${S.drawn?'selected':'not selected'}`:''}.</p>
   <h3>Performance and stress by block</h3>
   <table class="res"><tr><th>Block</th><th>Guidance</th><th>Boards</th><th>Unchecked</th><th>Urgent sent</th><th>Deadline</th><th>Detection</th><th>False marks / board</th><th>Verdict accuracy</th><th>Time / board</th><th>Stress before · mid · after</th><th>Stress after removal</th></tr>
   ${R.map(r=>`<tr><td>${r.n}</td><td>${gname(r.g)}</td><td>${r.boards}</td><td>${r.unchecked}</td><td>${r.urg}</td><td>${r.dl}</td><td>${r.det}</td><td>${r.fa}</td><td>${r.acc}</td><td>${r.tpb}</td><td>${r.vpre} · ${r.vmid} · ${r.vpost}</td><td>${r.vrem}</td></tr>`).join('')}</table>
@@ -635,7 +636,7 @@ async function run(){
   FAMS={T:famT,[famX.name]:famX,[famY.name]:famY};
   S.famOf={1:famX.name,2:famY.name,3:famY.name};
   logEvent('families',{baseline:famX.name,test:famY.name});
-  const res=S.arm.res;
+  const res=S.guide?S.arm.res:'none',off=S.arm.withdrawn||!S.guide;
   await intro();
   await training(famT);
   await announcement();
@@ -643,15 +644,15 @@ async function run(){
   await vasScreen('pre',1);await reminder(1);
   await block(1,famX,'none',[]);
   await questionnaire(1,'none');
-  await familiarise(famY);
+  if(S.guide)await familiarise(famY);
   await rest('Recovery',S.restMs,'quiet recovery with nature sounds; baseline 2 saliva sample at the end.');
   await vasScreen('pre',2);await reminder(2);
-  await block(2,famY,res,[.3,.68]);
+  await block(2,famY,res,S.guide?[.3,.68]:[]);
   await questionnaire(2,res);
   await rest('Recovery',S.restMs,'recovery; baseline 3 saliva sample at the end.');
   await vasScreen('pre',3);await reminder(3);
-  if(S.arm.withdrawn)await block(3,famY,'none',[]);else await block(3,famY,res,[.38,.78]);
-  await questionnaire(3,S.arm.withdrawn?'none':res);
+  if(off)await block(3,famY,'none',[]);else await block(3,famY,res,[.38,.78]);
+  await questionnaire(3,off?'none':res);
   await drawAndReview();
   await results();
 }
