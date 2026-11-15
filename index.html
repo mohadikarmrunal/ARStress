@@ -386,12 +386,12 @@ async function reminder(block){
   let extra='',gd='';
   if(block===1){extra='';gd='none'}
   if(block===2&&S.guide){extra='In this block, you will also have guidance. Please note: guidance is not guaranteed. It may become unavailable at any time.';gd='threat'}
-  if(block===3&&S.guide){if(S.arm.withdrawn){extra='Guidance is not available for this block.';gd='removed'}else{extra='In this block, you continue with the guidance. It may become unavailable at any time.';gd='threat'}}
+  if(block===3)gd=S.guide&&S.arm.withdrawn?'removed_unannounced':'none';
   if(useBox(block))extra+=' Boards now arrive in a box. You choose which board to check next. Urgent boards have a short deadline and cost double if they ship unchecked.';
-  extra=('The boards in this block are type '+S.famOf[block]+'. '+extra).trim();
+  extra=extra.trim();
   const txt=base+' '+extra;
-  show(`<div class="card"><span class="speaker">🔊 Recorded announcement</span><h2>Before Block ${block}</h2><p>${base}</p><p style="font-weight:700;${gd==='removed'?'color:#c0392b':''}">${extra}</p>${block>1&&S.guide?'<div class="labnote"><b>Experimenter note:</b> the printed sheet stays on the desk as the fallback whenever the guidance is gone. Participants are not reminded of it here.</div>':''}<div class="row"><button class="primary big" id="n" disabled>Start Block ${block}</button></div></div>`);
-  logEvent('reminder',{block,removed:gd==='removed'});
+  show(`<div class="card"><span class="speaker">🔊 Recorded announcement</span><h2>Before Block ${block}</h2><p>${base}</p><p style="font-weight:700;${gd==='removed'?'color:#c0392b':''}">${extra}</p><div class="row"><button class="primary big" id="n" disabled>Start Block ${block}</button></div></div>`);
+  logEvent('reminder',{block,guidance_removed_this_block:block===3&&S.guide&&S.arm.withdrawn,announced:false});
   if(gd==='removed'){beep(240,.35,.06,'square');await sleep(400)}
   await Promise.race([speak(txt),sleep(S.sound?25000:2500)]);await sleep(600);
   $('#n').disabled=false;await waitClick('#n');
