@@ -385,7 +385,7 @@ async function reminder(block){
   const base='Reminder. At the end of the session, one board from each block will be drawn for batch sign-off review. One in '+(S.draw===4?'four':'eight')+' participants will be selected to present and defend their decisions on those boards.';
   let extra='',gd='';
   if(block===1){extra='';gd='none'}
-  if(block===2&&S.guide){extra='In this block, you will also have guidance. Please note: guidance is not guaranteed. It may become unavailable at any time.';gd='threat'}
+  if(block===2&&S.guide){extra='In this block, you will also have guidance.';gd='threat'}
   if(block===3)gd=S.guide&&S.arm.withdrawn?'removed_unannounced':'none';
   if(useBox(block))extra+=' Boards now arrive in a box. You choose which board to check next. Urgent boards have a short deadline and cost double if they ship unchecked.';
   extra=extra.trim();
