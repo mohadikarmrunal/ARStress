@@ -270,7 +270,7 @@ function closePop(){const p=$('#pop');if(p)p.remove()}
 async function setup(){
   show(`<div class="card"><h1>Board Inspection Study – test version</h1>
   <p>This is a playable version of the planned lab session. You work through three blocks of a circuit-board inspection task under time pressure, with an evaluation rule hanging over every block. Everyone has a printed reference sheet for the whole session. Depending on the treatment condition, you also get AR guidance or an on-screen manual in Block 2, and you may lose it in Block 3.</p>
-  <div class="example" style="border-color:#c0392b;background:#fdf1ef"><b>Before you start:</b> print the three reference sheets, or open them on a second device such as a phone or tablet. You need them next to you for the whole session: sheet P for the practice boards, sheets A and B for the three blocks.<br><a href="manual_P.pdf" target="_blank"><b>Reference sheet P (practice)</b></a> · <a href="manual_A.pdf" target="_blank"><b>Reference sheet A</b></a> · <a href="manual_B.pdf" target="_blank"><b>Reference sheet B</b></a></div>
+  <div class="example" style="border-color:#c0392b;background:#fdf1ef"><b>Before you start:</b> print the two reference sheets, or open them on a second device such as a phone or tablet. You need both next to you for the whole session. The practice boards use sheet A.<br><a href="manual_A.pdf" target="_blank"><b>Reference sheet A</b></a> · <a href="manual_B.pdf" target="_blank"><b>Reference sheet B</b></a></div>
   <div class="co" style="display:block"><span class="cotag">Experimenter notes</span>
   <p>Everything in a purple dashed box like this one is for the experimenter only. Participants would not see it. Untick the last option below to see the session exactly as a participant would.</p>
   <p><b>Differences from the lab:</b> the AR overlay is drawn on screen instead of in the HoloLens; the reference sheets are already printed and on the desk; rest periods are shortened.</p>
@@ -282,7 +282,7 @@ async function setup(){
   <h3>Options</h3>
   <label class="opt"><input type="checkbox" id="snd" checked> <span>Sound and spoken reminders (use headphones, as in the lab)</span></label>
 
-  <label class="opt"><input type="checkbox" id="guide" checked> <span>Guidance in Blocks 2 and 3 (AR overlay or on-screen manual, according to the treatment condition). Untick to run all three blocks with the printed sheets only.</span></label>
+  <label class="opt"><input type="checkbox" id="guide" checked> <span>On-screen manual</span></label>
   <label class="opt"><input type="checkbox" id="tst" checked> <span>Show experimenter notes and skip buttons during the session</span></label>
   <p style="margin:8px 0 0">At the end you can download your data (JSON and CSV).</p></div>
   <div class="row" style="margin-top:14px"><button class="primary big" id="go">Start session</button></div></div>`);
@@ -291,8 +291,8 @@ async function setup(){
   S.armKey=k;S.arm=ARMS[k];{let m=parseFloat($('#len').value);if(!(m>=1))m=1;if(m>20)m=20;S.blockMs=(+P.get('sec')||m*60)*1000}
   S.outageMs=Math.round(Math.min(45000,Math.max(S.blockMs>=60000?10000:1500,S.blockMs*0.11)));
   S.restMs=S.blockMs>=900000?300000:Math.min(30000,S.blockMs/6);{const d0=(+P.get('dl')||60)*1000;S.pace='cal';S.dl=d0;S.dlMin=Math.min(14000,d0)}
-  S.sound=$('#snd').checked;S.guide=$('#guide').checked;S.tester=$('#tst').checked;document.body.classList.toggle('part',!S.tester);
-  logEvent('setup',{guidance_enabled:S.guide,draw_odds:S.draw,arm:k,blockMs:S.blockMs,pace:S.pace,dl:S.dl,layout:S.layout});
+  S.sound=$('#snd').checked;S.manual=$('#guide').checked;S.guide=S.arm.res==='ar'||S.manual;S.tester=$('#tst').checked;document.body.classList.toggle('part',!S.tester);
+  logEvent('setup',{onscreen_manual:S.manual,draw_odds:S.draw,arm:k,blockMs:S.blockMs,pace:S.pace,dl:S.dl,layout:S.layout});
   if(S.sound){beep(440,.05,.02)}
 }
 async function intro(){
@@ -300,7 +300,7 @@ async function intro(){
   <p>You will work as a quality inspector for printed circuit boards. No technical knowledge is needed. Each board carries 18 small parts in six numbered areas. Some boards are correct; others have one or more defects.</p>
   <p><b>Your job:</b> click every part that has a defect and choose the kind of defect. If you find nothing wrong, submit the board without marks.</p>
   <h3>Your printed reference sheets</h3>
-  <p>On your desk are three printed reference sheets: <b>P</b> for the practice boards, and <b>A</b> and <b>B</b> for the main task. They show how a correct board of each type looks. Every board has its type printed at the bottom edge. <b>The sheets stay with you for the whole session.</b></p>
+  <p>On your desk are two printed reference sheets, <b>A</b> and <b>B</b>. They show how a correct board of each type looks. Every board has its type printed at the bottom edge. <b>The sheets stay with you for the whole session.</b></p>
   <h3>Pay rule (identical in every block)</h3>
   <ul><li>+ €0.10 for each correct board verdict (correct / flawed)</li><li>+ €0.10 for each defect found and correctly named (+ €0.05 if the type is wrong)</li><li>− €0.05 for each missed defect and for each mark on a part that is fine</li><li>− €0.10 for each board that leaves your station unchecked</li></ul>
   <h3>The line does not wait</h3>
@@ -329,7 +329,7 @@ async function training(famT){
   ${galleryItem('Blob of solder','A silver blob sticking out next to a part.',{t:'C',a:0},{t:'C',a:0,bridge:true})}
   ${galleryItem('Burn mark','A dark scorch on or around a part.',{t:'R',a:0,v:0},{t:'R',a:0,v:0,burn:true})}
   </div>
-  <p>Next you inspect two practice boards. The practice boards are <b>type P</b>, so use <b>reference sheet P</b>. You have <b>four minutes in total</b> for both boards. After each board you see the solution.</p>
+  <p>Next you inspect two practice boards. The practice boards are <b>type A</b>, so use <b>reference sheet A</b>. You have <b>four minutes in total</b> for both boards. After each board you see the solution.</p>
   <div class="row"><button class="primary big" id="n">Start practice</button>${skipBtn()}</div></div>`);
   const skip=await new Promise(r=>{$('#n').onclick=()=>r(false);if($('#skip'))$('#skip').onclick=()=>r(true)});
   if(skip)return;
@@ -338,7 +338,7 @@ async function training(famT){
     const b=makeBoard(famT,i===0?2:3),marks={};
     await new Promise(res=>{let iv=null,done=false;
       const draw=(fb)=>{const lastOne=i===1||left<=0;
-        show(`<div class="hud"><span class="pill">Practice board ${i+1} of 2</span><span class="pill btype">Board type P</span><span class="pill timer ${left<30000?'low':''}" id="pt">${fmt(left)}</span><span class="pill gd-none">Practice time left</span></div>
+        show(`<div class="hud"><span class="pill">Practice board ${i+1} of 2</span><span class="pill btype">Board type A</span><span class="pill timer ${left<30000?'low':''}" id="pt">${fmt(left)}</span><span class="pill gd-none">Practice time left</span></div>
         <div class="work"><div class="boardwrap">${boardSVG(famT,b,{interactive:!fb,marks,feedback:fb})}</div></div>
         <div class="actions">${fb?`<button class="primary big" id="nx">${lastOne?'Finish training':'Next practice board'}</button><span class="hint">Green: found. Yellow dashed: missed. Red cross: marked, but nothing was wrong.</span>`:`<button class="primary big" id="sb">Submit board</button><button id="cl">Clear marks</button><span class="hint">Click a part to mark a defect.</span>`}</div>`);
         if(fb){done=true;clearInterval(iv);closePop();$('#nx').onclick=res;return}
@@ -611,7 +611,7 @@ async function results(){
   const R=summarise(),total=R.reduce((a,r)=>a+r.earn,0);
   const gname=g=>({none:'printed sheet only',ar:'AR',paper:'on-screen manual'}[g]||g);
   show(`<div class="card" style="max-width:900px"><h1>Thank you – session complete</h1>
-  <p>Treatment condition: <b>${S.guide?S.arm.name:'guidance switched off, printed sheets only'}</b>. Bonus earned: <b>€${total.toFixed(2)}</b>${S.drawn!=null?` · Sign-off draw: ${S.drawn?'selected':'not selected'}`:''}.</p>
+  <p>Treatment condition: <b>${S.arm.name}${S.guide?'':' (on-screen manual switched off)'}</b>. Bonus earned: <b>€${total.toFixed(2)}</b>${S.drawn!=null?` · Sign-off draw: ${S.drawn?'selected':'not selected'}`:''}.</p>
   <h3>Performance and stress by block</h3>
   <table class="res"><tr><th>Block</th><th>Guidance</th><th>Boards</th><th>Unchecked</th><th>Urgent sent</th><th>Deadline</th><th>Detection</th><th>False marks / board</th><th>Verdict accuracy</th><th>Time / board</th><th>Stress before · mid · after</th><th>Stress after removal</th></tr>
   ${R.map(r=>`<tr><td>${r.n}</td><td>${gname(r.g)}</td><td>${r.boards}</td><td>${r.unchecked}</td><td>${r.urg}</td><td>${r.dl}</td><td>${r.det}</td><td>${r.fa}</td><td>${r.acc}</td><td>${r.tpb}</td><td>${r.vpre} · ${r.vmid} · ${r.vpost}</td><td>${r.vrem}</td></tr>`).join('')}</table>
@@ -632,7 +632,7 @@ let FAMS={};
 async function run(){
   await setup();
   const swap=Math.random()<.5,fA=makeFamily('A',SEEDS.A),fB=makeFamily('B',SEEDS.B);
-  const famT=makeFamily('P',SEEDS.P),famX=swap?fB:fA,famY=swap?fA:fB;
+  const famT=fA,famX=swap?fB:fA,famY=swap?fA:fB;
   FAMS={T:famT,[famX.name]:famX,[famY.name]:famY};
   S.famOf={1:famX.name,2:famY.name,3:famY.name};
   logEvent('families',{baseline:famX.name,test:famY.name});
