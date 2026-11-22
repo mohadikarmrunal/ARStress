@@ -124,14 +124,19 @@ const fmt=ms=>{const s=Math.max(0,Math.ceil(ms/1000));return String(Math.floor(s
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 
 const P=new URLSearchParams(location.search);
-const S={draw:8,layout:'b23',pace:'cal',dl:60000,dlMin:14000,dlMax:150000,arm:null,armKey:null,blockMs:180000,outageMs:20000,restMs:20000,sound:true,tester:true,
+const S={times:{},sessionStart:ts(),draw:8,layout:'b23',pace:'cal',dl:60000,dlMin:14000,dlMax:150000,arm:null,armKey:null,blockMs:180000,outageMs:20000,restMs:20000,sound:true,tester:true,
   boards:[],events:[],qs:[],vas:[],review:null,start:Date.now(),drawn:null};
 const ARMS={
   A:{name:'A · AR, removed in Block 3',res:'ar',withdrawn:true},
   B:{name:'B · On-screen manual, removed in Block 3',res:'paper',withdrawn:true},
   C:{name:'C · AR, kept in Block 3',res:'ar',withdrawn:false},
   D:{name:'D · On-screen manual, kept in Block 3',res:'paper',withdrawn:false}};
-function logEvent(type,data={}){S.events.push({t:Date.now()-S.start,type,...data})}
+function p2(x){return String(x).padStart(2,'0')}
+function ts(d=new Date()){return`${p2(d.getDate())}-${p2(d.getMonth()+1)}-${d.getFullYear()} ${p2(d.getHours())}:${p2(d.getMinutes())}:${p2(d.getSeconds())}`}
+function hms(ms){const s=Math.round(ms/1000);return`${p2(Math.floor(s/3600))}:${p2(Math.floor(s/60)%60)}:${p2(s%60)}`}
+function logEvent(type,data={}){const now=new Date();S.events.push({t:Date.now()-S.start,clock:ts(now),type,...data});
+  if(type==='block_start')S.times[data.block]={block:data.block,start:ts(now),end:null,startMs:+now,endMs:null};
+  if(type==='block_end'&&S.times[data.block]){S.times[data.block].end=ts(now);S.times[data.block].endMs=+now}}
 
 /* sound */
 let AC=null;
@@ -608,10 +613,16 @@ function summarise(){
 }
 function download(name,text,type){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([text],{type}));a.download=name;a.click()}
 async function results(){
+  S.sessionEnd=ts();
+  const TT=[1,2,3].filter(n=>S.times[n]).map(n=>{const t=S.times[n];return{block:n,start:t.start,end:t.end,duration:t.endMs?hms(t.endMs-t.startMs):'–'}});
   const R=summarise(),total=R.reduce((a,r)=>a+r.earn,0);
   const gname=g=>({none:'printed sheet only',ar:'AR',paper:'on-screen manual'}[g]||g);
   show(`<div class="card" style="max-width:900px"><h1>Thank you – session complete</h1>
   <p>Treatment condition: <b>${S.arm.name}${S.guide?'':' (on-screen manual switched off)'}</b>. Bonus earned: <b>€${total.toFixed(2)}</b>${S.drawn!=null?` · Sign-off draw: ${S.drawn?'selected':'not selected'}`:''}.</p>
+  <h3>Block times</h3>
+  <table class="res"><tr><th>Block</th><th>Start</th><th>End</th><th>Duration</th></tr>
+  ${TT.map(t=>`<tr><td>${t.block}</td><td>${t.start}</td><td>${t.end||'–'}</td><td>${t.duration}</td></tr>`).join('')}</table>
+  <p class="muted" style="font-size:.85rem;margin-top:-2px">Session started ${S.sessionStart}, ended ${S.sessionEnd}. Durations include the paused time for stress ratings.</p>
   <h3>Performance and stress by block</h3>
   <table class="res"><tr><th>Block</th><th>Guidance</th><th>Boards</th><th>Unchecked</th><th>Urgent sent</th><th>Deadline</th><th>Detection</th><th>False marks / board</th><th>Verdict accuracy</th><th>Time / board</th><th>Stress before · mid · after</th><th>Stress after removal</th></tr>
   ${R.map(r=>`<tr><td>${r.n}</td><td>${gname(r.g)}</td><td>${r.boards}</td><td>${r.unchecked}</td><td>${r.urg}</td><td>${r.dl}</td><td>${r.det}</td><td>${r.fa}</td><td>${r.acc}</td><td>${r.tpb}</td><td>${r.vpre} · ${r.vmid} · ${r.vpost}</td><td>${r.vrem}</td></tr>`).join('')}</table>
@@ -619,11 +630,12 @@ async function results(){
   <table class="res"><tr><th>Block</th><th>Boards hit by outage</th><th>Detection: outage vs normal</th><th>Time / board: outage vs normal</th></tr>
   ${R.filter(r=>r.g!=='none').map(r=>`<tr><td>${r.n}</td><td>${r.outN}</td><td>${r.detOut} vs ${r.detIn}</td><td>${r.tOut} vs ${r.tIn}</td></tr>`).join('')||'<tr><td colspan="4">No outages in this treatment condition.</td></tr>'}</table>
   <p class="muted" style="font-size:.85rem">Stress ratings are 0–100. </p>
-  <div class="row" style="margin-top:12px"><button class="primary" id="dj">Download data (JSON)</button><button id="dc">Download boards (CSV)</button><button id="re">Start again</button></div></div>`);
+  <div class="row" style="margin-top:12px"><button class="primary" id="dj">Download data (JSON)</button><button id="dc">Download boards (CSV)</button><button id="dt">Download block times (CSV)</button><button id="re">Start again</button></div></div>`);
   const clean=S.boards.map(({_b,_m,...r})=>r);
-  const stamp=new Date().toISOString().slice(0,16).replace(/[:T]/g,'-');
-  $('#dj').onclick=()=>download(`inspection_${S.armKey}_${stamp}.json`,JSON.stringify({condition:S.armKey,blockSeconds:S.blockMs/1000,boards:clean,questionnaires:S.qs,vas:S.vas,events:S.events,review:S.review,drawn:S.drawn,summary:R},null,2),'application/json');
+  const stamp=ts().slice(0,16).replace(/[: ]/g,'-');
+  $('#dj').onclick=()=>download(`inspection_${S.armKey}_${stamp}.json`,JSON.stringify({condition:S.armKey,sessionStart:S.sessionStart,sessionEnd:S.sessionEnd,blockTimes:TT,blockSeconds:S.blockMs/1000,boards:clean,questionnaires:S.qs,vas:S.vas,events:S.events,review:S.review,drawn:S.drawn,summary:R},null,2),'application/json');
   $('#dc').onclick=()=>{const keys=[...new Set(clean.flatMap(r=>Object.keys(r)))];download(`inspection_${S.armKey}_${stamp}.csv`,[keys.join(',')].concat(clean.map(r=>keys.map(k=>JSON.stringify(r[k]??'')).join(','))).join('\n'),'text/csv')};
+  $('#dt').onclick=()=>download(`inspection_${S.armKey}_${stamp}_block_times.csv`,['condition,block,start,end,duration'].concat(TT.map(t=>[S.armKey,t.block,t.start,t.end||'',t.duration].join(','))).join('\n'),'text/csv');
   $('#re').onclick=()=>location.reload();
 }
 
